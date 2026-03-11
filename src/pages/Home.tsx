@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { api } from "../services/api";
 
-const ownerImg = "/owner.jpg";
+const ownerImg = "/hani.jpeg";
 
 const GOLD = "#C5A059";
 const GOLD_LIGHT = "#D4B06A";
@@ -304,7 +304,7 @@ const Home = () => {
         className="relative min-h-screen flex items-center overflow-hidden"
       >
         <motion.div className="absolute inset-0 z-0" style={{ y: bgY }}>
-          <img src="/hani.jpeg" alt="Owner" />
+          <img src="/owner.jpg" alt="Owner" />
           <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
         </motion.div>
