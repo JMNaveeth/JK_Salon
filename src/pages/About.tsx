@@ -264,11 +264,11 @@ const About = () => {
               />
               {/* main image */}
               <div className="relative z-10 rounded-3xl overflow-hidden"
-                style={{ boxShadow: '0 30px 60px rgba(197,160,89,0.15), 0 0 0 1.5px rgba(197,160,89,0.2)' }}>
+                style={{ boxShadow: '0 30px 60px rgba(197,160,89,0.15), 0 0 0 1.5px rgba(197,160,89,0.2)', maxWidth: '440px', margin: '0 auto' }}>
                 <img
                   src="https://images.unsplash.com/photo-1585747860715-2ba37e788b70?auto=format&fit=crop&q=80&w=1000"
                   alt="JK Salon Interior"
-                  className="w-full aspect-[4/5] object-cover"
+                  className="w-full aspect-[3/3] object-cover"
                   referrerPolicy="no-referrer"
                 />
                 <div className="absolute inset-0" style={{ background: 'linear-gradient(to top,rgba(253,250,245,0.3) 0%,transparent 50%)' }} />
@@ -320,16 +320,12 @@ const About = () => {
               </span>
               <h2 className="text-5xl font-serif tracking-[-0.03em] text-[#1A1A1A] leading-tight">
                 Crafting Confidence<br />
-                <span style={{ background: `linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-                  Since 2014.
-                </span>
+                
               </h2>
               <p className="text-zinc-500 leading-relaxed">
                 JK Salon started with a simple vision: to create a sanctuary where grooming meets luxury. Over the past decade, we have grown from a small neighbourhood barber shop to Colombo's premier destination for modern grooming.
               </p>
-              <p className="text-zinc-500 leading-relaxed">
-                Our philosophy is rooted in precision and personalised care. We believe that a great haircut is more than just a service — it's an experience that boosts your confidence and reflects your unique personality.
-              </p>
+              
 
               {/* quote */}
               <div className="relative pl-6 py-2" style={{ borderLeft: `3px solid ${GOLD}` }}>
@@ -351,14 +347,7 @@ const About = () => {
               </div>
 
               <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                <Link
-                  to="/booking"
-                  className="relative overflow-hidden inline-flex items-center gap-2 px-9 py-4 rounded-full text-sm font-bold text-white"
-                  style={{ background: `linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`, boxShadow: `0 8px 28px rgba(197,160,89,0.38)` }}
-                >
-                  <span className="relative z-10">Book an Appointment</span>
-                  <ArrowRight className="relative z-10 h-4 w-4" />
-                </Link>
+                
               </motion.div>
             </motion.div>
           </div>
