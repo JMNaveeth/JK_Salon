@@ -297,7 +297,7 @@ const Home = () => {
         ))}
 
         {/* ── OWNER IMAGE ────────────────────────────────────────── */}
-        <div className="absolute right-0 bottom-0 z-10 hidden lg:flex items-end justify-end w-[48%] h-full pointer-events-none">
+        <div className="absolute right-0 top-30 z-10 hidden lg:flex items-start justify-end w-[48%] h-full pointer-events-none">
 
           {/* ambient glow */}
           <motion.div
@@ -516,7 +516,7 @@ const Home = () => {
         >
           {[...Array(10)].map((_, i) => (
             <span key={i} className="inline-flex items-center gap-5 px-6 text-white/90 text-[10px] font-black uppercase tracking-[0.35em]">
-              <Scissors className="h-3 w-3 shrink-0" />
+              <Scissors className="h-3 w-3 shrink-10" />
               Premium Grooming
               <span className="w-1 h-1 rounded-full bg-white/30 shrink-0" />
               Expert Stylists
