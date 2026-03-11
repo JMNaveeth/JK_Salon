@@ -54,10 +54,12 @@ const ServiceCard = ({ service, idx }: { service: any; idx: number }) => {
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.75, delay: (idx % 3) * 0.12, ease: [0.22, 1, 0.36, 1] }}
       whileHover={{ y: -8 }}
-      className="group relative bg-white rounded-3xl overflow-hidden flex flex-col"
+      className="group relative bg-white rounded-xl overflow-hidden flex flex-col"
       style={{
         border: '1px solid rgba(197,160,89,0.13)',
-        boxShadow: '0 4px 30px rgba(197,160,89,0.07), 0 1px 4px rgba(0,0,0,0.04)',
+        boxShadow: '0 2px 12px rgba(197,160,89,0.07), 0 1px 2px rgba(0,0,0,0.04)',
+        maxWidth: '320px',
+        minHeight: '340px',
       }}
     >
       {/* top gold line reveal */}
@@ -106,16 +108,9 @@ const ServiceCard = ({ service, idx }: { service: any; idx: number }) => {
       </div>
 
       {/* content */}
-      <div className="flex flex-col flex-1 p-8">
-        {/* stars */}
-        <div className="flex gap-0.5 mb-4">
-          {[...Array(5)].map((_, i) => (
-            <Star key={i} className="h-3.5 w-3.5 fill-[#C5A059] text-[#C5A059]" />
-          ))}
-        </div>
-
-        <h3 className="text-xl font-bold text-[#1A1A1A] mb-3 leading-tight">{service.name}</h3>
-        <p className="text-zinc-500 text-sm leading-relaxed mb-6 line-clamp-2 flex-1">
+      <div className="flex flex-col flex-1 p-4">
+        <h3 className="text-lg font-bold text-[#1A1A1A] mb-2 leading-tight">{service.name}</h3>
+        <p className="text-zinc-500 text-xs leading-relaxed mb-4 line-clamp-2 flex-1">
           {service.description}
         </p>
 
