@@ -272,7 +272,7 @@ const Home = () => {
             alt="Salon Interior"
             className="w-full h-full object-cover scale-110"
             referrerPolicy="no-referrer"
-            style={{ opacity: 0.12 }}
+            style={{ opacity: 40 }}
           />
           {/* cream fade overlays */}
           <div className="absolute inset-0" style={{ background: `linear-gradient(105deg,${CREAM} 38%,rgba(253,250,245,0.75) 58%,rgba(253,250,245,0.2) 100%)` }} />
