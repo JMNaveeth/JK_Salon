@@ -35,7 +35,7 @@ const Navbar = () => {
                 to={link.path}
                 className={cn(
                   "text-sm font-medium transition-colors hover:text-[#C5A059]",
-                  isActive(link.path) ? "text-[#C5A059]" : "text-zinc-400"
+                  isActive(link.path) ? "text-[#C5A059]" : "text-white"
                 )}
               >
                 {link.name}
