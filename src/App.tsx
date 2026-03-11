@@ -15,12 +15,14 @@ import Contact from './pages/Contact';
 import Booking from './pages/Booking';
 import AdminLogin from './pages/AdminLogin';
 import AdminLayout from './admin/AdminLayout';
+import ScrollToTop from './components/ScrollToTop';
 
 export default function App() {
   return (
     <Router>
       <div className="min-h-screen bg-black font-sans selection:bg-emerald-500/30 selection:text-emerald-500">
         <Navbar />
+        <ScrollToTop />
         <main>
           <Routes>
             <Route path="/" element={<Home />} />
