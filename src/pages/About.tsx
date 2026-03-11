@@ -383,47 +383,7 @@ const About = () => {
         </div>
       </section>
 
-      {/* ════════════════════════════════════════════════════════
-          TIMELINE STRIP
-      ════════════════════════════════════════════════════════ */}
-      <section className="py-20 overflow-hidden" style={{ background: CREAM2 }}>
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-          <SectionHeading eyebrow="Our Journey" title="A Decade of Excellence" />
-          <div className="relative">
-            {/* horizontal line */}
-            <div className="absolute top-6 left-0 right-0 h-px hidden md:block" style={{ background: `linear-gradient(90deg,transparent,${GOLD}55,transparent)` }} />
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              {[
-                { year: '2014', event: 'JK Salon founded in Colombo with a team of 3 expert barbers.' },
-                { year: '2017', event: 'Expanded to a premium studio space and launched luxury grooming packages.' },
-                { year: '2020', event: 'Launched online booking and earned Colombo\'s Top Salon award.' },
-                { year: '2024', event: '10 years strong — 15,000+ styles crafted, 5-star rated on all platforms.' },
-              ].map((item, idx) => {
-                const ref = useRef(null);
-                const inView = useInView(ref, { once: true });
-                return (
-                  <motion.div
-                    key={idx}
-                    ref={ref}
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={inView ? { opacity: 1, y: 0 } : {}}
-                    transition={{ delay: idx * 0.15, duration: 0.7 }}
-                    className="relative pt-14 md:pt-16"
-                  >
-                    {/* dot */}
-                    <div className="absolute top-3.5 left-0 md:left-1/2 md:-translate-x-1/2 w-5 h-5 rounded-full flex items-center justify-center"
-                      style={{ background: `linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`, boxShadow: `0 0 0 4px rgba(197,160,89,0.15)` }}>
-                      <div className="w-2 h-2 rounded-full bg-white" />
-                    </div>
-                    <span className="text-2xl font-black" style={{ color: GOLD }}>{item.year}</span>
-                    <p className="text-zinc-500 text-sm leading-relaxed mt-2">{item.event}</p>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </section>
+  
 
       {/* ════════════════════════════════════════════════════════
           TEAM
