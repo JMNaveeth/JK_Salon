@@ -485,28 +485,7 @@ const Contact = () => {
                   </div>
                 </div>
 
-                {/* hours table */}
-                <div
-                  className="rounded-2xl p-5 space-y-3"
-                  style={{ background: CREAM2, border: '1px solid rgba(197,160,89,0.1)' }}
-                >
-                  <p className="text-[10px] font-bold uppercase tracking-[0.35em] mb-4" style={{ color: GOLD }}>
-                    Opening Hours
-                  </p>
-                  {[
-                    { day: 'Monday – Friday', hours: '9:00 AM – 8:00 PM', open: true },
-                    { day: 'Saturday', hours: '9:00 AM – 6:00 PM', open: true },
-                    { day: 'Sunday', hours: '9:00 AM – 6:00 PM', open: true },
-                  ].map((row) => (
-                    <div key={row.day} className="flex items-center justify-between">
-                      <span className="text-sm text-zinc-500">{row.day}</span>
-                      <div className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full" style={{ background: GOLD }} />
-                        <span className="text-sm font-semibold text-[#1A1A1A]">{row.hours}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                {/* Opening hours removed per request */}
               </div>
 
               {/* Google Map embed */}
@@ -555,68 +534,7 @@ const Contact = () => {
         </div>
       </section>
 
-      {/* ════════════════════════════════════════════════════════
-          CTA
-      ════════════════════════════════════════════════════════ */}
-      <section className="py-24 relative overflow-hidden" style={{ background: CREAM }}>
-        <div className="absolute inset-0 pointer-events-none"
-          style={{ background: 'radial-gradient(ellipse at 50% 50%,rgba(197,160,89,0.09) 0%,transparent 65%)' }} />
-        {[160, 280, 400].map((size, i) => (
-          <motion.div
-            key={i}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none"
-            style={{ width: size, height: size, border: `1px solid rgba(197,160,89,${0.14 - i * 0.04})` }}
-            animate={{ scale: [1, 1.06, 1], opacity: [0.4, 0.75, 0.4] }}
-            transition={{ duration: 2.5 + i, repeat: Infinity, delay: i * 0.5 }}
-          />
-        ))}
-        <div className="relative z-10 max-w-xl mx-auto px-6 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <div
-              className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-8"
-              style={{ background: `linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`, boxShadow: `0 12px 30px rgba(197,160,89,0.35)` }}
-            >
-              <Scissors className="h-7 w-7 text-white" />
-            </div>
-            <h2
-              className="font-serif tracking-[-0.02em] mb-5 text-[#1A1A1A]"
-              style={{ fontSize: 'clamp(2rem,5vw,3.5rem)', lineHeight: 1.1 }}
-            >
-              Ready to{' '}
-              <span style={{ background: `linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-                Book?
-              </span>
-            </h2>
-            <p className="text-zinc-500 text-base leading-relaxed mb-10">
-              Skip the message — book your appointment directly and secure your slot today.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.96 }}>
-                <Link
-                  to="/booking"
-                  className="relative overflow-hidden inline-flex items-center gap-2 px-10 py-4 rounded-full text-sm font-bold text-white"
-                  style={{ background: `linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`, boxShadow: `0 12px 40px rgba(197,160,89,0.4)` }}
-                >
-                  <span className="relative z-10">Book an Appointment</span>
-                  <ArrowRight className="relative z-10 h-4 w-4" />
-                </Link>
-              </motion.div>
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.96 }}>
-                <Link
-                  to="/services"
-                  className="inline-flex items-center gap-2 px-10 py-4 rounded-full text-sm font-bold"
-                  style={{ border: `2px solid ${GOLD}`, color: GOLD, background: 'transparent' }}
-                >
-                  View Services
-                </Link>
-              </motion.div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+      {/* CTA section removed per request */}
     </div>
   );
 };
