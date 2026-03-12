@@ -183,14 +183,14 @@ const Contact = () => {
     {
       icon: Phone,
       title: 'Call Us',
-      lines: ['+94 11 234 5678', '+94 77 123 4567'],
-      action: { label: 'Call Now', href: 'tel:+94112345678' },
+      lines: ['+94 759560114', '+94 759560114'],
+      action: { label: 'Call Now', href: 'tel:+94759560114' },
     },
     {
       icon: MessageSquare,
       title: 'WhatsApp',
-      lines: ['+94 77 123 4567', 'Available 9am – 8pm'],
-      action: { label: 'Chat Now', href: 'https://wa.me/94771234567' },
+      lines: ['+94 759560114', 'Available 9am – 8pm'],
+      action: { label: 'Chat Now', href: 'https://wa.me/94759560114' },
     },
     {
       icon: Mail,
