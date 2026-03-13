@@ -87,10 +87,10 @@ const Field = ({
   label: string;
   children: React.ReactNode;
 }) => (
-  <div className="space-y-2">
+  <div className="relative group pt-3 mb-2">
     <label
-      className="block text-[10px] font-bold uppercase tracking-[0.35em]"
-      style={{ color: GOLD }}
+      className="absolute top-0 left-4 px-2 text-[10px] font-bold uppercase tracking-[0.2em] z-10 transition-colors duration-300 rounded-full"
+      style={{ color: GOLD, background: '#ffffff' }}
     >
       {label}
     </label>
@@ -99,14 +99,14 @@ const Field = ({
 );
 
 const inputClass =
-  'w-full rounded-xl px-4 py-3.5 text-sm text-[#1A1A1A] outline-none transition-all placeholder:text-zinc-400 bg-white';
+  'w-full rounded-[1.25rem] px-5 py-[18px] text-sm text-[#1A1A1A] outline-none transition-all duration-500 placeholder:text-zinc-300 bg-[#FAF7F2]';
 const inputStyle = {
-  border: '1.5px solid rgba(197,160,89,0.2)',
-  boxShadow: '0 2px 8px rgba(197,160,89,0.04)',
+  border: '1.5px solid transparent',
 };
 const inputFocusStyle = {
   borderColor: GOLD,
-  boxShadow: `0 0 0 3px rgba(197,160,89,0.12)`,
+  background: '#ffffff',
+  boxShadow: `0 8px 32px rgba(197,160,89,0.12), 0 0 0 4px rgba(197,160,89,0.05)`,
 };
 
 /* ── Focus-aware input wrapper ─────────────────────────────── */
@@ -343,173 +343,248 @@ const Contact = () => {
               initial={{ opacity: 0, x: -50 }}
               animate={formInView ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-              className="bg-white rounded-3xl p-8 lg:p-10"
-              style={{
-                border: '1px solid rgba(197,160,89,0.15)',
-                boxShadow: '0 8px 40px rgba(197,160,89,0.08)',
-              }}
+              className="relative z-10"
             >
-              {/* form header */}
-              <div className="flex items-center gap-3 mb-8">
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{ background: `linear-gradient(135deg,${GOLD},${GOLD_LIGHT})` }}
-                >
-                  <Send className="h-4 w-4 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-[#1A1A1A] leading-none">Send a Message</h3>
-                  <p className="text-xs text-zinc-400 mt-0.5">We reply within 24 hours</p>
-                </div>
-              </div>
+              {/* Decorative blurred glow behind form */}
+              <div
+                className="absolute -inset-2 lg:-inset-4 rounded-[3rem] -z-10 opacity-60 blur-2xl transition-all duration-700 hover:opacity-100"
+                style={{ background: `linear-gradient(135deg, ${GOLD}30, ${GOLD_LIGHT}60, ${CREAM2})` }}
+              />
 
-              {/* success state */}
-              {success ? (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="flex flex-col items-center justify-center py-16 text-center"
-                >
+              <div
+                className="bg-white rounded-[2.5rem] p-8 lg:p-12 relative overflow-hidden"
+                style={{
+                  border: '1px solid rgba(197,160,89,0.2)',
+                  boxShadow: '0 20px 60px rgba(197,160,89,0.08)',
+                }}
+              >
+                {/* top corner decoration */}
+                <div className="absolute top-0 right-0 w-32 h-32 opacity-10 pointer-events-none"
+                  style={{ background: `radial-gradient(circle at top right, ${GOLD}, transparent 70%)` }} />
+                {/* form header */}
+                <div className="flex items-center gap-3 mb-8">
                   <div
-                    className="w-20 h-20 rounded-full flex items-center justify-center mb-6"
-                    style={{ background: `linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`, boxShadow: `0 16px 40px rgba(197,160,89,0.35)` }}
+                    className="w-10 h-10 rounded-xl flex items-center justify-center"
+                    style={{ background: `linear-gradient(135deg,${GOLD},${GOLD_LIGHT})` }}
                   >
-                    <CheckCircle className="h-10 w-10 text-white" />
+                    <Send className="h-4 w-4 text-white" />
                   </div>
-                  <h4 className="text-2xl font-bold text-[#1A1A1A] mb-3">Message Sent!</h4>
-                  <p className="text-zinc-500 text-sm leading-relaxed max-w-xs">
-                    Thank you for reaching out. Our team will get back to you within 24 hours.
-                  </p>
-                </motion.div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-5" noValidate>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    <Field label="Full Name">
+                  <div>
+                    <h3 className="text-xl font-bold text-[#1A1A1A] leading-none">Send a Message</h3>
+                    <p className="text-xs text-zinc-400 mt-0.5">We reply within 24 hours</p>
+                  </div>
+                </div>
+
+                {/* success state */}
+                {success ? (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="flex flex-col items-center justify-center py-16 text-center"
+                  >
+                    <div
+                      className="w-20 h-20 rounded-full flex items-center justify-center mb-6"
+                      style={{ background: `linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`, boxShadow: `0 16px 40px rgba(197,160,89,0.35)` }}
+                    >
+                      <CheckCircle className="h-10 w-10 text-white" />
+                    </div>
+                    <h4 className="text-2xl font-bold text-[#1A1A1A] mb-3">Message Sent!</h4>
+                    <p className="text-zinc-500 text-sm leading-relaxed max-w-xs">
+                      Thank you for reaching out. Our team will get back to you within 24 hours.
+                    </p>
+                  </motion.div>
+                ) : (
+                  <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                      <Field label="Full Name">
+                        <FocusInput
+                          type="text"
+                          name="name"
+                          required
+                          value={formData.name}
+                          onChange={handleChange}
+                          placeholder="John Doe"
+                        />
+                      </Field>
+                      <Field label="Email Address">
+                        <FocusInput
+                          type="email"
+                          name="email"
+                          required
+                          value={formData.email}
+                          onChange={handleChange}
+                          placeholder="john@example.com"
+                        />
+                      </Field>
+                    </div>
+
+                    <Field label="Subject">
                       <FocusInput
                         type="text"
-                        name="name"
+                        name="subject"
                         required
-                        value={formData.name}
+                        value={formData.subject}
                         onChange={handleChange}
-                        placeholder="John Doe"
+                        placeholder="How can we help?"
                       />
                     </Field>
-                    <Field label="Email Address">
-                      <FocusInput
-                        type="email"
-                        name="email"
+
+                    <Field label="Message">
+                      <FocusTextarea
+                        name="message"
+                        rows={5}
                         required
-                        value={formData.email}
+                        value={formData.message}
                         onChange={handleChange}
-                        placeholder="john@example.com"
+                        placeholder="Tell us more about your enquiry..."
                       />
                     </Field>
-                  </div>
 
-                  <Field label="Subject">
-                    <FocusInput
-                      type="text"
-                      name="subject"
-                      required
-                      value={formData.subject}
-                      onChange={handleChange}
-                      placeholder="How can we help?"
-                    />
-                  </Field>
-
-                  <Field label="Message">
-                    <FocusTextarea
-                      name="message"
-                      rows={5}
-                      required
-                      value={formData.message}
-                      onChange={handleChange}
-                      placeholder="Tell us more about your enquiry..."
-                    />
-                  </Field>
-
-                  {/* error */}
-                  {error && (
-                    <motion.p
-                      initial={{ opacity: 0, y: -8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="text-xs font-semibold px-4 py-3 rounded-xl"
-                      style={{ background: 'rgba(197,160,89,0.08)', color: '#9B6D1E', border: '1px solid rgba(197,160,89,0.2)' }}
-                    >
-                      {error}
-                    </motion.p>
-                  )}
-
-                  {/* submit — GOLDEN button */}
-                  <motion.button
-                    type="submit"
-                    disabled={loading}
-                    whileHover={{ scale: loading ? 1 : 1.02 }}
-                    whileTap={{ scale: loading ? 1 : 0.97 }}
-                    className="w-full relative overflow-hidden flex items-center justify-center gap-2 py-4 rounded-xl text-sm font-bold text-white disabled:opacity-60 disabled:cursor-not-allowed"
-                    style={{
-                      background: `linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`,
-                      boxShadow: `0 8px 28px rgba(197,160,89,0.38)`,
-                    }}
-                  >
-                    {loading ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        <span>Sending…</span>
-                      </>
-                    ) : (
-                      <>
-                        <span className="relative z-10">Send Message</span>
-                        <Send className="relative z-10 h-4 w-4" />
-                        {/* shimmer */}
-                        <motion.div
-                          className="absolute inset-0 bg-white/20"
-                          initial={{ x: '-110%' }}
-                          whileHover={{ x: '110%' }}
-                          transition={{ duration: 0.55 }}
-                        />
-                      </>
+                    {/* error */}
+                    {error && (
+                      <motion.p
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-xs font-semibold px-4 py-3 rounded-xl"
+                        style={{ background: 'rgba(197,160,89,0.08)', color: '#9B6D1E', border: '1px solid rgba(197,160,89,0.2)' }}
+                      >
+                        {error}
+                      </motion.p>
                     )}
-                  </motion.button>
 
-                  <p className="text-center text-[10px] text-zinc-400 uppercase tracking-widest">
-                    Or call us directly at{' '}
-                    <a href="tel:+94759560114" className="font-bold" style={{ color: GOLD }}>
-                      +94 759560114
-                    </a>
-                  </p>
-                </form>
-              )}
+                    {/* submit — GOLDEN button */}
+                    <motion.button
+                      type="submit"
+                      disabled={loading}
+                      whileHover={{ scale: loading ? 1 : 1.02 }}
+                      whileTap={{ scale: loading ? 1 : 0.97 }}
+                      className="w-full relative overflow-hidden flex items-center justify-center gap-2 py-[18px] rounded-[1.25rem] text-sm font-bold text-white mt-4 disabled:opacity-60 disabled:cursor-not-allowed group"
+                      style={{
+                        background: `linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`,
+                        boxShadow: `0 12px 32px rgba(197,160,89,0.35), inset 0 2px 0 rgba(255,255,255,0.2)`,
+                      }}
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <span>Sending…</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="relative z-10">Send Message</span>
+                          <Send className="relative z-10 h-4 w-4" />
+                          {/* shimmer */}
+                          <motion.div
+                            className="absolute inset-0 bg-white/20"
+                            initial={{ x: '-110%' }}
+                            whileHover={{ x: '110%' }}
+                            transition={{ duration: 0.55 }}
+                          />
+                        </>
+                      )}
+                    </motion.button>
+
+                    <p className="text-center text-[10px] text-zinc-400 uppercase tracking-widest">
+                      Or call us directly at{' '}
+                      <a href="tel:+94759560114" className="font-bold" style={{ color: GOLD }}>
+                        +94 759560114
+                      </a>
+                    </p>
+                  </form>
+                )}
+              </div>
             </motion.div>
 
-            {/* ── Location side ── */}
+            {/* ── Location Block ── */}
             <motion.div
               initial={{ opacity: 0, x: 50 }}
               animate={formInView ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 0.9, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-              className="space-y-6"
+              className="relative h-full min-h-[500px] lg:min-h-[600px] flex flex-col justify-end lg:justify-center z-20 group perspective-1000"
             >
-
-              {/* Google Map embed */}
+              {/* Back Layer Map */}
               <div
-                className="rounded-3xl overflow-hidden"
+                className="absolute inset-0 rounded-[2.5rem] overflow-hidden transition-transform duration-700 lg:group-hover:scale-[1.01]"
                 style={{
-                  border: '1px solid rgba(197,160,89,0.15)',
-                  boxShadow: '0 8px 30px rgba(197,160,89,0.08)',
-                  height: 280,
+                  border: '1px solid rgba(197,160,89,0.2)',
+                  boxShadow: '0 24px 50px rgba(0,0,0,0.08)',
                 }}
               >
+                <div className="absolute inset-0 z-10 pointer-events-none transition-opacity duration-500 opacity-20 lg:group-hover:opacity-0"
+                  style={{ background: 'linear-gradient(to bottom right, rgba(197,160,89,0.4), transparent)' }} />
                 <iframe
                   src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d63371.81529707!2d79.8211859!3d6.9218374!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ae2593cf65a1e9d%3A0x53139987a6691ff3!2sColombo!5e0!3m2!1sen!2slk!4v1647856456789!5m2!1sen!2slk"
                   width="100%"
                   height="100%"
-                  style={{ border: 0, filter: 'saturate(0.8) contrast(1.05)' }}
+                  style={{ border: 0, filter: 'grayscale(0.2) saturate(1.1) contrast(1.05)' }}
                   allowFullScreen
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
                   title="JK Salon Location"
+                  className="transition-all duration-700"
                 />
               </div>
+
+              {/* Floating Glassmorphism Card */}
+              <motion.div
+                whileHover={{ y: -8, rotateX: 3, rotateY: -3 }}
+                className="relative z-20 m-6 lg:m-8 lg:-ml-12 lg:mb-12 mt-auto lg:mt-auto self-start bg-white/85 backdrop-blur-2xl rounded-3xl p-7 lg:p-9 max-w-sm transition-all duration-500"
+                style={{
+                  border: '1px solid rgba(255,255,255,0.8)',
+                  boxShadow: '0 30px 60px rgba(0,0,0,0.12), 0 0 0 1px rgba(197,160,89,0.1), inset 0 1px 0 rgba(255,255,255,1)',
+                  transformStyle: 'preserve-3d',
+                }}
+              >
+                {/* Decorative background blur within card */}
+                <div className="absolute -inset-4 rounded-full blur-2xl opacity-40 -z-10 pointer-events-none"
+                  style={{ background: `radial-gradient(circle, ${GOLD_LIGHT}, transparent)` }} />
+
+                <div className="absolute top-0 right-0 p-4 opacity-[0.03] pointer-events-none translate-z-[20px]">
+                  <MapPin className="w-32 h-32" />
+                </div>
+
+                <div className="flex items-center gap-5 mb-6 translate-z-[10px]">
+                  <div className="w-16 h-16 rounded-[1.25rem] flex items-center justify-center shrink-0 shadow-inner relative overflow-hidden"
+                    style={{ background: `linear-gradient(135deg, ${GOLD}, ${GOLD_LIGHT})` }}>
+                    <div className="absolute inset-0 bg-white/20 translate-y-full hover:translate-y-0 transition-transform duration-300" />
+                    <MapPin className="h-7 w-7 text-white drop-shadow-md relative z-10" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-[#1A1A1A] tracking-tight mb-1">Our Studio</h3>
+                    <div className="flex items-center gap-2" style={{ color: GOLD }}>
+                      <span className="relative flex h-2.5 w-2.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+                      </span>
+                      <span className="text-xs font-bold uppercase tracking-[0.15em]">Open Now</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4 relative z-10 translate-z-[15px]">
+                  <div className="flex items-start gap-4">
+                    <p className="text-zinc-600 text-[15px] leading-[1.6] font-medium">
+                      123 Salon Street, Colombo 07, <br />Sri Lanka.<br />
+                      <span className="text-zinc-400 font-normal text-sm block mt-2">📍 Near Independence Square</span>
+                    </p>
+                  </div>
+                </div>
+
+                <a
+                  href="https://maps.google.com/?q=Colombo+07+Sri+Lanka"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-8 relative overflow-hidden flex items-center justify-center gap-2 w-full py-[18px] rounded-2xl text-sm font-bold text-white transition-all hover:scale-[1.02] active:scale-[0.98] drop-shadow-lg group/btn translate-z-[20px]"
+                  style={{
+                    background: '#1A1A1A',
+                    boxShadow: 'inset 0 2px 0 rgba(255,255,255,0.1)'
+                  }}
+                >
+                  <span className="relative z-10">Get Directions</span>
+                  <ArrowRight className="w-4 h-4 text-white/70 relative z-10 group-hover/btn:translate-x-1 transition-transform" />
+                  <div className="absolute inset-0 bg-white/10 opacity-0 group-hover/btn:opacity-100 transition-opacity" />
+                </a>
+              </motion.div>
             </motion.div>
           </div>
         </div>
