@@ -525,66 +525,7 @@ const Contact = () => {
                 />
               </div>
 
-              {/* Floating Glassmorphism Card */}
-              <motion.div
-                whileHover={{ y: -8, rotateX: 3, rotateY: -3 }}
-                className="relative z-20 m-6 lg:m-8 lg:-ml-12 lg:mb-12 mt-auto lg:mt-auto self-start bg-white/85 backdrop-blur-2xl rounded-3xl p-7 lg:p-9 max-w-sm transition-all duration-500"
-                style={{
-                  border: '1px solid rgba(255,255,255,0.8)',
-                  boxShadow: '0 30px 60px rgba(0,0,0,0.12), 0 0 0 1px rgba(197,160,89,0.1), inset 0 1px 0 rgba(255,255,255,1)',
-                  transformStyle: 'preserve-3d',
-                }}
-              >
-                {/* Decorative background blur within card */}
-                <div className="absolute -inset-4 rounded-full blur-2xl opacity-40 -z-10 pointer-events-none"
-                  style={{ background: `radial-gradient(circle, ${GOLD_LIGHT}, transparent)` }} />
-
-                <div className="absolute top-0 right-0 p-4 opacity-[0.03] pointer-events-none translate-z-[20px]">
-                  <MapPin className="w-32 h-32" />
-                </div>
-
-                <div className="flex items-center gap-5 mb-6 translate-z-[10px]">
-                  <div className="w-16 h-16 rounded-[1.25rem] flex items-center justify-center shrink-0 shadow-inner relative overflow-hidden"
-                    style={{ background: `linear-gradient(135deg, ${GOLD}, ${GOLD_LIGHT})` }}>
-                    <div className="absolute inset-0 bg-white/20 translate-y-full hover:translate-y-0 transition-transform duration-300" />
-                    <MapPin className="h-7 w-7 text-white drop-shadow-md relative z-10" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-[#1A1A1A] tracking-tight mb-1">Our Studio</h3>
-                    <div className="flex items-center gap-2" style={{ color: GOLD }}>
-                      <span className="relative flex h-2.5 w-2.5">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
-                      </span>
-                      <span className="text-xs font-bold uppercase tracking-[0.15em]">Open Now</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-4 relative z-10 translate-z-[15px]">
-                  <div className="flex items-start gap-4">
-                    <p className="text-zinc-600 text-[15px] leading-[1.6] font-medium">
-                      123 Salon Street, Colombo 07, <br />Sri Lanka.<br />
-                      <span className="text-zinc-400 font-normal text-sm block mt-2">📍 Near Independence Square</span>
-                    </p>
-                  </div>
-                </div>
-
-                <a
-                  href="https://maps.google.com/?q=Colombo+07+Sri+Lanka"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-8 relative overflow-hidden flex items-center justify-center gap-2 w-full py-[18px] rounded-2xl text-sm font-bold text-white transition-all hover:scale-[1.02] active:scale-[0.98] drop-shadow-lg group/btn translate-z-[20px]"
-                  style={{
-                    background: '#1A1A1A',
-                    boxShadow: 'inset 0 2px 0 rgba(255,255,255,0.1)'
-                  }}
-                >
-                  <span className="relative z-10">Get Directions</span>
-                  <ArrowRight className="w-4 h-4 text-white/70 relative z-10 group-hover/btn:translate-x-1 transition-transform" />
-                  <div className="absolute inset-0 bg-white/10 opacity-0 group-hover/btn:opacity-100 transition-opacity" />
-                </a>
-              </motion.div>
+              
             </motion.div>
           </div>
         </div>
