@@ -455,38 +455,6 @@ const Contact = () => {
               transition={{ duration: 0.9, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
               className="space-y-6"
             >
-              {/* location card */}
-              <div
-                className="bg-white rounded-3xl p-8"
-                style={{ border: '1px solid rgba(197,160,89,0.15)', boxShadow: '0 8px 40px rgba(197,160,89,0.07)' }}
-              >
-                <div className="flex items-start gap-4 mb-6">
-                  <div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
-                    style={{ background: `linear-gradient(135deg,${GOLD},${GOLD_LIGHT})` }}
-                  >
-                    <MapPin className="h-5 w-5 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-[#1A1A1A] font-bold text-lg mb-1">Our Location</h3>
-                    <p className="text-zinc-500 text-sm leading-relaxed">
-                      123 Salon Street, Colombo 07, Sri Lanka.<br />
-                      Near Independence Square.
-                    </p>
-                    <a
-                      href="https://maps.google.com/?q=Colombo+07+Sri+Lanka"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-1.5 mt-3 text-xs font-bold uppercase tracking-wider"
-                      style={{ color: GOLD }}
-                    >
-                      Open in Google Maps <ArrowRight className="h-3 w-3" />
-                    </a>
-                  </div>
-                </div>
-
-                {/* Opening hours removed per request */}
-              </div>
 
               {/* Google Map embed */}
               <div
