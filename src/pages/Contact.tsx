@@ -34,11 +34,12 @@ const InfoCard = ({
       initial={{ opacity: 0, y: 40 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ delay: idx * 0.1, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-      whileHover={{ y: -5 }}
-      className="group relative bg-white rounded-2xl p-7 overflow-hidden transition-all"
+      whileHover={{ y: -8, scale: 1.02, rotateX: 6, rotateY: -3 }}
+      className="group relative bg-white rounded-2xl p-7 transition-all"
       style={{
         border: '1px solid rgba(197,160,89,0.13)',
         boxShadow: '0 4px 24px rgba(197,160,89,0.07)',
+        transformPerspective: 1000,
       }}
     >
       {/* top gold reveal */}
@@ -63,15 +64,16 @@ const InfoCard = ({
         ))}
       </div>
       {action && (
-        <a
-          href={action.href}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center gap-1.5 mt-4 text-xs font-bold uppercase tracking-wider transition-all hover:gap-2.5"
-          style={{ color: GOLD }}
-        >
-          {action.label} <ArrowRight className="h-3 w-3" />
-        </a>
+        <div className="mt-5 pb-2 w-full max-w-[200px]">
+          <ActionBtn3D
+            href={action.href}
+            icon={action.label.includes('Call') ? Phone : action.label.includes('Chat') ? MessageSquare : Mail}
+            label={action.label}
+            colorTop={action.label.includes('Call') ? GOLD_LIGHT : action.label.includes('Chat') ? '#4ADE80' : '#60A5FA'}
+            colorBottom={action.label.includes('Call') ? GOLD : action.label.includes('Chat') ? '#16A34A' : '#2563EB'}
+            colorShadow={action.label.includes('Call') ? '#99783D' : action.label.includes('Chat') ? '#14532D' : '#1E3A8A'}
+          />
+        </div>
       )}
     </motion.div>
   );
@@ -131,6 +133,38 @@ const FocusTextarea = (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>)
       onFocus={() => setFocused(true)}
       onBlur={() => setFocused(false)}
     />
+  );
+};
+
+/* ── 3D Action Button ───────────────────────────────────────── */
+const ActionBtn3D = ({ icon: Icon, label, href, colorTop, colorBottom, colorShadow }: { icon: any, label: string, href: string, colorTop: string, colorBottom: string, colorShadow: string }) => {
+  return (
+    <a
+      href={href}
+      className="relative w-full block group outline-none"
+      target="_blank"
+      rel="noreferrer"
+    >
+      {/* 3D Depth Layer */}
+      <div
+        className="absolute inset-0 rounded-2xl transition-all duration-150 group-hover:translate-y-[2px]"
+        style={{
+          background: colorShadow,
+          transform: 'translateY(6px)',
+        }}
+      />
+      {/* Top Layer */}
+      <div
+        className="relative flex items-center justify-center gap-2 py-3.5 px-2 rounded-2xl font-bold text-white transition-all duration-150 group-hover:-translate-y-[1px] group-active:translate-y-[6px]"
+        style={{
+          background: `linear-gradient(135deg, ${colorTop}, ${colorBottom})`,
+          boxShadow: 'inset 0 2px 0 rgba(255,255,255,0.25), inset 0 -2px 0 rgba(0,0,0,0.1)'
+        }}
+      >
+        <Icon className="h-5 w-5" style={{ filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.2))' }} />
+        <span className="text-[13px] sm:text-sm tracking-wide" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>{label}</span>
+      </div>
+    </a>
   );
 };
 
@@ -478,24 +512,31 @@ const Contact = () => {
               </div>
 
               {/* quick action buttons */}
-              <div className="grid grid-cols-2 gap-4">
-                <motion.a
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 pt-4 pb-2">
+                <ActionBtn3D
                   href="tel:+94759560114"
-                  whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-                  className="flex items-center justify-center gap-2 py-3.5 rounded-2xl text-sm font-bold text-white"
-                  style={{ background: `linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`, boxShadow: `0 6px 20px rgba(197,160,89,0.3)` }}
-                >
-                  <Phone className="h-4 w-4" /> Call Now
-                </motion.a>
-                <motion.a
+                  icon={Phone}
+                  label="Call Now"
+                  colorTop={GOLD_LIGHT}
+                  colorBottom={GOLD}
+                  colorShadow="#99783D"
+                />
+                <ActionBtn3D
                   href="https://wa.me/94759560114"
-                  target="_blank" rel="noreferrer"
-                  whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-                  className="flex items-center justify-center gap-2 py-3.5 rounded-2xl text-sm font-bold"
-                  style={{ border: `2px solid ${GOLD}`, color: 'white', background: 'green' }}
-                >
-                  <MessageSquare className="h-4 w-4" /> WhatsApp
-                </motion.a>
+                  icon={MessageSquare}
+                  label="WhatsApp"
+                  colorTop="#4ADE80"
+                  colorBottom="#16A34A"
+                  colorShadow="#14532D"
+                />
+                <ActionBtn3D
+                  href="mailto:hello@jksalon.com"
+                  icon={Mail}
+                  label="Email Us"
+                  colorTop="#60A5FA"
+                  colorBottom="#2563EB"
+                  colorShadow="#1E3A8A"
+                />
               </div>
             </motion.div>
           </div>
