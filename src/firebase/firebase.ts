@@ -1,34 +1,16 @@
-// Mock Authentication and API Service
-// Since Firebase was declined, we use a local state/API approach
+import { initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
 
-export const auth = {
-  currentUser: null as any,
-  onAuthStateChanged: (callback: (user: any) => void) => {
-    // Simulate auth check
-    const savedUser = localStorage.getItem('jk_salon_user');
-    const user = savedUser ? JSON.parse(savedUser) : null;
-    auth.currentUser = user;
-    setTimeout(() => callback(user), 500);
-    return () => {};
-  },
-  signInWithPopup: async () => {
-    // Mock Google Login
-    const mockUser = {
-      uid: 'admin_123',
-      email: 'asamathu587@gmail.com',
-      displayName: 'Admin User',
-      photoURL: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin'
-    };
-    localStorage.setItem('jk_salon_user', JSON.stringify(mockUser));
-    auth.currentUser = mockUser;
-    window.location.reload();
-    return { user: mockUser };
-  },
-  signOut: async () => {
-    localStorage.removeItem('jk_salon_user');
-    auth.currentUser = null;
-    window.location.reload();
-  }
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
 };
 
-export const db = {}; // Placeholder for components that might still import it
+const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);
+export const db = getFirestore(app);
