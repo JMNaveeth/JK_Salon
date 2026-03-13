@@ -510,34 +510,6 @@ const Contact = () => {
                   title="JK Salon Location"
                 />
               </div>
-
-              {/* quick action buttons */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 pt-4 pb-2">
-                <ActionBtn3D
-                  href="tel:+94759560114"
-                  icon={Phone}
-                  label="Call Now"
-                  colorTop={GOLD_LIGHT}
-                  colorBottom={GOLD}
-                  colorShadow="#99783D"
-                />
-                <ActionBtn3D
-                  href="https://wa.me/94759560114"
-                  icon={MessageSquare}
-                  label="WhatsApp"
-                  colorTop="#4ADE80"
-                  colorBottom="#16A34A"
-                  colorShadow="#14532D"
-                />
-                <ActionBtn3D
-                  href="mailto:hello@jksalon.com"
-                  icon={Mail}
-                  label="Email Us"
-                  colorTop="#60A5FA"
-                  colorBottom="#2563EB"
-                  colorShadow="#1E3A8A"
-                />
-              </div>
             </motion.div>
           </div>
         </div>
