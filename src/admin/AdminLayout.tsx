@@ -1,12 +1,12 @@
 import React from 'react';
 import { Link, useNavigate, useLocation, Routes, Route, Navigate } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Scissors, 
-  Calendar, 
-  Image as ImageIcon, 
-  Star, 
-  Settings, 
+import {
+  LayoutDashboard,
+  Scissors,
+  Calendar,
+  Image as ImageIcon,
+  Star,
+  Settings,
   LogOut,
   Menu,
   X,
@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { auth } from '../firebase/firebase';
+import { signOut } from 'firebase/auth';
 import { cn } from '@/src/utils/cn';
 import DashboardOverview from './DashboardOverview';
 import ServiceManagement from './ServiceManagement';
@@ -33,7 +34,7 @@ const AdminLayout = () => {
   if (!user) return <Navigate to="/admin/login" />;
 
   const handleLogout = async () => {
-    await auth.signOut();
+    await signOut(auth);
     navigate('/admin/login');
   };
 
@@ -70,8 +71,8 @@ const AdminLayout = () => {
                 onClick={() => setIsSidebarOpen(false)}
                 className={cn(
                   "flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all",
-                  isActive(item.path) 
-                    ? "bg-[#C5A059] text-white shadow-lg shadow-[#C5A059]/20" 
+                  isActive(item.path)
+                    ? "bg-[#C5A059] text-white shadow-lg shadow-[#C5A059]/20"
                     : "text-zinc-500 hover:text-white hover:bg-zinc-900"
                 )}
               >
@@ -100,7 +101,7 @@ const AdminLayout = () => {
           >
             <Menu className="h-6 w-6" />
           </button>
-          
+
           <div className="flex items-center space-x-4">
             <div className="text-right hidden sm:block">
               <p className="text-sm font-bold text-white">{user.email}</p>
@@ -128,7 +129,7 @@ const AdminLayout = () => {
 
       {/* Mobile Overlay */}
       {isSidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase/firebase';
 import { motion } from 'motion/react';
 import { Lock, Mail, Scissors } from 'lucide-react';
@@ -17,15 +18,10 @@ const AdminLogin = () => {
     setError('');
 
     try {
-      // Mock login - any email/password works for demo, but we'll simulate a check
-      if (email === 'asamathu587@gmail.com' && password === 'admin') {
-        await auth.signInWithPopup(); // Reusing the mock login logic
-        navigate('/admin/dashboard');
-      } else {
-        throw new Error('Invalid credentials');
-      }
+      await signInWithEmailAndPassword(auth, email, password);
+      navigate('/admin/dashboard');
     } catch (err: any) {
-      setError('Invalid email or password. Use asamathu587@gmail.com / admin');
+      setError('Invalid email or password.');
       console.error(err);
     } finally {
       setLoading(false);
@@ -52,8 +48,8 @@ const AdminLogin = () => {
             <label className="text-xs font-bold uppercase tracking-widest text-zinc-500">Email Address</label>
             <div className="relative">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-500" />
-              <input 
-                type="email" 
+              <input
+                type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -67,8 +63,8 @@ const AdminLogin = () => {
             <label className="text-xs font-bold uppercase tracking-widest text-zinc-500">Password</label>
             <div className="relative">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-500" />
-              <input 
-                type="password" 
+              <input
+                type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -84,7 +80,7 @@ const AdminLogin = () => {
             </p>
           )}
 
-          <button 
+          <button
             type="submit"
             disabled={loading}
             className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold py-4 rounded-xl transition-all flex items-center justify-center"
