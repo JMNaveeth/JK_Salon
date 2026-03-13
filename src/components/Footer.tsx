@@ -1,10 +1,41 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useInView } from 'motion/react';
 import {
   Scissors, Instagram, Facebook, Twitter, Mail, Phone,
   MapPin, ArrowUpRight, Clock, Heart, ArrowRight
 } from 'lucide-react';
+
+/* ── Real-time shop status based on Sri Lanka time (Asia/Colombo, UTC+5:30) ── */
+const useSalonStatus = () => {
+  const checkStatus = () => {
+    const now = new Date(
+      new Date().toLocaleString('en-US', { timeZone: 'Asia/Colombo' })
+    );
+    const day = now.getDay(); // 0 = Sunday
+    const hour = now.getHours();
+    const minute = now.getMinutes();
+    const time = hour + minute / 60;
+
+    // Schedule:
+    // Mon–Fri (1–5): 9:00 AM – 8:00 PM
+    // Saturday  (6): 9:00 AM – 6:00 PM
+    // Sunday    (0): 10:00 AM – 4:00 PM
+    if (day >= 1 && day <= 5) return time >= 9 && time < 20;
+    if (day === 6) return time >= 9 && time < 18;
+    if (day === 0) return time >= 10 && time < 16;
+    return false;
+  };
+
+  const [isOpen, setIsOpen] = useState(checkStatus);
+
+  useEffect(() => {
+    const interval = setInterval(() => setIsOpen(checkStatus()), 60_000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return isOpen;
+};
 
 const GOLD = '#C5A059';
 const GOLD_LIGHT = '#E8C97A';
@@ -65,6 +96,7 @@ const ContactLine = ({ icon: Icon, children }: { icon: any; children: React.Reac
 );
 
 const Footer = () => {
+  const isOpen = useSalonStatus();
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
 
@@ -238,17 +270,28 @@ const Footer = () => {
                 </div>
               ))}
             </div>
-            {/* Status Badge */}
+            {/* Status Badge — live based on Sri Lanka time */}
             <div
-              className="mt-5 inline-flex items-center gap-2 px-4 py-2 rounded-full"
-              style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.15)' }}
+              className="mt-5 inline-flex items-center gap-2 px-4 py-2 rounded-full transition-colors duration-500"
+              style={{
+                background: isOpen ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)',
+                border: `1px solid ${isOpen ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)'}`,
+              }}
             >
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                {isOpen && (
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                )}
+                <span
+                  className="relative inline-flex rounded-full h-2 w-2 transition-colors duration-500"
+                  style={{ background: isOpen ? '#10B981' : '#EF4444' }}
+                />
               </span>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400">
-                Open Now
+              <span
+                className="text-[11px] font-bold uppercase tracking-wider transition-colors duration-500"
+                style={{ color: isOpen ? '#34D399' : '#F87171' }}
+              >
+                {isOpen ? 'Open Now' : 'Closed'}
               </span>
             </div>
           </motion.div>
