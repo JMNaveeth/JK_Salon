@@ -5,3 +5,22 @@
   --font-serif: "Cormorant Garamond", serif;
   --font-sans: "Inter", sans-serif;
 }
+
+@utility premium-scrollbar {
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #C5A059;
+    border-radius: 10px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: #E8C97A;
+  }
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: #C5A059 transparent;
+}

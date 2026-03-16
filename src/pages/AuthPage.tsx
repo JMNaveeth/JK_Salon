@@ -575,15 +575,17 @@ const AuthPage = () => {
                     </motion.div>
 
                     {/* Form Panel */}
-                    <div className="flex-1 flex items-center justify-center p-8 lg:p-16 relative bg-white">
-                        <div className="w-full max-w-[440px]">
-                            <AnimatePresence mode="popLayout" initial={false}>
-                                {isLogin ? (
-                                    <LoginForm navigate={navigate} />
-                                ) : (
-                                    <RegisterForm navigate={navigate} />
-                                )}
-                            </AnimatePresence>
+                    <div className="flex-1 overflow-y-auto premium-scrollbar bg-white relative">
+                        <div className="min-h-full flex items-center justify-center p-8 lg:p-16">
+                            <div className="w-full max-w-[440px]">
+                                <AnimatePresence mode="popLayout" initial={false}>
+                                    {isLogin ? (
+                                        <LoginForm navigate={navigate} />
+                                    ) : (
+                                        <RegisterForm navigate={navigate} />
+                                    )}
+                                </AnimatePresence>
+                            </div>
                         </div>
                     </div>
 
