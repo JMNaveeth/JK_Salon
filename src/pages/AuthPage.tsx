@@ -92,10 +92,13 @@ const LoginForm = ({ navigate }: { navigate: any }) => {
                             value={email}
                             onChange={(e) => { setEmail(e.target.value); setError(''); }}
                             placeholder="your@email.com"
-                            autoComplete="off"
+                            readOnly
+                            onFocus={(e) => {
+                                e.target.removeAttribute('readonly');
+                                e.target.style.borderColor = GOLD;
+                            }}
                             className="w-full rounded-2xl pl-12 pr-5 py-4 text-sm text-[#1A1A1A] outline-none transition-all duration-300 placeholder:text-zinc-300 bg-[#FAF7F2] focus:bg-white focus:shadow-[0_8px_32px_rgba(197,160,89,0.12),0_0_0_3px_rgba(197,160,89,0.08)]"
                             style={{ border: '1.5px solid transparent' }}
-                            onFocus={(e) => (e.target.style.borderColor = GOLD)}
                             onBlur={(e) => (e.target.style.borderColor = 'transparent')}
                         />
                     </div>
@@ -112,10 +115,14 @@ const LoginForm = ({ navigate }: { navigate: any }) => {
                             type={showPassword ? 'text' : 'password'}
                             value={password}
                             onChange={(e) => { setPassword(e.target.value); setError(''); }}
-                           
+                            placeholder="••••••••"
+                            readOnly
+                            onFocus={(e) => {
+                                e.target.removeAttribute('readonly');
+                                e.target.style.borderColor = GOLD;
+                            }}
                             className="w-full rounded-2xl pl-12 pr-12 py-4 text-sm text-[#1A1A1A] outline-none transition-all duration-300 placeholder:text-zinc-300 bg-[#FAF7F2] focus:bg-white focus:shadow-[0_8px_32px_rgba(197,160,89,0.12),0_0_0_3px_rgba(197,160,89,0.08)]"
                             style={{ border: '1.5px solid transparent' }}
-                            onFocus={(e) => (e.target.style.borderColor = GOLD)}
                             onBlur={(e) => (e.target.style.borderColor = 'transparent')}
                         />
                         <button
@@ -303,9 +310,13 @@ const RegisterForm = ({ navigate }: { navigate: any }) => {
                             value={name}
                             onChange={(e) => { setName(e.target.value); setError(''); }}
                             placeholder="John Doe"
+                            readOnly
+                            onFocus={(e) => {
+                                e.target.removeAttribute('readonly');
+                                e.target.style.borderColor = GOLD;
+                            }}
                             className="w-full rounded-2xl pl-12 pr-5 py-4 text-sm text-[#1A1A1A] outline-none transition-all duration-300 placeholder:text-zinc-300 bg-[#FAF7F2] focus:bg-white focus:shadow-[0_8px_32px_rgba(197,160,89,0.12),0_0_0_3px_rgba(197,160,89,0.08)]"
                             style={{ border: '1.5px solid transparent' }}
-                            onFocus={(e) => (e.target.style.borderColor = GOLD)}
                             onBlur={(e) => (e.target.style.borderColor = 'transparent')}
                         />
                     </div>
@@ -323,10 +334,13 @@ const RegisterForm = ({ navigate }: { navigate: any }) => {
                             value={email}
                             onChange={(e) => { setEmail(e.target.value); setError(''); }}
                             placeholder="your@email.com"
-                            autoComplete="off"
+                            readOnly
+                            onFocus={(e) => {
+                                e.target.removeAttribute('readonly');
+                                e.target.style.borderColor = GOLD;
+                            }}
                             className="w-full rounded-2xl pl-12 pr-5 py-4 text-sm text-[#1A1A1A] outline-none transition-all duration-300 placeholder:text-zinc-300 bg-[#FAF7F2] focus:bg-white focus:shadow-[0_8px_32px_rgba(197,160,89,0.12),0_0_0_3px_rgba(197,160,89,0.08)]"
                             style={{ border: '1.5px solid transparent' }}
-                            onFocus={(e) => (e.target.style.borderColor = GOLD)}
                             onBlur={(e) => (e.target.style.borderColor = 'transparent')}
                         />
                     </div>
@@ -344,10 +358,13 @@ const RegisterForm = ({ navigate }: { navigate: any }) => {
                             value={password}
                             onChange={(e) => { setPassword(e.target.value); setError(''); }}
                             placeholder="Min. 6 characters"
-                            autoComplete="new-password"
+                            readOnly
+                            onFocus={(e) => {
+                                e.target.removeAttribute('readonly');
+                                e.target.style.borderColor = GOLD;
+                            }}
                             className="w-full rounded-2xl pl-12 pr-12 py-4 text-sm text-[#1A1A1A] outline-none transition-all duration-300 placeholder:text-zinc-300 bg-[#FAF7F2] focus:bg-white focus:shadow-[0_8px_32px_rgba(197,160,89,0.12),0_0_0_3px_rgba(197,160,89,0.08)]"
                             style={{ border: '1.5px solid transparent' }}
-                            onFocus={(e) => (e.target.style.borderColor = GOLD)}
                             onBlur={(e) => (e.target.style.borderColor = 'transparent')}
                         />
                         <button
@@ -395,10 +412,13 @@ const RegisterForm = ({ navigate }: { navigate: any }) => {
                             value={confirmPassword}
                             onChange={(e) => { setConfirmPassword(e.target.value); setError(''); }}
                             placeholder="Re-enter password"
-                            autoComplete="new-password"
+                            readOnly
+                            onFocus={(e) => {
+                                e.target.removeAttribute('readonly');
+                                e.target.style.borderColor = GOLD;
+                            }}
                             className="w-full rounded-2xl pl-12 pr-12 py-4 text-sm text-[#1A1A1A] outline-none transition-all duration-300 placeholder:text-zinc-300 bg-[#FAF7F2] focus:bg-white focus:shadow-[0_8px_32px_rgba(197,160,89,0.12),0_0_0_3px_rgba(197,160,89,0.08)]"
                             style={{ border: '1.5px solid transparent' }}
-                            onFocus={(e) => (e.target.style.borderColor = GOLD)}
                             onBlur={(e) => (e.target.style.borderColor = 'transparent')}
                         />
                         {confirmPassword && password === confirmPassword && (
