@@ -141,9 +141,12 @@ const LoginForm = ({ navigate }: { navigate: any }) => {
                 <motion.button
                     type="submit"
                     disabled={loading}
-                    whileHover={{ scale: loading ? 1 : 1.02 }}
-                    whileTap={{ scale: loading ? 1 : 0.97 }}
-                    className="w-full relative overflow-hidden flex items-center justify-center gap-2.5 py-[18px] rounded-2xl text-sm font-bold text-white disabled:opacity-60 disabled:cursor-not-allowed group"
+                    whileHover={loading ? {} : { 
+                        scale: 1.02,
+                        boxShadow: `0 20px 40px rgba(197,160,89,0.45), inset 0 2px 0 rgba(255,255,255,0.3)`,
+                    }}
+                    whileTap={loading ? {} : { scale: 0.96 }}
+                    className="w-full relative overflow-hidden flex items-center justify-center gap-2.5 py-[18px] rounded-2xl text-sm font-bold text-white disabled:opacity-60 disabled:cursor-not-allowed group transition-shadow duration-300"
                     style={{
                         background: `linear-gradient(135deg, ${GOLD}, ${GOLD_LIGHT})`,
                         boxShadow: '0 12px 32px rgba(197,160,89,0.35), inset 0 2px 0 rgba(255,255,255,0.2)',
@@ -153,13 +156,16 @@ const LoginForm = ({ navigate }: { navigate: any }) => {
                         <><Loader2 className="h-4 w-4 animate-spin" /><span>Signing in…</span></>
                     ) : (
                         <>
-                            <span className="relative z-10">Sign In</span>
-                            <ArrowRight className="relative z-10 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                            <span className="relative z-10 flex items-center gap-2.5">
+                                Sign In
+                                <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                            </span>
+                            {/* Premium Shimmer Effect */}
                             <motion.div
-                                className="absolute inset-0 bg-white/15"
-                                initial={{ x: '-110%' }}
-                                whileHover={{ x: '110%' }}
-                                transition={{ duration: 0.55 }}
+                                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -skew-x-[35deg] pointer-events-none"
+                                initial={{ left: '-150%' }}
+                                whileHover={{ left: '150%' }}
+                                transition={{ duration: 0.75, ease: "easeInOut" }}
                             />
                         </>
                     )}
@@ -399,9 +405,12 @@ const RegisterForm = ({ navigate }: { navigate: any }) => {
                 <motion.button
                     type="submit"
                     disabled={loading}
-                    whileHover={{ scale: loading ? 1 : 1.02 }}
-                    whileTap={{ scale: loading ? 1 : 0.97 }}
-                    className="w-full relative overflow-hidden flex items-center justify-center gap-2.5 py-[18px] rounded-2xl text-sm font-bold text-white mt-2 disabled:opacity-60 disabled:cursor-not-allowed group"
+                    whileHover={loading ? {} : { 
+                        scale: 1.02,
+                        boxShadow: `0 20px 40px rgba(197,160,89,0.45), inset 0 2px 0 rgba(255,255,255,0.3)`,
+                    }}
+                    whileTap={loading ? {} : { scale: 0.96 }}
+                    className="w-full relative overflow-hidden flex items-center justify-center gap-2.5 py-[18px] rounded-2xl text-sm font-bold text-white mt-2 disabled:opacity-60 disabled:cursor-not-allowed group transition-shadow duration-300"
                     style={{
                         background: `linear-gradient(135deg, ${GOLD}, ${GOLD_LIGHT})`,
                         boxShadow: '0 12px 32px rgba(197,160,89,0.35), inset 0 2px 0 rgba(255,255,255,0.2)',
@@ -411,13 +420,16 @@ const RegisterForm = ({ navigate }: { navigate: any }) => {
                         <><Loader2 className="h-4 w-4 animate-spin" /><span>Creating account…</span></>
                     ) : (
                         <>
-                            <span className="relative z-10">Create Account</span>
-                            <ArrowRight className="relative z-10 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                            <span className="relative z-10 flex items-center gap-2.5">
+                                Create Account
+                                <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                            </span>
+                            {/* Premium Shimmer Effect */}
                             <motion.div
-                                className="absolute inset-0 bg-white/15"
-                                initial={{ x: '-110%' }}
-                                whileHover={{ x: '110%' }}
-                                transition={{ duration: 0.55 }}
+                                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -skew-x-[35deg] pointer-events-none"
+                                initial={{ left: '-150%' }}
+                                whileHover={{ left: '150%' }}
+                                transition={{ duration: 0.75, ease: "easeInOut" }}
                             />
                         </>
                     )}
@@ -440,169 +452,143 @@ const AuthPage = () => {
     const isLogin = location.pathname === '/login';
 
     return (
-        <div className={`min-h-screen flex w-full relative overflow-hidden`} style={{ background: CREAM }}>
-            <div className={`flex w-full ${isLogin ? 'flex-row' : 'flex-row-reverse'}`}>
-
-                {/* Decorative Panel */}
-                <motion.div
-                    layout
-                    transition={{ type: 'spring', stiffness: 200, damping: 24 }}
-                    className="hidden lg:flex lg:w-1/2 relative overflow-hidden items-center justify-center z-20"
-                    style={{ background: '#0F0F0F' }}
-                >
-                    {/* Floating background circles */}
-                    {[300, 450, 600].map((size, i) => (
-                        <motion.div
-                            key={i}
-                            className="absolute rounded-full pointer-events-none"
-                            style={{
-                                width: size, height: size,
-                                border: `1px solid rgba(197,160,89,${0.12 - i * 0.03})`,
-                                top: '50%', left: '50%',
-                                transform: 'translate(-50%, -50%)',
-                            }}
-                            animate={{ scale: [1, 1.06, 1], rotate: [0, isLogin ? 3 : -3, 0] }}
-                            transition={{ duration: 5 + i * 2, repeat: Infinity, ease: 'easeInOut' }}
-                        />
-                    ))}
-
-                    {/* Gold ambient glow */}
-                    <div
-                        className="absolute w-[400px] h-[400px] rounded-full blur-[120px] pointer-events-none opacity-20"
-                        style={{ background: GOLD, top: '40%', left: '50%', transform: 'translate(-50%, -50%)' }}
+        <div 
+            className="min-h-screen w-full relative flex items-center justify-center py-12 px-4 lg:px-8 overflow-hidden" 
+            style={{ background: CREAM }}
+        >
+            {/* Ambient Background Elements */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                {[400, 700, 1000].map((size, i) => (
+                    <motion.div
+                        key={i}
+                        className="absolute rounded-full"
+                        style={{
+                            width: size, height: size,
+                            border: `1px solid rgba(197,160,89,${0.08 - i * 0.02})`,
+                            top: '50%', left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                        }}
+                        animate={{ 
+                            scale: [1, 1.05, 1], 
+                            rotate: [0, isLogin ? 5 : -5, 0] 
+                        }}
+                        transition={{ duration: 8 + i * 4, repeat: Infinity, ease: 'easeInOut' }}
                     />
-
-                    {/* Content container with absolute positioning to prevent height jumps during crossfade */}
-                    <div className="relative z-10 text-center px-12 max-w-lg w-full h-[400px] flex flex-col justify-center">
-                        <AnimatePresence mode="wait">
-                            {isLogin ? (
-                                <motion.div
-                                    key="login-content"
-                                    initial={{ opacity: 0, scale: 0.95 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    exit={{ opacity: 0, scale: 0.95 }}
-                                    transition={{ duration: 0.4 }}
-                                >
-                                    {/* 3D Scissors Icon */}
-                                    <motion.div
-                                        whileHover={{ rotateY: 180 }}
-                                        transition={{ duration: 0.6 }}
-                                        className="inline-flex items-center justify-center w-24 h-24 rounded-3xl mb-10"
-                                        style={{
-                                            background: `linear-gradient(135deg, ${GOLD}, ${GOLD_LIGHT})`,
-                                            boxShadow: `0 30px 60px rgba(197,160,89,0.4), inset 0 2px 0 rgba(255,255,255,0.2)`,
-                                            transformStyle: 'preserve-3d',
-                                        }}
-                                    >
-                                        <Scissors className="h-12 w-12 text-white" />
-                                    </motion.div>
-
-                                    <h2 className="text-4xl font-serif text-white tracking-tight mb-4">
-                                        Welcome to{' '}
-                                        <span style={{
-                                            background: `linear-gradient(135deg, ${GOLD}, ${GOLD_LIGHT})`,
-                                            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-                                        }}>
-                                            JK Salon
-                                        </span>
-                                    </h2>
-                                    <p className="text-zinc-500 text-sm leading-relaxed mb-8">
-                                        Experience premium grooming and styling. Sign in to book appointments, track your visits, and enjoy exclusive member benefits.
-                                    </p>
-
-                                    {/* Floating feature pills */}
-                                    <div className="flex flex-wrap justify-center gap-3">
-                                        {['Premium Services', 'Easy Booking', 'Member Rewards'].map((text, i) => (
-                                            <div
-                                                key={text}
-                                                className="px-4 py-2 rounded-full text-xs font-medium"
-                                                style={{
-                                                    background: 'rgba(197,160,89,0.08)',
-                                                    border: '1px solid rgba(197,160,89,0.15)',
-                                                    color: GOLD_LIGHT,
-                                                }}
-                                            >
-                                                <Sparkles className="inline h-3 w-3 mr-1.5" />{text}
-                                            </div>
-                                        ))}
-                                    </div>
-                                </motion.div>
-                            ) : (
-                                <motion.div
-                                    key="register-content"
-                                    initial={{ opacity: 0, scale: 0.95 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    exit={{ opacity: 0, scale: 0.95 }}
-                                    transition={{ duration: 0.4 }}
-                                >
-                                    {/* 3D Icon */}
-                                    <motion.div
-                                        animate={{ rotateY: [0, 360] }}
-                                        transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
-                                        className="inline-flex items-center justify-center w-24 h-24 rounded-3xl mb-10"
-                                        style={{
-                                            background: `linear-gradient(135deg, ${GOLD}, ${GOLD_LIGHT})`,
-                                            boxShadow: `0 30px 60px rgba(197,160,89,0.4), inset 0 2px 0 rgba(255,255,255,0.2)`,
-                                            transformStyle: 'preserve-3d',
-                                        }}
-                                    >
-                                        <Scissors className="h-12 w-12 text-white" />
-                                    </motion.div>
-
-                                    <h2 className="text-4xl font-serif text-white tracking-tight mb-4">
-                                        Join the{' '}
-                                        <span style={{
-                                            background: `linear-gradient(135deg, ${GOLD}, ${GOLD_LIGHT})`,
-                                            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-                                        }}>
-                                            Experience
-                                        </span>
-                                    </h2>
-                                    <p className="text-zinc-500 text-sm leading-relaxed mb-8">
-                                        Create your personal account to unlock member-exclusive offers, seamless booking, and a luxury grooming experience tailored just for you.
-                                    </p>
-
-                                    {/* Benefits list */}
-                                    <div className="space-y-3 text-left max-w-xs mx-auto">
-                                        {[
-                                            'Book appointments instantly',
-                                            'Earn loyalty rewards',
-                                            'Exclusive member discounts',
-                                            'Track your style history',
-                                        ].map((text, i) => (
-                                            <div key={text} className="flex items-center gap-3">
-                                                <div
-                                                    className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0"
-                                                    style={{ background: 'rgba(197,160,89,0.15)' }}
-                                                >
-                                                    <CheckCircle className="h-3.5 w-3.5" style={{ color: GOLD_LIGHT }} />
-                                                </div>
-                                                <span className="text-sm text-zinc-400">{text}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </div>
-                </motion.div>
-
-                {/* Form Panel */}
-                <motion.div
-                    layout
-                    transition={{ type: 'spring', stiffness: 200, damping: 24 }}
-                    className="flex-1 w-full lg:w-1/2 flex items-center justify-center px-6 py-16 lg:px-16 z-10"
-                >
-                    <AnimatePresence mode="popLayout">
-                        {isLogin ? (
-                            <LoginForm navigate={navigate} />
-                        ) : (
-                            <RegisterForm navigate={navigate} />
-                        )}
-                    </AnimatePresence>
-                </motion.div>
-
+                ))}
             </div>
+
+            {/* Main Floating Container */}
+            <motion.div
+                layout
+                initial={{ opacity: 0, scale: 0.98, y: 15 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                className="relative z-10 w-full lg:w-[65%] max-w-4xl aspect-square lg:aspect-[16/9] flex flex-col lg:flex-row bg-white rounded-[40px] overflow-hidden shadow-[0_40px_100px_rgba(0,0,0,0.12)] border border-white"
+            >
+                <div className={`flex w-full h-full ${isLogin ? 'flex-row' : 'flex-row-reverse'}`}>
+                    
+                    {/* Decorative Panel (Old Design Component) */}
+                    <motion.div
+                        layout
+                        className="hidden lg:flex w-1/2 relative overflow-hidden items-center justify-center p-12"
+                        style={{ background: '#0F0F0F' }}
+                    >
+                        {/* Panel Animations */}
+                        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                            <motion.div
+                                className="absolute w-[400px] h-[400px] rounded-full blur-[100px] opacity-20"
+                                style={{ background: GOLD, top: '40%', left: '50%', transform: 'translate(-50%, -50%)' }}
+                                animate={{ scale: [1, 1.2, 1], opacity: [0.15, 0.25, 0.15] }}
+                                transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+                            />
+                        </div>
+
+                        <div className="relative z-10 text-center w-full max-w-md">
+                            <AnimatePresence mode="wait">
+                                {isLogin ? (
+                                    <motion.div
+                                        key="login-content"
+                                        initial={{ opacity: 0, y: 15 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -15 }}
+                                    >
+                                        <motion.div
+                                            whileHover={{ rotateY: 180 }}
+                                            className="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-8"
+                                            style={{
+                                                background: `linear-gradient(135deg, ${GOLD}, ${GOLD_LIGHT})`,
+                                                boxShadow: `0 20px 40px rgba(197,160,89,0.3)`,
+                                            }}
+                                        >
+                                            <Scissors className="h-10 w-10 text-white" />
+                                        </motion.div>
+                                        <h2 className="text-4xl font-serif text-white mb-4">Welcome Back</h2>
+                                        <p className="text-zinc-500 text-sm leading-relaxed mb-8">
+                                            Return to luxury. Sign in to manage your appointments and services.
+                                        </p>
+                                        <div className="flex flex-wrap justify-center gap-2">
+                                            {['Premium', 'Luxury', 'Expert'].map(tag => (
+                                                <span key={tag} className="px-3 py-1 rounded-full text-[10px] uppercase tracking-widest border border-zinc-800 text-zinc-400 bg-zinc-900/50">
+                                                    {tag}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </motion.div>
+                                ) : (
+                                    <motion.div
+                                        key="register-content"
+                                        initial={{ opacity: 0, y: 15 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -15 }}
+                                    >
+                                        <motion.div
+                                            animate={{ rotateY: [0, 360] }}
+                                            transition={{ duration: 10, repeat: Infinity, ease: 'linear' }}
+                                            className="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-8"
+                                            style={{
+                                                background: `linear-gradient(135deg, ${GOLD}, ${GOLD_LIGHT})`,
+                                                boxShadow: `0 20px 40px rgba(197,160,89,0.3)`,
+                                            }}
+                                        >
+                                            <Scissors className="h-10 w-10 text-white" />
+                                        </motion.div>
+                                        <h2 className="text-4xl font-serif text-white mb-4">Join Us</h2>
+                                        <p className="text-zinc-500 text-sm leading-relaxed mb-8">
+                                            Experience the finest grooming services tailored to your style.
+                                        </p>
+                                        <div className="space-y-4 text-left max-w-[240px] mx-auto">
+                                            {[
+                                                'Priority Booking',
+                                                'Member Perks',
+                                                'Style Tracking'
+                                            ].map((benefit) => (
+                                                <div key={benefit} className="flex items-center gap-3 text-sm text-zinc-400">
+                                                    <CheckCircle className="h-4 w-4 text-[#C5A059]" />
+                                                    {benefit}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    </motion.div>
+
+                    {/* Form Panel */}
+                    <div className="flex-1 flex items-center justify-center p-8 lg:p-16 relative bg-white">
+                        <div className="w-full max-w-[440px]">
+                            <AnimatePresence mode="popLayout" initial={false}>
+                                {isLogin ? (
+                                    <LoginForm navigate={navigate} />
+                                ) : (
+                                    <RegisterForm navigate={navigate} />
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    </div>
+
+                </div>
+            </motion.div>
         </div>
     );
 };
