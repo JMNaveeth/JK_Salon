@@ -41,10 +41,15 @@ const LoginForm = ({ navigate }: { navigate: any }) => {
     return (
         <motion.div
             key="login"
-            initial={{ opacity: 0, x: -40 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -40 }}
-            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            initial={{ opacity: 0, rotateY: -70, z: -100 }}
+            animate={{ opacity: 1, rotateY: 0, z: 0 }}
+            exit={{ opacity: 0, rotateY: 70, z: -100 }}
+            transition={{ 
+                duration: 0.7, 
+                ease: [0.22, 1, 0.36, 1],
+                opacity: { duration: 0.4 }
+            }}
+            style={{ transformStyle: 'preserve-3d' }}
             className="w-full max-w-[440px] mx-auto"
         >
             {/* Mobile Logo */}
@@ -87,6 +92,7 @@ const LoginForm = ({ navigate }: { navigate: any }) => {
                             value={email}
                             onChange={(e) => { setEmail(e.target.value); setError(''); }}
                             placeholder="your@email.com"
+                            autoComplete="off"
                             className="w-full rounded-2xl pl-12 pr-5 py-4 text-sm text-[#1A1A1A] outline-none transition-all duration-300 placeholder:text-zinc-300 bg-[#FAF7F2] focus:bg-white focus:shadow-[0_8px_32px_rgba(197,160,89,0.12),0_0_0_3px_rgba(197,160,89,0.08)]"
                             style={{ border: '1.5px solid transparent' }}
                             onFocus={(e) => (e.target.style.borderColor = GOLD)}
@@ -106,7 +112,7 @@ const LoginForm = ({ navigate }: { navigate: any }) => {
                             type={showPassword ? 'text' : 'password'}
                             value={password}
                             onChange={(e) => { setPassword(e.target.value); setError(''); }}
-                            placeholder="••••••••"
+                           
                             className="w-full rounded-2xl pl-12 pr-12 py-4 text-sm text-[#1A1A1A] outline-none transition-all duration-300 placeholder:text-zinc-300 bg-[#FAF7F2] focus:bg-white focus:shadow-[0_8px_32px_rgba(197,160,89,0.12),0_0_0_3px_rgba(197,160,89,0.08)]"
                             style={{ border: '1.5px solid transparent' }}
                             onFocus={(e) => (e.target.style.borderColor = GOLD)}
@@ -174,8 +180,15 @@ const LoginForm = ({ navigate }: { navigate: any }) => {
 
             <p className="text-center text-sm text-zinc-400 mt-8">
                 Don't have an account?{' '}
-                <Link to="/register" className="font-bold transition-colors hover:underline" style={{ color: GOLD }}>
-                    Create one
+                <Link to="/register" className="inline-block">
+                    <motion.span 
+                        className="font-bold transition-colors hover:underline cursor-pointer" 
+                        style={{ color: GOLD }}
+                        whileHover={{ scale: 1.05, y: -1 }}
+                        whileTap={{ scale: 0.95 }}
+                    >
+                        Create one
+                    </motion.span>
                 </Link>
             </p>
         </motion.div>
@@ -239,10 +252,15 @@ const RegisterForm = ({ navigate }: { navigate: any }) => {
     return (
         <motion.div
             key="register"
-            initial={{ opacity: 0, x: 40 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 40 }}
-            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            initial={{ opacity: 0, rotateY: 70, z: -100 }}
+            animate={{ opacity: 1, rotateY: 0, z: 0 }}
+            exit={{ opacity: 0, rotateY: -70, z: -100 }}
+            transition={{ 
+                duration: 0.7, 
+                ease: [0.22, 1, 0.36, 1],
+                opacity: { duration: 0.4 }
+            }}
+            style={{ transformStyle: 'preserve-3d' }}
             className="w-full max-w-[440px] mx-auto"
         >
             {/* Mobile Logo */}
@@ -305,6 +323,7 @@ const RegisterForm = ({ navigate }: { navigate: any }) => {
                             value={email}
                             onChange={(e) => { setEmail(e.target.value); setError(''); }}
                             placeholder="your@email.com"
+                            autoComplete="off"
                             className="w-full rounded-2xl pl-12 pr-5 py-4 text-sm text-[#1A1A1A] outline-none transition-all duration-300 placeholder:text-zinc-300 bg-[#FAF7F2] focus:bg-white focus:shadow-[0_8px_32px_rgba(197,160,89,0.12),0_0_0_3px_rgba(197,160,89,0.08)]"
                             style={{ border: '1.5px solid transparent' }}
                             onFocus={(e) => (e.target.style.borderColor = GOLD)}
@@ -325,6 +344,7 @@ const RegisterForm = ({ navigate }: { navigate: any }) => {
                             value={password}
                             onChange={(e) => { setPassword(e.target.value); setError(''); }}
                             placeholder="Min. 6 characters"
+                            autoComplete="new-password"
                             className="w-full rounded-2xl pl-12 pr-12 py-4 text-sm text-[#1A1A1A] outline-none transition-all duration-300 placeholder:text-zinc-300 bg-[#FAF7F2] focus:bg-white focus:shadow-[0_8px_32px_rgba(197,160,89,0.12),0_0_0_3px_rgba(197,160,89,0.08)]"
                             style={{ border: '1.5px solid transparent' }}
                             onFocus={(e) => (e.target.style.borderColor = GOLD)}
@@ -375,6 +395,7 @@ const RegisterForm = ({ navigate }: { navigate: any }) => {
                             value={confirmPassword}
                             onChange={(e) => { setConfirmPassword(e.target.value); setError(''); }}
                             placeholder="Re-enter password"
+                            autoComplete="new-password"
                             className="w-full rounded-2xl pl-12 pr-12 py-4 text-sm text-[#1A1A1A] outline-none transition-all duration-300 placeholder:text-zinc-300 bg-[#FAF7F2] focus:bg-white focus:shadow-[0_8px_32px_rgba(197,160,89,0.12),0_0_0_3px_rgba(197,160,89,0.08)]"
                             style={{ border: '1.5px solid transparent' }}
                             onFocus={(e) => (e.target.style.borderColor = GOLD)}
@@ -438,8 +459,15 @@ const RegisterForm = ({ navigate }: { navigate: any }) => {
 
             <p className="text-center text-sm text-zinc-400 mt-8">
                 Already have an account?{' '}
-                <Link to="/login" className="font-bold transition-colors hover:underline" style={{ color: GOLD }}>
-                    Sign in
+                <Link to="/login" className="inline-block">
+                    <motion.span 
+                        className="font-bold transition-colors hover:underline cursor-pointer" 
+                        style={{ color: GOLD }}
+                        whileHover={{ scale: 1.05, y: -1 }}
+                        whileTap={{ scale: 0.95 }}
+                    >
+                        Sign in
+                    </motion.span>
                 </Link>
             </p>
         </motion.div>
@@ -575,10 +603,10 @@ const AuthPage = () => {
                     </motion.div>
 
                     {/* Form Panel */}
-                    <div className="flex-1 overflow-y-auto premium-scrollbar bg-white relative">
+                    <div className="flex-1 overflow-y-auto premium-scrollbar bg-white relative" style={{ perspective: '1200px' }}>
                         <div className="min-h-full flex items-center justify-center p-8 lg:p-16">
                             <div className="w-full max-w-[440px]">
-                                <AnimatePresence mode="popLayout" initial={false}>
+                                <AnimatePresence mode="wait" initial={false}>
                                     {isLogin ? (
                                         <LoginForm navigate={navigate} />
                                     ) : (
