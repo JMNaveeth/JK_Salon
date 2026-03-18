@@ -4,7 +4,8 @@
  */
 
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate, useNavigate } from 'react-router-dom';
+import { signOut } from 'firebase/auth';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -18,8 +19,9 @@ import AdminLogin from './pages/AdminLogin';
 import AdminLayout from './admin/AdminLayout';
 import ScrollToTop from './components/ScrollToTop';
 import { useAuth } from './hooks/useAuth';
+import { auth } from './firebase/firebase';
 
-/* Auth guard — redirects to /register if not logged in */
+/* Auth guard — redirects to /login if not logged in */
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
 
@@ -37,17 +39,26 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  if (!user) return <Navigate to="/register" replace />;
+  if (!user) return <Navigate to="/login" replace />;
   return <>{children}</>;
 };
 
 const AppContent = () => {
   const location = useLocation();
-  const hideChrome = ['/login', '/register'].includes(location.pathname);
+  const navigate = useNavigate();
+  const { user, loading } = useAuth();
+  const hideChrome =
+    ['/login', '/register'].includes(location.pathname) ||
+    (!!loading || !user) && location.pathname === '/';
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    navigate('/login', { replace: true });
+  };
 
   return (
     <div className="min-h-screen bg-black font-sans selection:bg-emerald-500/30 selection:text-emerald-500">
-      {!hideChrome && <Navbar />}
+      {!hideChrome && <Navbar onLogout={user ? handleLogout : undefined} />}
       <ScrollToTop />
       <main>
         <Routes>
