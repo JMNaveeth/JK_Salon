@@ -148,14 +148,15 @@ const Navbar = ({ onLogout }: { onLogout?: () => void }) => {
                 whileTap={{ scale: 0.95 }}
                 whileHover={{ scale: 1.02 }}
                 className={cn(
-                  "flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-full border transition-all duration-200",
+                  "w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300 border",
                   isDark
-                    ? "border-zinc-700 text-zinc-400 hover:text-red-400 hover:border-red-400/50 hover:bg-red-400/10"
-                    : "border-zinc-300 text-zinc-600 hover:text-red-500 hover:border-red-400/60 hover:bg-red-50"
+                    ? "bg-black/20 border-[#C5A059]/35 text-[#C5A059] hover:bg-[#C5A059]/10"
+                    : "bg-white/40 border-[#C5A059]/45 text-[#C5A059] hover:bg-[#C5A059]/10"
                 )}
+                aria-label="Log out"
+                title="Log out"
               >
-                <LogOut className="h-3.5 w-3.5" />
-                <span>Log out</span>
+                <LogOut className="h-4 w-4" />
               </motion.button>
             )}
           </div>
@@ -186,6 +187,24 @@ const Navbar = ({ onLogout }: { onLogout?: () => void }) => {
                 )}
               </AnimatePresence>
             </motion.button>
+
+            {/* Logout Mobile (icon only) */}
+            {onLogout && (
+              <motion.button
+                onClick={onLogout}
+                whileTap={{ scale: 0.85 }}
+                className={cn(
+                  "w-9 h-9 rounded-full flex items-center justify-center border transition-colors duration-300",
+                  isDark
+                    ? "bg-black/20 border-[#C5A059]/35 text-[#C5A059]"
+                    : "bg-white/40 border-[#C5A059]/45 text-[#C5A059]"
+                )}
+                aria-label="Log out"
+                title="Log out"
+              >
+                <LogOut className="h-4 w-4" />
+              </motion.button>
+            )}
 
             {/* Hamburger */}
             <button
@@ -242,21 +261,6 @@ const Navbar = ({ onLogout }: { onLogout?: () => void }) => {
                 Book Now
               </Link>
 
-              {/* Mobile Logout */}
-              {onLogout && (
-                <button
-                  onClick={() => { setIsOpen(false); onLogout(); }}
-                  className={cn(
-                    "flex items-center gap-2 w-full px-3 py-4 text-base font-medium rounded-md mt-1 transition-colors",
-                    isDark
-                      ? "text-red-400 hover:bg-red-400/10"
-                      : "text-red-500 hover:bg-red-50"
-                  )}
-                >
-                  <LogOut className="h-5 w-5" />
-                  Log out
-                </button>
-              )}
             </div>
           </motion.div>
         )}
