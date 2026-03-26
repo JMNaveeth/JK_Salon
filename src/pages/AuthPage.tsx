@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { auth } from '../firebase/firebase';
+import { doc, setDoc } from 'firebase/firestore';
+import { auth, db } from '../firebase/firebase';
 import { Scissors, Mail, Lock, Eye, EyeOff, ArrowRight, Loader2, Sparkles, User, CheckCircle } from 'lucide-react';
 
 const GOLD = '#C5A059';
@@ -245,6 +246,13 @@ const RegisterForm = ({ navigate }: { navigate: any }) => {
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             await updateProfile(userCredential.user, { displayName: name });
+            // Save user with 'user' role in Firestore
+            await setDoc(doc(db, 'users', userCredential.user.uid), {
+              name,
+              email,
+              role: 'user',
+              createdAt: new Date().toISOString(),
+            });
             navigate('/');
         } catch (err: any) {
             if (err.code === 'auth/email-already-in-use') setError('Email is already registered. Try logging in.');

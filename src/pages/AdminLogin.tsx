@@ -1,7 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../firebase/firebase';
+import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { auth, db } from '../firebase/firebase';
 import { motion } from 'motion/react';
 import { Lock, Mail, Scissors } from 'lucide-react';
 
@@ -18,8 +19,18 @@ const AdminLogin = () => {
     setError('');
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      navigate('/admin/dashboard');
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      
+      // Check if user has admin role in Firestore
+      const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
+      
+      if (userDoc.exists() && userDoc.data().role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        // Not an admin — sign them out and show error
+        await signOut(auth);
+        setError('Access denied. This account does not have admin privileges.');
+      }
     } catch (err: any) {
       setError('Invalid email or password.');
       console.error(err);
