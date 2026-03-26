@@ -56,6 +56,8 @@ const ServiceManagement = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<ServiceForm>(emptyForm);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   // Delete confirmation
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -95,6 +97,8 @@ const ServiceManagement = () => {
   const openAddModal = () => {
     setForm(emptyForm);
     setEditingId(null);
+    setImageFile(null);
+    setImagePreview(null);
     setShowModal(true);
   };
 
@@ -110,7 +114,19 @@ const ServiceManagement = () => {
       imageUrl: service.imageUrl || '',
     });
     setEditingId(service.id);
+    setImageFile(null);
+    setImagePreview(service.imageUrl || null);
     setShowModal(true);
+  };
+
+  // Handle Image Selection
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+      setForm({ ...form, imageUrl: '' }); // clear URL if file selected
+    }
   };
 
   // Save (Create or Update)
@@ -121,8 +137,23 @@ const ServiceManagement = () => {
     }
     setSaving(true);
     try {
+      let finalImageUrl = form.imageUrl;
+
+      // Upload image if file selected
+      if (imageFile) {
+        const uploadRes = await api.uploadImage(imageFile);
+        if (uploadRes.success) {
+          finalImageUrl = uploadRes.imageUrl;
+        } else {
+          showToast('Image upload failed.', 'error');
+          setSaving(false);
+          return;
+        }
+      }
+
       const payload = {
         ...form,
+        imageUrl: finalImageUrl,
         price: parseInt(form.price),
         duration: parseInt(form.duration),
       };
@@ -495,30 +526,61 @@ const ServiceManagement = () => {
                 </div>
               </div>
 
-              {/* Image URL */}
+              {/* Image Upload / URL */}
               <div>
                 <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 mb-2">
-                  Image URL
+                  Service Image (Upload or URL)
                 </label>
-                <div className="relative">
-                  <ImageIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-600" />
-                  <input
-                    type="url"
-                    value={form.imageUrl}
-                    onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
-                    placeholder="https://images.unsplash.com/..."
-                    className="w-full bg-black border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white outline-none focus:border-[#C5A059]/50 transition-all placeholder:text-zinc-700"
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                  <div className="relative">
+                    <input
+                      type="file"
+                      accept="image/png, image/jpeg, image/webp"
+                      onChange={handleImageChange}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                    <div className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-sm text-zinc-400 flex items-center gap-2 transition-all hover:border-[#C5A059]/50">
+                      <ImageIcon className="h-4 w-4" />
+                      {imageFile ? <span className="truncate">{imageFile.name}</span> : <span>Upload from device</span>}
+                    </div>
+                  </div>
+                  <div className="relative">
+                    <div className="absolute left-0 top-0 bottom-0 flex items-center pl-3">
+                      <span className="text-zinc-600 text-xs font-bold uppercase">OR</span>
+                    </div>
+                    <input
+                      type="url"
+                      value={form.imageUrl}
+                      onChange={(e) => {
+                        setForm({ ...form, imageUrl: e.target.value });
+                        setImageFile(null);
+                        setImagePreview(e.target.value);
+                      }}
+                      placeholder="Paste Image URL..."
+                      className="w-full bg-black border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white outline-none focus:border-[#C5A059]/50 transition-all placeholder:text-zinc-700"
+                    />
+                  </div>
                 </div>
-                {form.imageUrl && (
-                  <div className="mt-3 rounded-xl overflow-hidden border border-white/5 h-32">
+
+                {imagePreview && (
+                  <div className="mt-3 rounded-xl overflow-hidden border border-white/5 h-32 relative group">
                     <img
-                      src={form.imageUrl}
+                      src={imagePreview}
                       alt="Preview"
                       className="w-full h-full object-cover"
                       referrerPolicy="no-referrer"
                       onError={(e) => ((e.target as HTMLImageElement).style.display = 'none')}
                     />
+                    <button
+                      onClick={() => {
+                        setImageFile(null);
+                        setImagePreview(null);
+                        setForm({ ...form, imageUrl: '' });
+                      }}
+                      className="absolute top-2 right-2 p-1.5 bg-black/50 backdrop-blur-md rounded-lg text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500/80"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
                   </div>
                 )}
               </div>
