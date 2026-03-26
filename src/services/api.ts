@@ -2,6 +2,14 @@
 // Fetches data from the Express backend
 
 export const api = {
+  // Image Upload
+  uploadImage: async (file: File) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    const res = await fetch('/api/upload', { method: 'POST', body: formData });
+    return res.json();
+  },
+
   // Services
   getServices: async () => {
     const res = await fetch('/api/services');

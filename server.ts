@@ -1,8 +1,10 @@
 import express from "express";
 import { createServer as createViteServer } from "vite";
 import path from "path";
+import fs from "fs";
 import { fileURLToPath } from "url";
 import Database from "better-sqlite3";
+import multer from "multer";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -80,6 +82,39 @@ async function startServer() {
   const PORT = 3000;
 
   app.use(express.json());
+
+  // Ensure uploads directory exists
+  const uploadsDir = path.join(__dirname, "public", "uploads");
+  if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+
+  // Serve uploaded files
+  app.use("/uploads", express.static(uploadsDir));
+
+  // Multer config for image uploads
+  const storage = multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, uploadsDir),
+    filename: (_req, file, cb) => {
+      const uniqueName = `${Date.now()}-${Math.random().toString(36).substring(7)}${path.extname(file.originalname)}`;
+      cb(null, uniqueName);
+    },
+  });
+  const upload = multer({
+    storage,
+    fileFilter: (_req, file, cb) => {
+      const allowed = ['.png', '.jpg', '.jpeg', '.webp'];
+      const ext = path.extname(file.originalname).toLowerCase();
+      if (allowed.includes(ext)) cb(null, true);
+      else cb(new Error('Only PNG, JPG, JPEG, and WEBP images are allowed.'));
+    },
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
+  });
+
+  // Image upload endpoint
+  app.post("/api/upload", upload.single("image"), (req, res) => {
+    if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+    const imageUrl = `/uploads/${req.file.filename}`;
+    res.json({ success: true, imageUrl });
+  });
 
   // API routes
   app.get("/api/health", (req, res) => {
