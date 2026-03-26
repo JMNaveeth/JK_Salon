@@ -59,6 +59,7 @@ const AppContent = () => {
   const { user, loading } = useAuth();
   const hideChrome =
     ['/login', '/register'].includes(location.pathname) ||
+    location.pathname.startsWith('/admin') ||
     (!!loading || !user) && location.pathname === '/';
 
   const handleLogout = async () => {
