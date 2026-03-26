@@ -7,6 +7,30 @@ export const api = {
     const res = await fetch('/api/services');
     return res.json();
   },
+  createService: async (data: any) => {
+    const res = await fetch('/api/services', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return res.json();
+  },
+  updateService: async (id: string, data: any) => {
+    const res = await fetch(`/api/services/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return res.json();
+  },
+  deleteService: async (id: string) => {
+    const res = await fetch(`/api/services/${id}`, { method: 'DELETE' });
+    return res.json();
+  },
+  toggleServiceStatus: async (id: string) => {
+    const res = await fetch(`/api/services/${id}/toggle`, { method: 'PATCH' });
+    return res.json();
+  },
 
   // Bookings
   getBookings: async () => {

@@ -161,7 +161,8 @@ const Services = () => {
     const fetchServices = async () => {
       try {
         const data = await api.getServices();
-        setServices(data);
+        // Only show Active services to customers
+        setServices(data.filter((s: any) => s.status === 'Active'));
       } catch (error) {
         console.error('Failed to fetch services:', error);
       } finally {

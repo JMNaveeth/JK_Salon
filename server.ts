@@ -106,6 +106,40 @@ async function startServer() {
     res.json(services);
   });
 
+  app.post("/api/services", (req, res) => {
+    const { name, category, price, duration, status, description, imageUrl } = req.body;
+    const id = Math.random().toString(36).substring(7).toUpperCase();
+    const insert = db.prepare(
+      "INSERT INTO services (id, name, category, price, duration, status, description, imageUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+    );
+    insert.run(id, name, category, price, duration, status || 'Active', description || '', imageUrl || '');
+    res.json({ success: true, id });
+  });
+
+  app.put("/api/services/:id", (req, res) => {
+    const { id } = req.params;
+    const { name, category, price, duration, status, description, imageUrl } = req.body;
+    const update = db.prepare(
+      "UPDATE services SET name = ?, category = ?, price = ?, duration = ?, status = ?, description = ?, imageUrl = ? WHERE id = ?"
+    );
+    update.run(name, category, price, duration, status, description || '', imageUrl || '', id);
+    res.json({ success: true });
+  });
+
+  app.delete("/api/services/:id", (req, res) => {
+    const { id } = req.params;
+    db.prepare("DELETE FROM services WHERE id = ?").run(id);
+    res.json({ success: true });
+  });
+
+  app.patch("/api/services/:id/toggle", (req, res) => {
+    const { id } = req.params;
+    const service = db.prepare("SELECT status FROM services WHERE id = ?").get(id) as any;
+    const newStatus = service?.status === 'Active' ? 'Inactive' : 'Active';
+    db.prepare("UPDATE services SET status = ? WHERE id = ?").run(newStatus, id);
+    res.json({ success: true, status: newStatus });
+  });
+
   // Bookings API
   app.get("/api/bookings", (req, res) => {
     const bookings = db.prepare("SELECT * FROM bookings ORDER BY createdAt DESC").all();
