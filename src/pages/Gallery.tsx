@@ -121,6 +121,8 @@ const GalleryCard = ({ item, idx, onClick }: { item: any; idx: number; onClick: 
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           muted
           playsInline
+          autoPlay
+          loop
         />
       ) : (
         <img

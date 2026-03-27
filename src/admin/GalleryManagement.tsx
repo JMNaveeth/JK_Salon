@@ -50,9 +50,12 @@ const GalleryManagement = () => {
           category: 'Styling' // Default category
         });
         fetchGallery();
+      } else {
+        alert("Upload Failed: " + (uploadRes.error || "Please check file format and size (Max 50MB)"));
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Upload failed:', error);
+      alert("Error: " + (error?.message || "Something went wrong during upload"));
     } finally {
       setUploading(false);
     }
@@ -95,6 +98,8 @@ const GalleryManagement = () => {
                 className="w-full h-full object-cover transition-transform group-hover:scale-110"
                 muted 
                 playsInline
+                autoPlay
+                loop
               />
             ) : (
               <img 

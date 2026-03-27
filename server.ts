@@ -102,11 +102,21 @@ async function startServer() {
     limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB
   });
 
-  // Image upload endpoint
-  app.post("/api/upload", upload.single("image"), (req, res) => {
-    if (!req.file) return res.status(400).json({ error: "No file uploaded" });
-    const imageUrl = `/uploads/${req.file.filename}`;
-    res.json({ success: true, imageUrl });
+  // Image/Video upload endpoint
+  app.post("/api/upload", (req, res) => {
+    upload.single("image")(req, res, (err) => {
+      if (err) {
+        console.error("Multer Upload Error:", err.message);
+        return res.status(400).json({ success: false, error: err.message });
+      }
+      if (!req.file) {
+        console.error("Upload Error: No file in request");
+        return res.status(400).json({ success: false, error: "No file uploaded" });
+      }
+      const imageUrl = `/uploads/${req.file.filename}`;
+      console.log(`File uploaded successfully: ${imageUrl} (${req.file.size} bytes)`);
+      res.json({ success: true, imageUrl });
+    });
   });
 
   // API routes

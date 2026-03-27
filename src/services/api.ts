@@ -10,10 +10,15 @@ export const api = {
         method: 'POST',
         body: formData
       });
+      if (!res.ok) {
+        const text = await res.text();
+        console.error("Local Upload Server Error:", text);
+        return { success: false, error: `Server Error ${res.status}` };
+      }
       return await res.json();
     } catch (error) {
-      console.error("Local Upload Error:", error);
-      return { success: false, error };
+      console.error("Local Upload Network Error:", error);
+      return { success: false, error: "Network Error" };
     }
   },
 
