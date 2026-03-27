@@ -96,27 +96,43 @@ async function startServer() {
     fileFilter: (_req, file, cb) => {
       const allowed = ['.png', '.jpg', '.jpeg', '.webp', '.mp4'];
       const ext = path.extname(file.originalname).toLowerCase();
-      if (allowed.includes(ext)) cb(null, true);
-      else cb(new Error('Only PNG, JPG, JPEG, WEBP, and MP4 files are allowed.'));
+      if (allowed.includes(ext)) {
+        cb(null, true);
+      } else {
+        const msg = `Unsupported file type: ${ext}. Only PNG, JPG, JPEG, WEBP, and MP4 are allowed.`;
+        console.warn(`[UPLOAD REJECTED] ${msg}`);
+        cb(new Error(msg));
+      }
     },
-    limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB
+    limits: { fileSize: 100 * 1024 * 1024 }, // 100 MB
   });
 
   // Image/Video upload endpoint
   app.post("/api/upload", (req, res) => {
-    upload.single("image")(req, res, (err) => {
-      if (err) {
-        console.error("Multer Upload Error:", err.message);
-        return res.status(400).json({ success: false, error: err.message });
-      }
-      if (!req.file) {
-        console.error("Upload Error: No file in request");
-        return res.status(400).json({ success: false, error: "No file uploaded" });
-      }
-      const imageUrl = `/uploads/${req.file.filename}`;
-      console.log(`File uploaded successfully: ${imageUrl} (${req.file.size} bytes)`);
-      res.json({ success: true, imageUrl });
-    });
+    try {
+      console.log(`[UPLOAD] Request received. Content-Type: ${req.headers["content-type"]}, Length: ${req.headers["content-length"]}`);
+      
+      // Ensure directory exists right before upload
+      if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+
+      upload.single("image")(req, res, (err) => {
+        if (err) {
+          console.error("[UPLOAD] Multer error:", err.message);
+          return res.status(400).json({ success: false, error: err.message });
+        }
+        if (!req.file) {
+          console.error("[UPLOAD] No file found in request.");
+          return res.status(400).json({ success: false, error: "No file was uploaded." });
+        }
+        
+        const imageUrl = `/uploads/${req.file.filename}`;
+        console.log(`[UPLOAD] Success: ${imageUrl} from ${req.file.originalname} (${req.file.size} bytes)`);
+        res.json({ success: true, imageUrl });
+      });
+    } catch (routeErr: any) {
+      console.error("[UPLOAD] Route crash:", routeErr);
+      res.status(500).json({ success: false, error: routeErr.message || "Failed to initiate upload" });
+    }
   });
 
   // API routes
@@ -319,6 +335,12 @@ async function startServer() {
       res.sendFile(path.join(__dirname, "dist", "index.html"));
     });
   }
+
+  // Final Error Handler
+  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    console.error("GLOBAL ERROR:", err);
+    res.status(500).json({ success: false, error: err.message || "Internal Server Error" });
+  });
 
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://localhost:${PORT}`);
