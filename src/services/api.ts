@@ -11,9 +11,14 @@ export const api = {
         body: formData
       });
       if (!res.ok) {
-        const text = await res.text();
-        console.error("Local Upload Server Error:", text);
-        return { success: false, error: `Server Error ${res.status}` };
+        try {
+          const errData = await res.json();
+          return { success: false, error: errData.error || `Server Error ${res.status}` };
+        } catch {
+          const text = await res.text();
+          console.error("Local Upload Server Error (Text):", text);
+          return { success: false, error: `Server Error ${res.status}` };
+        }
       }
       return await res.json();
     } catch (error) {

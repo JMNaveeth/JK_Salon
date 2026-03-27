@@ -74,66 +74,52 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  app.use(express.json());
-
-  // Ensure uploads directory exists
-  const uploadsDir = path.join(__dirname, "public", "uploads");
+  // Ensure uploads directory exists with absolute path
+  const uploadsDir = path.resolve(__dirname, "public", "uploads");
   if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 
-  // Serve uploaded files
+  // 1. STATICS (Highest priority)
   app.use("/uploads", express.static(uploadsDir));
 
-  // Multer config for image uploads
+  // 2. FILE UPLOAD (Handled before global body-parsers to avoid stream conflicts)
   const storage = multer.diskStorage({
     destination: (_req, _file, cb) => cb(null, uploadsDir),
     filename: (_req, file, cb) => {
-      const uniqueName = `${Date.now()}-${Math.random().toString(36).substring(7)}${path.extname(file.originalname)}`;
-      cb(null, uniqueName);
+      const ext = path.extname(file.originalname).toLowerCase();
+      const name = `${Date.now()}-${Math.random().toString(36).substring(7)}${ext}`;
+      cb(null, name);
     },
   });
+
   const upload = multer({
     storage,
     fileFilter: (_req, file, cb) => {
-      const allowed = ['.png', '.jpg', '.jpeg', '.webp', '.mp4'];
+      const allowed = ['.png', '.jpg', '.jpeg', '.webp', '.mp4', '.mov', '.webm', '.m4v'];
       const ext = path.extname(file.originalname).toLowerCase();
-      if (allowed.includes(ext)) {
-        cb(null, true);
-      } else {
-        const msg = `Unsupported file type: ${ext}. Only PNG, JPG, JPEG, WEBP, and MP4 are allowed.`;
-        console.warn(`[UPLOAD REJECTED] ${msg}`);
-        cb(new Error(msg));
-      }
+      if (allowed.includes(ext)) return cb(null, true);
+      cb(new Error(`Format ${ext} not supported`));
     },
-    limits: { fileSize: 100 * 1024 * 1024 }, // 100 MB
+    limits: { fileSize: 200 * 1024 * 1024 }, // 200 MB
   });
 
-  // Image/Video upload endpoint
   app.post("/api/upload", (req, res) => {
-    try {
-      console.log(`[UPLOAD] Request received. Content-Type: ${req.headers["content-type"]}, Length: ${req.headers["content-length"]}`);
+    console.log(`[PRO-LOG] Multi-part upload started: ${req.headers['content-length']} bytes`);
+    upload.single("image")(req, res, (err) => {
+      if (err) {
+        console.error("[PRO-LOG] Multer Error:", err);
+        return res.status(400).json({ success: false, error: err.message });
+      }
+      if (!req.file) return res.status(400).json({ success: false, error: "No file received" });
       
-      // Ensure directory exists right before upload
-      if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
-
-      upload.single("image")(req, res, (err) => {
-        if (err) {
-          console.error("[UPLOAD] Multer error:", err.message);
-          return res.status(400).json({ success: false, error: err.message });
-        }
-        if (!req.file) {
-          console.error("[UPLOAD] No file found in request.");
-          return res.status(400).json({ success: false, error: "No file was uploaded." });
-        }
-        
-        const imageUrl = `/uploads/${req.file.filename}`;
-        console.log(`[UPLOAD] Success: ${imageUrl} from ${req.file.originalname} (${req.file.size} bytes)`);
-        res.json({ success: true, imageUrl });
-      });
-    } catch (routeErr: any) {
-      console.error("[UPLOAD] Route crash:", routeErr);
-      res.status(500).json({ success: false, error: routeErr.message || "Failed to initiate upload" });
-    }
+      const imageUrl = `/uploads/${req.file.filename}`;
+      console.log(`[PRO-LOG] File stored: ${imageUrl}`);
+      res.json({ success: true, imageUrl });
+    });
   });
+
+  // 3. GLOBAL PARSERS (Applied after file upload)
+  app.use(express.json({ limit: '100mb' }));
+  app.use(express.urlencoded({ extended: true, limit: '100mb' }));
 
   // API routes
   app.get("/api/health", (req, res) => {
@@ -342,9 +328,13 @@ async function startServer() {
     res.status(500).json({ success: false, error: err.message || "Internal Server Error" });
   });
 
-  app.listen(PORT, "0.0.0.0", () => {
+  const server = app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://localhost:${PORT}`);
   });
+
+  // PROFESSIONAL FIX: Disable server timeouts for large video transfers
+  server.timeout = 0; 
+  server.keepAliveTimeout = 60000;
 }
 
 startServer();

@@ -35,7 +35,8 @@ const GalleryManagement = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const isVideo = file.type.includes('video') || file.name.toLowerCase().endsWith('.mp4');
+    const videoExts = ['.mp4', '.mov', '.webm', '.m4v'];
+    const isVideo = file.type.startsWith('video/') || videoExts.some(ext => file.name.toLowerCase().endsWith(ext));
     const type = isVideo ? 'video' : 'image';
 
     setUploading(true);
@@ -51,7 +52,7 @@ const GalleryManagement = () => {
         });
         fetchGallery();
       } else {
-        alert("Upload Failed: " + (uploadRes.error || "Please check file format and size (Max 50MB)"));
+        alert("Upload Failed: " + (uploadRes.error || "Please check file format and size (Max 100MB)"));
       }
     } catch (error: any) {
       console.error('Upload failed:', error);
@@ -131,7 +132,7 @@ const GalleryManagement = () => {
           type="file" 
           ref={fileInputRef} 
           className="hidden" 
-          accept="image/*,video/mp4" 
+          accept="image/*,video/*" 
           onChange={handleFileUpload}
         />
         
