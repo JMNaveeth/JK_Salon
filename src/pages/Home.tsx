@@ -234,13 +234,25 @@ const Home = () => {
     const fetchData = async () => {
       try {
         const [servicesData, reviewsData] = await Promise.all([api.getServices(), api.getReviews()]);
-        setServices(servicesData.slice(0, 3));
+        setServices(servicesData.filter((s: any) => s.status === 'Active').slice(0, 3));
         setReviews(reviewsData.filter((r: any) => r.status === "approved").slice(0, 3));
       } catch (error) {
         console.error("Failed to fetch home data:", error);
       }
     };
     fetchData();
+
+    // Listen to real-time updates
+    const source = new EventSource('/api/services/stream');
+    source.onmessage = (event) => {
+      if (event.data === 'updated') {
+        fetchData();
+      }
+    };
+
+    return () => {
+      source.close();
+    };
   }, []);
 
   const whyItems = [

@@ -83,6 +83,18 @@ const ServiceManagement = () => {
 
   useEffect(() => {
     fetchServices();
+
+    // Listen to real-time updates
+    const source = new EventSource('/api/services/stream');
+    source.onmessage = (event) => {
+      if (event.data === 'updated') {
+        fetchServices();
+      }
+    };
+
+    return () => {
+      source.close();
+    };
   }, []);
 
   const filteredServices = services.filter((s) => {

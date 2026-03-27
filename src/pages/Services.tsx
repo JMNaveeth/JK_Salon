@@ -170,6 +170,18 @@ const Services = () => {
       }
     };
     fetchServices();
+
+    // Listen to real-time updates
+    const source = new EventSource('/api/services/stream');
+    source.onmessage = (event) => {
+      if (event.data === 'updated') {
+        fetchServices();
+      }
+    };
+
+    return () => {
+      source.close();
+    };
   }, []);
 
   const categories = ['All', ...Array.from(new Set(services.map((s: any) => s.category))) as string[]];

@@ -34,7 +34,7 @@ const Booking = () => {
     const fetchServices = async () => {
       try {
         const data = await api.getServices();
-        setServices(data);
+        setServices(data.filter((s: any) => s.status === 'Active'));
       } catch (error) {
         console.error('Failed to fetch services:', error);
       } finally {
@@ -42,6 +42,18 @@ const Booking = () => {
       }
     };
     fetchServices();
+
+    // Listen to real-time updates
+    const source = new EventSource('/api/services/stream');
+    source.onmessage = (event) => {
+      if (event.data === 'updated') {
+        fetchServices();
+      }
+    };
+
+    return () => {
+      source.close();
+    };
   }, []);
 
   const selectedService = services.find(s => s.id === formData.serviceId);

@@ -3,6 +3,7 @@ import { createServer as createViteServer } from "vite";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
+import { EventEmitter } from "events";
 import Database from "better-sqlite3";
 import multer from "multer";
 
@@ -133,6 +134,25 @@ async function startServer() {
     res.json(services);
   });
 
+  // Basic SSE for real-time services sync
+  const dbEvents = new EventEmitter();
+
+  app.get("/api/services/stream", (req, res) => {
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+    // Send an initial ping to establish connection
+    res.write("data: connected\n\n");
+
+    const listener = () => {
+      res.write("data: updated\n\n");
+    };
+    dbEvents.on("services_updated", listener);
+    req.on("close", () => {
+      dbEvents.off("services_updated", listener);
+    });
+  });
+
   app.post("/api/services", (req, res) => {
     const { name, category, price, duration, status, description, imageUrl } = req.body;
     const id = Math.random().toString(36).substring(7).toUpperCase();
@@ -140,6 +160,7 @@ async function startServer() {
       "INSERT INTO services (id, name, category, price, duration, status, description, imageUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
     );
     insert.run(id, name, category, price, duration, status || 'Active', description || '', imageUrl || '');
+    dbEvents.emit("services_updated");
     res.json({ success: true, id });
   });
 
@@ -150,12 +171,14 @@ async function startServer() {
       "UPDATE services SET name = ?, category = ?, price = ?, duration = ?, status = ?, description = ?, imageUrl = ? WHERE id = ?"
     );
     update.run(name, category, price, duration, status, description || '', imageUrl || '', id);
+    dbEvents.emit("services_updated");
     res.json({ success: true });
   });
 
   app.delete("/api/services/:id", (req, res) => {
     const { id } = req.params;
     db.prepare("DELETE FROM services WHERE id = ?").run(id);
+    dbEvents.emit("services_updated");
     res.json({ success: true });
   });
 
@@ -164,6 +187,7 @@ async function startServer() {
     const service = db.prepare("SELECT status FROM services WHERE id = ?").get(id) as any;
     const newStatus = service?.status === 'Active' ? 'Inactive' : 'Active';
     db.prepare("UPDATE services SET status = ? WHERE id = ?").run(newStatus, id);
+    dbEvents.emit("services_updated");
     res.json({ success: true, status: newStatus });
   });
 
