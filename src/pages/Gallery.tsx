@@ -9,24 +9,7 @@ const GOLD_LIGHT = '#E8C97A';
 const CREAM = '#FDFAF5';
 const CREAM2 = '#F7F2EA';
 
-/* ── Fallback images per category ──────────────────────────── */
-const FALLBACK_IMAGES = [
-  'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&q=80&w=800',
-  'https://images.unsplash.com/photo-1599351431202-1e0f0137899a?auto=format&fit=crop&q=80&w=800',
-  'https://images.unsplash.com/photo-1621605815971-fbc98d665033?auto=format&fit=crop&q=80&w=800',
-  'https://images.unsplash.com/photo-1605497788044-5a32c7078486?auto=format&fit=crop&q=80&w=800',
-  'https://images.unsplash.com/photo-1622286342621-4bd786c2447c?auto=format&fit=crop&q=80&w=800',
-  'https://images.unsplash.com/photo-1634302086526-dd0e9f52c8e7?auto=format&fit=crop&q=80&w=800',
-  'https://images.unsplash.com/photo-1590540305004-2d23d74a5c28?auto=format&fit=crop&q=80&w=800',
-  'https://images.unsplash.com/photo-1596178060810-72660ee8f3e7?auto=format&fit=crop&q=80&w=800',
-  'https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&q=80&w=800',
-  'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?auto=format&fit=crop&q=80&w=800',
-  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=800',
-  'https://images.unsplash.com/photo-1562004760-aceed7bb0fe3?auto=format&fit=crop&q=80&w=800',
-];
 
-/* Assign a stable fallback image per item index */
-const getFallback = (idx: number) => FALLBACK_IMAGES[idx % FALLBACK_IMAGES.length];
 
 /* ── Filter pill ────────────────────────────────────────────── */
 const FilterPill = ({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) => (
@@ -79,7 +62,7 @@ const Lightbox = ({ item, onClose }: { item: any; onClose: () => void }) => (
         style={{ border: `1.5px solid rgba(197,160,89,0.25)`, boxShadow: '0 40px 80px rgba(197,160,89,0.15), 0 10px 30px rgba(0,0,0,0.08)' }}
       >
         <img
-          src={item.url || getFallback(item._idx || 0)}
+          src={item.url}
           alt={item.category}
           className="w-full max-h-[75vh] object-cover"
           referrerPolicy="no-referrer"
@@ -97,7 +80,6 @@ const Lightbox = ({ item, onClose }: { item: any; onClose: () => void }) => (
 const GalleryCard = ({ item, idx, onClick }: { item: any; idx: number; onClick: () => void }) => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-50px' });
-  const imgSrc = item.url || getFallback(idx);
 
   // alternate tall cards for masonry feel
   const isTall = idx % 5 === 1 || idx % 5 === 3;
@@ -124,11 +106,10 @@ const GalleryCard = ({ item, idx, onClick }: { item: any; idx: number; onClick: 
       />
 
       <img
-        src={imgSrc}
+        src={item.url}
         alt={item.category}
         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
         referrerPolicy="no-referrer"
-        onError={(e) => { (e.target as HTMLImageElement).src = getFallback(idx); }}
       />
 
       {/* hover overlay */}
@@ -179,9 +160,7 @@ const Gallery = () => {
     const fetchGallery = async () => {
       try {
         const data = await api.getGallery();
-        // tag each item with its index for stable fallback mapping
-        const tagged = data.map((item: any, i: number) => ({ ...item, _idx: i }));
-        setGalleryItems(tagged);
+        setGalleryItems(data);
       } catch (error) {
         console.error('Failed to fetch gallery:', error);
       } finally {
@@ -199,16 +178,7 @@ const Gallery = () => {
     return () => source.close();
   }, []);
 
-  // If API returns nothing, show fallback demo items
-  const displayItems: any[] = galleryItems.length > 0
-    ? galleryItems
-    : FALLBACK_IMAGES.map((url, i) => ({
-        _idx: i,
-        id: `demo-${i}`,
-        url,
-        category: ['Hair', 'Beard', 'Styling', 'Color', 'Shave', 'Kids'][i % 6],
-        type: 'image',
-      }));
+  const displayItems = galleryItems;
 
   const categories = ['All', ...Array.from(new Set(displayItems.map((item) => item.category))) as string[]];
   const filtered = filter === 'All' ? displayItems : displayItems.filter((item) => item.category === filter);

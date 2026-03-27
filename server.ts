@@ -94,12 +94,12 @@ async function startServer() {
   const upload = multer({
     storage,
     fileFilter: (_req, file, cb) => {
-      const allowed = ['.png', '.jpg', '.jpeg', '.webp'];
+      const allowed = ['.png', '.jpg', '.jpeg', '.webp', '.mp4'];
       const ext = path.extname(file.originalname).toLowerCase();
       if (allowed.includes(ext)) cb(null, true);
-      else cb(new Error('Only PNG, JPG, JPEG, and WEBP images are allowed.'));
+      else cb(new Error('Only PNG, JPG, JPEG, WEBP, and MP4 files are allowed.'));
     },
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
+    limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB
   });
 
   // Image upload endpoint
