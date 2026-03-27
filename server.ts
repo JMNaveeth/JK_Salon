@@ -205,6 +205,20 @@ async function startServer() {
     res.json({ success: true, id });
   });
 
+  app.patch("/api/bookings/:id/status", (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+    const update = db.prepare("UPDATE bookings SET status = ? WHERE id = ?");
+    update.run(status, id);
+    res.json({ success: true });
+  });
+
+  app.delete("/api/bookings/:id", (req, res) => {
+    const { id } = req.params;
+    db.prepare("DELETE FROM bookings WHERE id = ?").run(id);
+    res.json({ success: true });
+  });
+
   // Reviews API
   app.get("/api/reviews", (req, res) => {
     const reviews = db.prepare("SELECT * FROM reviews").all();

@@ -75,6 +75,20 @@ export const api = {
     });
     return res.json();
   },
+  updateBookingStatus: async (id: string, status: string) => {
+    const res = await fetch(`/api/bookings/${id}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status })
+    });
+    return res.json();
+  },
+  deleteBooking: async (id: string) => {
+    const res = await fetch(`/api/bookings/${id}`, {
+      method: 'DELETE'
+    });
+    return res.json();
+  },
 
   // Reviews
   getReviews: async () => {
