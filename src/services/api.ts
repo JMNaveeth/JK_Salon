@@ -123,6 +123,12 @@ export const api = {
     });
     return res.json();
   },
+  deleteGalleryItem: async (id: string) => {
+    const res = await fetch(`/api/gallery/${id}`, {
+      method: 'DELETE'
+    });
+    return res.json();
+  },
 
   // Messages
   getMessages: async () => {

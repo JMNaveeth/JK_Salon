@@ -153,6 +153,21 @@ async function startServer() {
     });
   });
 
+  app.get("/api/gallery/stream", (req, res) => {
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+    res.write("data: connected\n\n");
+
+    const listener = () => {
+      res.write("data: updated\n\n");
+    };
+    dbEvents.on("gallery_updated", listener);
+    req.on("close", () => {
+      dbEvents.off("gallery_updated", listener);
+    });
+  });
+
   app.post("/api/services", (req, res) => {
     const { name, category, price, duration, status, description, imageUrl } = req.body;
     const id = Math.random().toString(36).substring(7).toUpperCase();
@@ -251,7 +266,15 @@ async function startServer() {
     const id = Math.random().toString(36).substring(7).toUpperCase();
     const insert = db.prepare("INSERT INTO gallery (id, url, type, category) VALUES (?, ?, ?, ?)");
     insert.run(id, url, type, category);
+    dbEvents.emit("gallery_updated");
     res.json({ success: true, id });
+  });
+
+  app.delete("/api/gallery/:id", (req, res) => {
+    const { id } = req.params;
+    db.prepare("DELETE FROM gallery WHERE id = ?").run(id);
+    dbEvents.emit("gallery_updated");
+    res.json({ success: true });
   });
 
   // Payment Simulation Endpoint

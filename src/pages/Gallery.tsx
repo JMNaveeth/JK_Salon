@@ -189,6 +189,14 @@ const Gallery = () => {
       }
     };
     fetchGallery();
+
+    const source = new EventSource('/api/gallery/stream');
+    source.onmessage = (event) => {
+      if (event.data === 'updated') {
+        fetchGallery();
+      }
+    };
+    return () => source.close();
   }, []);
 
   // If API returns nothing, show fallback demo items
