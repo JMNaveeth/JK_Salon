@@ -61,12 +61,22 @@ const Lightbox = ({ item, onClose }: { item: any; onClose: () => void }) => (
         className="overflow-hidden rounded-3xl"
         style={{ border: `1.5px solid rgba(197,160,89,0.25)`, boxShadow: '0 40px 80px rgba(197,160,89,0.15), 0 10px 30px rgba(0,0,0,0.08)' }}
       >
-        <img
-          src={item.url}
-          alt={item.category}
-          className="w-full max-h-[75vh] object-cover"
-          referrerPolicy="no-referrer"
-        />
+        {item.type === 'video' ? (
+          <video
+            src={item.url}
+            controls
+            autoPlay
+            className="w-full max-h-[75vh] outline-none"
+            style={{ display: 'block' }}
+          />
+        ) : (
+          <img
+            src={item.url}
+            alt={item.category}
+            className="w-full max-h-[75vh] object-cover"
+            referrerPolicy="no-referrer"
+          />
+        )}
         <div className="px-8 py-6" style={{ background: '#fff' }}>
           <span className="text-[9px] font-black uppercase tracking-[0.4em]" style={{ color: GOLD }}>{item.category}</span>
           <h3 className="text-xl font-bold text-[#1A1A1A] mt-1">Signature {item.category}</h3>
@@ -105,12 +115,21 @@ const GalleryCard = ({ item, idx, onClick }: { item: any; idx: number; onClick: 
         style={{ background: `linear-gradient(90deg,transparent,${GOLD},transparent)` }}
       />
 
-      <img
-        src={item.url}
-        alt={item.category}
-        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-        referrerPolicy="no-referrer"
-      />
+      {item.type === 'video' ? (
+        <video
+          src={item.url}
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          muted
+          playsInline
+        />
+      ) : (
+        <img
+          src={item.url}
+          alt={item.category}
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          referrerPolicy="no-referrer"
+        />
+      )}
 
       {/* hover overlay */}
       <div
