@@ -166,8 +166,9 @@ const ServiceManagement = () => {
       }
       setShowModal(false);
       await fetchServices();
-    } catch (err) {
-      showToast('Failed to save service.', 'error');
+    } catch (err: any) {
+      console.error("Save Error:", err);
+      showToast(err.message || 'Failed to save service.', 'error');
     } finally {
       setSaving(false);
     }
