@@ -68,15 +68,7 @@ db.exec(`
 `);
 
 // Seed initial data if empty
-const serviceCount = db.prepare("SELECT COUNT(*) as count FROM services").get() as any;
-if (serviceCount.count === 0) {
-  const insertService = db.prepare("INSERT INTO services (id, name, category, price, duration, status) VALUES (?, ?, ?, ?, ?, ?)");
-  insertService.run('1', 'Classic Haircut', 'Hair', 2500, 45, 'Active');
-  insertService.run('2', 'Beard Sculpting', 'Beard', 1500, 30, 'Active');
-  insertService.run('3', 'Hair Coloring', 'Hair', 5000, 90, 'Active');
-  insertService.run('4', 'Luxury Facial', 'Facial', 3500, 60, 'Inactive');
-}
-
+// (Removed fake details - using only real data added via the app)
 async function startServer() {
   const app = express();
   const PORT = 3000;
