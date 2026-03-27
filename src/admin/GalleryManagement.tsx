@@ -35,6 +35,9 @@ const GalleryManagement = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const isVideo = file.type.includes('video') || file.name.toLowerCase().endsWith('.mp4');
+    const type = isVideo ? 'video' : 'image';
+
     setUploading(true);
     try {
       // 1. Upload to storage
@@ -43,7 +46,7 @@ const GalleryManagement = () => {
         // 2. Save to gallery db
         await api.uploadMedia({
           url: uploadRes.imageUrl,
-          type: 'image',
+          type: type,
           category: 'Styling' // Default category
         });
         fetchGallery();
@@ -57,7 +60,7 @@ const GalleryManagement = () => {
 
   const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!window.confirm('Delete this image from gallery?')) return;
+    if (!window.confirm(`Delete this ${items.find(i => i.id === id)?.type || 'item'} from gallery?`)) return;
     try {
       await api.deleteGalleryItem(id);
       fetchGallery();
@@ -79,19 +82,28 @@ const GalleryManagement = () => {
       <div className="flex justify-between items-end">
         <div>
           <h1 className="text-3xl font-bold text-white tracking-tighter">Gallery</h1>
-          <p className="text-zinc-500 text-sm mt-1">Manage salon photos and videos. Add photos directly from your device.</p>
+          <p className="text-zinc-500 text-sm mt-1">Manage salon photos and videos. Add media directly from your device.</p>
         </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {items.map((item) => (
           <div key={item.id} className="group relative aspect-square rounded-2xl overflow-hidden bg-zinc-900 border border-white/5">
-            <img 
-              src={item.url} 
-              alt="" 
-              className="w-full h-full object-cover transition-transform group-hover:scale-110"
-              referrerPolicy="no-referrer"
-            />
+            {item.type === 'video' ? (
+              <video 
+                src={item.url} 
+                className="w-full h-full object-cover transition-transform group-hover:scale-110"
+                muted 
+                playsInline
+              />
+            ) : (
+              <img 
+                src={item.url} 
+                alt="" 
+                className="w-full h-full object-cover transition-transform group-hover:scale-110"
+                referrerPolicy="no-referrer"
+              />
+            )}
             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center">
               <div className="flex space-x-2">
                 <button 
@@ -114,7 +126,7 @@ const GalleryManagement = () => {
           type="file" 
           ref={fileInputRef} 
           className="hidden" 
-          accept="image/*" 
+          accept="image/*,video/mp4" 
           onChange={handleFileUpload}
         />
         
