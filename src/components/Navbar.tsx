@@ -1,50 +1,12 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Scissors, Menu, X, Sun, Moon, LogOut } from 'lucide-react';
+import { Scissors, Menu, X, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/src/utils/cn';
 
-// Theme context (can be moved to a separate context file)
-const ThemeContext = React.createContext<{
-  theme: 'dark' | 'light';
-  toggleTheme: () => void;
-}>({ theme: 'dark', toggleTheme: () => {} });
-
-export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-  const [theme, setTheme] = React.useState<'dark' | 'light'>('dark');
-
-  React.useEffect(() => {
-    const saved = localStorage.getItem('jk-theme') as 'dark' | 'light' | null;
-    if (saved) setTheme(saved);
-  }, []);
-
-  const toggleTheme = () => {
-    setTheme(prev => {
-      const next = prev === 'dark' ? 'light' : 'dark';
-      localStorage.setItem('jk-theme', next);
-      return next;
-    });
-  };
-
-  React.useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
-
-  return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      {children}
-    </ThemeContext.Provider>
-  );
-};
-
-export const useTheme = () => React.useContext(ThemeContext);
-
 const Navbar = ({ onLogout }: { onLogout?: () => void }) => {
   const [isOpen, setIsOpen] = React.useState(false);
-  const { theme, toggleTheme } = useTheme();
   const location = useLocation();
-
-  const isDark = theme === 'dark';
 
   const navLinks = [
     { name: 'Home', path: '/' },
@@ -58,12 +20,7 @@ const Navbar = ({ onLogout }: { onLogout?: () => void }) => {
 
   return (
     <nav
-      className={cn(
-        "fixed top-0 left-0 right-0 z-50 backdrop-blur-xl border-b transition-colors duration-300",
-        isDark
-          ? "bg-black/30 border-[#C5A059]/20"
-          : "bg-white/70 border-[#C5A059]/30 shadow-sm"
-      )}
+      className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl border-b transition-colors duration-300 bg-black/30 border-[#C5A059]/20"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
@@ -71,10 +28,7 @@ const Navbar = ({ onLogout }: { onLogout?: () => void }) => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <Scissors className="h-8 w-8 text-[#C5A059]" />
-            <span className={cn(
-              "text-2xl font-bold tracking-tighter transition-colors duration-300",
-              isDark ? "text-white" : "text-zinc-900"
-            )}>
+            <span className="text-2xl font-bold tracking-tighter transition-colors duration-300 text-white">
               JK SALON
             </span>
           </Link>
@@ -89,7 +43,7 @@ const Navbar = ({ onLogout }: { onLogout?: () => void }) => {
                   "text-sm font-medium transition-colors hover:text-[#C5A059]",
                   isActive(link.path)
                     ? "text-[#C5A059]"
-                    : isDark ? "text-white" : "text-zinc-700"
+                    : "text-white"
                 )}
               >
                 {link.name}
@@ -103,44 +57,6 @@ const Navbar = ({ onLogout }: { onLogout?: () => void }) => {
               Book Now
             </Link>
 
-            {/* Theme Toggle */}
-            <motion.button
-              onClick={toggleTheme}
-              whileTap={{ scale: 0.9 }}
-              whileHover={{ scale: 1.05 }}
-              className={cn(
-                "relative w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300 border",
-                isDark
-                  ? "bg-zinc-800 border-zinc-700 text-amber-400 hover:bg-zinc-700"
-                  : "bg-amber-50 border-amber-200 text-amber-600 hover:bg-amber-100"
-              )}
-              aria-label="Toggle theme"
-            >
-              <AnimatePresence mode="wait">
-                {isDark ? (
-                  <motion.span
-                    key="sun"
-                    initial={{ opacity: 0, rotate: -90, scale: 0.5 }}
-                    animate={{ opacity: 1, rotate: 0, scale: 1 }}
-                    exit={{ opacity: 0, rotate: 90, scale: 0.5 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Sun className="h-4 w-4" />
-                  </motion.span>
-                ) : (
-                  <motion.span
-                    key="moon"
-                    initial={{ opacity: 0, rotate: 90, scale: 0.5 }}
-                    animate={{ opacity: 1, rotate: 0, scale: 1 }}
-                    exit={{ opacity: 0, rotate: -90, scale: 0.5 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Moon className="h-4 w-4" />
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </motion.button>
-
             {/* Logout Button */}
             {onLogout && (
               <motion.button
@@ -149,9 +65,7 @@ const Navbar = ({ onLogout }: { onLogout?: () => void }) => {
                 whileHover={{ scale: 1.02 }}
                 className={cn(
                   "w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300 border",
-                  isDark
-                    ? "bg-black/20 border-[#C5A059]/35 text-[#C5A059] hover:bg-[#C5A059]/10"
-                    : "bg-white/40 border-[#C5A059]/45 text-[#C5A059] hover:bg-[#C5A059]/10"
+                  "bg-black/20 border-[#C5A059]/35 text-[#C5A059] hover:bg-[#C5A059]/10"
                 )}
                 aria-label="Log out"
                 title="Log out"
@@ -163,31 +77,6 @@ const Navbar = ({ onLogout }: { onLogout?: () => void }) => {
 
           {/* Mobile Right Controls */}
           <div className="md:hidden flex items-center gap-2">
-            {/* Theme Toggle Mobile */}
-            <motion.button
-              onClick={toggleTheme}
-              whileTap={{ scale: 0.85 }}
-              className={cn(
-                "w-9 h-9 rounded-full flex items-center justify-center border transition-colors duration-300",
-                isDark
-                  ? "bg-zinc-800 border-zinc-700 text-amber-400"
-                  : "bg-amber-50 border-amber-200 text-amber-600"
-              )}
-              aria-label="Toggle theme"
-            >
-              <AnimatePresence mode="wait">
-                {isDark ? (
-                  <motion.span key="sun-m" initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.5 }}>
-                    <Sun className="h-4 w-4" />
-                  </motion.span>
-                ) : (
-                  <motion.span key="moon-m" initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.5 }}>
-                    <Moon className="h-4 w-4" />
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </motion.button>
-
             {/* Logout Mobile (icon only) */}
             {onLogout && (
               <motion.button
@@ -195,9 +84,7 @@ const Navbar = ({ onLogout }: { onLogout?: () => void }) => {
                 whileTap={{ scale: 0.85 }}
                 className={cn(
                   "w-9 h-9 rounded-full flex items-center justify-center border transition-colors duration-300",
-                  isDark
-                    ? "bg-black/20 border-[#C5A059]/35 text-[#C5A059]"
-                    : "bg-white/40 border-[#C5A059]/45 text-[#C5A059]"
+                  "bg-black/20 border-[#C5A059]/35 text-[#C5A059]"
                 )}
                 aria-label="Log out"
                 title="Log out"
@@ -209,10 +96,7 @@ const Navbar = ({ onLogout }: { onLogout?: () => void }) => {
             {/* Hamburger */}
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className={cn(
-                "p-2 transition-colors",
-                isDark ? "text-zinc-400 hover:text-white" : "text-zinc-500 hover:text-zinc-900"
-              )}
+              className="p-2 transition-colors text-zinc-400 hover:text-white"
             >
               {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
@@ -229,9 +113,7 @@ const Navbar = ({ onLogout }: { onLogout?: () => void }) => {
             exit={{ opacity: 0, y: -20 }}
             className={cn(
               "md:hidden border-b transition-colors duration-300",
-              isDark
-                ? "bg-zinc-900 border-white/10"
-                : "bg-white border-zinc-200 shadow-lg"
+              "bg-zinc-900 border-white/10"
             )}
           >
             <div className="px-4 pt-2 pb-6 space-y-1">
@@ -244,9 +126,7 @@ const Navbar = ({ onLogout }: { onLogout?: () => void }) => {
                     "block px-3 py-4 text-base font-medium rounded-md transition-colors",
                     isActive(link.path)
                       ? "text-[#C5A059] bg-[#C5A059]/10"
-                      : isDark
-                        ? "text-zinc-400 hover:text-white hover:bg-zinc-800"
-                        : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100"
+                      : "text-zinc-400 hover:text-white hover:bg-zinc-800"
                   )}
                 >
                   {link.name}
