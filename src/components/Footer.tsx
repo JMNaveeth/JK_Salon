@@ -101,7 +101,7 @@ const Footer = () => {
   const inView = useInView(ref, { once: true, margin: '-80px' });
 
   return (
-    <footer className="relative overflow-hidden" style={{ background: '#0A0A0A' }}>
+    <footer className="relative overflow-hidden" style={{ background: 'white' }}>
       {/* Decorative Top Border */}
       <div className="h-px w-full" style={{ background: `linear-gradient(90deg, transparent, ${GOLD}40, transparent)` }} />
 
