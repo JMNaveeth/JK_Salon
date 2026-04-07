@@ -6,6 +6,30 @@
   --font-sans: "Inter", sans-serif;
 }
 
+/* Mobile-first responsive typography */
+html {
+  font-size: 16px;
+}
+
+@media (max-width: 640px) {
+  html {
+    font-size: 15px;
+  }
+}
+
+/* Improve touch targets on mobile */
+@media (max-width: 640px) {
+  button, a[role="button"], input, select, textarea {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Prevent zoom on input focus (iOS) */
+input, select, textarea {
+  font-size: 16px;
+}
+
 @utility premium-scrollbar {
   &::-webkit-scrollbar {
     width: 5px;

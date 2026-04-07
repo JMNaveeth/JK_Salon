@@ -323,13 +323,13 @@ const Gallery = () => {
           borderBottom: '1px solid rgba(197,160,89,0.12)',
         }}
       >
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
           <motion.div
-            className="flex flex-wrap gap-3 items-center justify-center"
+            className="flex flex-wrap gap-2 sm:gap-3 items-center justify-center sm:justify-start overflow-x-auto pb-2 -mx-2 px-2"
             initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
           >
-            <Sparkles className="h-4 w-4 mr-1 hidden sm:block" style={{ color: GOLD }} />
+            <Sparkles className="h-4 w-4 mr-1 hidden sm:block flex-shrink-0" style={{ color: GOLD }} />
             {categories.map((cat) => (
               <FilterPill key={cat} label={cat} active={filter === cat} onClick={() => setFilter(cat)} />
             ))}
@@ -354,10 +354,10 @@ const Gallery = () => {
           </motion.p>
 
           {/* masonry-style grid */}
-          <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
+          <div className="columns-1 sm:columns-2 lg:columns-3 gap-3 sm:gap-4 lg:gap-6 space-y-3 sm:space-y-4 lg:space-y-6">
             <AnimatePresence>
               {filtered.map((item, idx) => (
-                <div key={item.id || item._idx} className="break-inside-avoid mb-6">
+                <div key={item.id || item._idx} className="break-inside-avoid mb-3 sm:mb-4 lg:mb-6">
                   <GalleryCard item={item} idx={idx} onClick={() => setLightboxItem(item)} />
                 </div>
               ))}

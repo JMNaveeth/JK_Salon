@@ -48,7 +48,7 @@ const Counter = ({ target, label }: { target: string; label: string }) => {
       className="flex flex-col items-center"
     >
       <span
-        className="text-4xl md:text-5xl font-black tracking-tight"
+        className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight"
         style={{ background: `linear-gradient(135deg,${GOLD_LIGHT},${GOLD})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}
       >
         {target}
@@ -74,7 +74,7 @@ const SectionHeading = ({ eyebrow, title, light = false }: { eyebrow: string; ti
         {eyebrow}
         <span className="w-6 h-px bg-[#C5A059]" />
       </span>
-      <h2 className={`text-5xl md:text-6xl font-serif tracking-[-0.02em] mb-5 ${light ? "text-white" : "text-[#1A1A1A]"}`}>
+      <h2 className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif tracking-[-0.02em] mb-5 ${light ? "text-white" : "text-[#1A1A1A]"}`}>
         {title}
       </h2>
       <div className="w-12 h-[2px] rounded-full mx-auto" style={{ background: `linear-gradient(90deg,transparent,${GOLD},transparent)` }} />

@@ -315,14 +315,14 @@ const Services = () => {
           borderBottom: '1px solid rgba(197,160,89,0.12)',
         }}
       >
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
           <motion.div
-            className="flex flex-wrap gap-3 items-center justify-center"
+            className="flex flex-wrap gap-2 sm:gap-3 items-center justify-center sm:justify-start overflow-x-auto pb-2 -mx-2 px-2"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
           >
-            <Scissors className="h-4 w-4 mr-1 hidden sm:block" style={{ color: GOLD }} />
+            <Scissors className="h-4 w-4 mr-1 hidden sm:block flex-shrink-0" style={{ color: GOLD }} />
             {categories.map((cat) => (
               <FilterPill key={cat} label={cat} active={activeFilter === cat} onClick={() => setActiveFilter(cat)} />
             ))}
@@ -351,7 +351,7 @@ const Services = () => {
             {activeFilter === 'All' ? 'services' : `${activeFilter} services`}
           </motion.p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
             {filtered.map((service, idx) => (
               <ServiceCard key={service.id || service._id || idx} service={service} idx={idx} />
             ))}
