@@ -95,8 +95,8 @@ const ServiceCard = ({ service, idx }: { service: any; idx: number }) => {
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.8, delay: idx * 0.15, ease: [0.22, 1, 0.36, 1] }}
       whileHover={{ y: -10 }}
-      className="group relative bg-white rounded-3xl overflow-hidden"
-      style={{ boxShadow: "0 8px 35px rgba(197,160,89,0.08), 0 1px 4px rgba(0,0,0,0.04)", border: "1px solid rgba(197,160,89,0.12)" }}
+      className="group relative bg-white rounded-3xl overflow-hidden mx-auto w-full max-w-[350px]"
+      style={{ boxShadow: "0 6px 24px rgba(197,160,89,0.08), 0 1px 3px rgba(0,0,0,0.04)", border: "1px solid rgba(197,160,89,0.12)" }}
     >
       {/* hover gold tint */}
       <motion.div
@@ -107,7 +107,7 @@ const ServiceCard = ({ service, idx }: { service: any; idx: number }) => {
       <div className="absolute top-0 left-0 right-0 h-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-500"
         style={{ background: `linear-gradient(90deg,transparent,${GOLD},transparent)` }} />
 
-      <div className="relative aspect-[4/3] overflow-hidden">
+      <div className="relative aspect-[16/10] overflow-hidden">
         <img
           src={imageUrl}
           alt={service.name}
@@ -116,9 +116,9 @@ const ServiceCard = ({ service, idx }: { service: any; idx: number }) => {
         />
         <div className="absolute inset-0" style={{ background: "linear-gradient(to top,rgba(0,0,0,0.28) 0%,transparent 55%)" }} />
 
-        <div className="absolute top-4 left-4 z-10">
+        <div className="absolute top-3 left-3 z-10">
           <span
-            className="px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.3em] backdrop-blur-sm"
+            className="px-2.5 py-1 rounded-full text-[8px] font-black uppercase tracking-[0.25em] backdrop-blur-sm"
             style={{ background: "rgba(255,255,255,0.9)", color: GOLD, border: "1px solid rgba(197,160,89,0.28)" }}
           >
             {service.category || "Service"}
@@ -126,9 +126,9 @@ const ServiceCard = ({ service, idx }: { service: any; idx: number }) => {
         </div>
 
         {service.duration && (
-          <div className="absolute top-4 right-4 z-10">
+          <div className="absolute top-3 right-3 z-10">
             <span
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-bold backdrop-blur-sm"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[8px] font-bold backdrop-blur-sm"
               style={{ background: "rgba(255,255,255,0.9)", color: "#555", border: "1px solid rgba(0,0,0,0.06)" }}
             >
               <Clock className="h-3 w-3" style={{ color: GOLD }} />
@@ -138,22 +138,22 @@ const ServiceCard = ({ service, idx }: { service: any; idx: number }) => {
         )}
       </div>
 
-      <div className="p-6 sm:p-7 flex flex-col">
-        <h3 className="text-2xl font-serif font-bold text-[#1A1A1A] mb-2">{service.name}</h3>
-        <p className="text-zinc-500 text-sm leading-relaxed mb-6 line-clamp-2 min-h-[44px]">
+      <div className="p-5 sm:p-6 flex flex-col">
+        <h3 className="text-xl sm:text-2xl font-serif font-bold text-[#1A1A1A] mb-2">{service.name}</h3>
+        <p className="text-zinc-500 text-sm leading-relaxed mb-4 line-clamp-2 min-h-[40px]">
           {service.description || "Premium grooming service with expert care and precision styling."}
         </p>
 
-        <div className="flex items-center justify-between pt-5" style={{ borderTop: "1px solid rgba(197,160,89,0.12)" }}>
+        <div className="flex items-center justify-between pt-4" style={{ borderTop: "1px solid rgba(197,160,89,0.12)" }}>
           <div className="flex items-baseline gap-1">
             <span className="text-xs text-zinc-400 font-medium">LKR</span>
-            <span className="text-2xl font-black tracking-tight" style={{ color: GOLD }}>{Number(service.price).toLocaleString()}</span>
+            <span className="text-3xl font-black tracking-tight" style={{ color: GOLD }}>{Number(service.price).toLocaleString()}</span>
           </div>
 
           <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
             <Link
               to={`/booking?service=${service.id || service._id || ""}`}
-              className="group/btn px-5 py-3 rounded-xl text-xs font-bold tracking-wider uppercase inline-flex items-center justify-center gap-2 relative overflow-hidden"
+              className="group/btn px-4 py-2.5 rounded-xl text-[11px] font-bold tracking-wider uppercase inline-flex items-center justify-center gap-2 relative overflow-hidden"
               style={{ background: `linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`, color: "#fff", boxShadow: "0 6px 20px rgba(197,160,89,0.35)" }}
             >
               <span className="relative z-10">Reserve</span>
@@ -567,7 +567,7 @@ const Home = () => {
       <section className="py-28" style={{ background: CREAM2 }}>
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
           <SectionHeading eyebrow="What We Offer" title="Our Services" />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-7">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6">
             {services.map((service, idx) => (
               <ServiceCard key={service._id || idx} service={service} idx={idx} />
             ))}
