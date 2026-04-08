@@ -86,6 +86,8 @@ const SectionHeading = ({ eyebrow, title, light = false }: { eyebrow: string; ti
 const ServiceCard = ({ service, idx }: { service: any; idx: number }) => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-60px" });
+  const imageUrl = service.imageUrl || "https://images.unsplash.com/photo-1621605815971-fbc98d665033?auto=format&fit=crop&q=80&w=1200";
+
   return (
     <motion.div
       ref={ref}
@@ -93,8 +95,8 @@ const ServiceCard = ({ service, idx }: { service: any; idx: number }) => {
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.8, delay: idx * 0.15, ease: [0.22, 1, 0.36, 1] }}
       whileHover={{ y: -10 }}
-      className="group relative bg-white rounded-3xl p-10 flex flex-col items-center text-center overflow-hidden"
-      style={{ boxShadow: "0 4px 30px rgba(197,160,89,0.08), 0 1px 4px rgba(0,0,0,0.04)", border: "1px solid rgba(197,160,89,0.12)" }}
+      className="group relative bg-white rounded-3xl overflow-hidden"
+      style={{ boxShadow: "0 8px 35px rgba(197,160,89,0.08), 0 1px 4px rgba(0,0,0,0.04)", border: "1px solid rgba(197,160,89,0.12)" }}
     >
       {/* hover gold tint */}
       <motion.div
@@ -105,43 +107,62 @@ const ServiceCard = ({ service, idx }: { service: any; idx: number }) => {
       <div className="absolute top-0 left-0 right-0 h-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-500"
         style={{ background: `linear-gradient(90deg,transparent,${GOLD},transparent)` }} />
 
-      <motion.div
-        className="w-[72px] h-[72px] rounded-2xl flex items-center justify-center mb-8 transition-all duration-300"
-        style={{ background: `linear-gradient(135deg,rgba(197,160,89,0.12),rgba(232,201,122,0.08))`, border: "1px solid rgba(197,160,89,0.2)" }}
-        whileHover={{ rotate: 8, scale: 1.08 }}
-        transition={{ type: "spring", stiffness: 300 }}
-      >
-        {service.category === "Beard"
-          ? <Sparkles className="h-7 w-7 text-[#C5A059]" />
-          : <Scissors className="h-7 w-7 text-[#C5A059]" />}
-      </motion.div>
+      <div className="relative aspect-[4/3] overflow-hidden">
+        <img
+          src={imageUrl}
+          alt={service.name}
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          referrerPolicy="no-referrer"
+        />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to top,rgba(0,0,0,0.28) 0%,transparent 55%)" }} />
 
-      <h3 className="text-2xl font-serif font-bold text-[#1A1A1A] mb-3">{service.name}</h3>
-      <p className="text-zinc-500 text-sm leading-relaxed mb-6 max-w-[220px]">
-        {service.category === "Hair"
-          ? "Precision cuts tailored to your personality and lifestyle."
-          : service.category === "Beard"
-          ? "Expert beard shaping, trimming, and hot towel treatment."
-          : "Premium grooming services for the modern gentleman."}
-      </p>
+        <div className="absolute top-4 left-4 z-10">
+          <span
+            className="px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.3em] backdrop-blur-sm"
+            style={{ background: "rgba(255,255,255,0.9)", color: GOLD, border: "1px solid rgba(197,160,89,0.28)" }}
+          >
+            {service.category || "Service"}
+          </span>
+        </div>
 
-      <div className="flex items-baseline gap-1 mb-8">
-        <span className="text-xs text-zinc-400 font-medium">LKR</span>
-        <span className="text-2xl font-black tracking-tight" style={{ color: GOLD }}>{service.price.toLocaleString()}</span>
+        {service.duration && (
+          <div className="absolute top-4 right-4 z-10">
+            <span
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-bold backdrop-blur-sm"
+              style={{ background: "rgba(255,255,255,0.9)", color: "#555", border: "1px solid rgba(0,0,0,0.06)" }}
+            >
+              <Clock className="h-3 w-3" style={{ color: GOLD }} />
+              {service.duration} mins
+            </span>
+          </div>
+        )}
       </div>
 
-      {/* GOLDEN BUTTON */}
-      <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="w-full">
-        <Link
-          to="/booking"
-          className="group/btn w-full py-3.5 rounded-xl text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-2 relative overflow-hidden"
-          style={{ background: `linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`, color: "#fff", boxShadow: `0 6px 20px rgba(197,160,89,0.35)` }}
-        >
-          <span className="relative z-10">Reserve Now</span>
-          <ArrowRight className="relative z-10 h-3 w-3 group-hover/btn:translate-x-1 transition-transform" />
-          <motion.div className="absolute inset-0 bg-white/15" initial={{ x: "-110%" }} whileHover={{ x: "110%" }} transition={{ duration: 0.5 }} />
-        </Link>
-      </motion.div>
+      <div className="p-6 sm:p-7 flex flex-col">
+        <h3 className="text-2xl font-serif font-bold text-[#1A1A1A] mb-2">{service.name}</h3>
+        <p className="text-zinc-500 text-sm leading-relaxed mb-6 line-clamp-2 min-h-[44px]">
+          {service.description || "Premium grooming service with expert care and precision styling."}
+        </p>
+
+        <div className="flex items-center justify-between pt-5" style={{ borderTop: "1px solid rgba(197,160,89,0.12)" }}>
+          <div className="flex items-baseline gap-1">
+            <span className="text-xs text-zinc-400 font-medium">LKR</span>
+            <span className="text-2xl font-black tracking-tight" style={{ color: GOLD }}>{Number(service.price).toLocaleString()}</span>
+          </div>
+
+          <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+            <Link
+              to={`/booking?service=${service.id || service._id || ""}`}
+              className="group/btn px-5 py-3 rounded-xl text-xs font-bold tracking-wider uppercase inline-flex items-center justify-center gap-2 relative overflow-hidden"
+              style={{ background: `linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`, color: "#fff", boxShadow: "0 6px 20px rgba(197,160,89,0.35)" }}
+            >
+              <span className="relative z-10">Reserve</span>
+              <ArrowRight className="relative z-10 h-3 w-3 group-hover/btn:translate-x-1 transition-transform" />
+              <motion.div className="absolute inset-0 bg-white/15" initial={{ x: "-110%" }} whileHover={{ x: "110%" }} transition={{ duration: 0.5 }} />
+            </Link>
+          </motion.div>
+        </div>
+      </div>
     </motion.div>
   );
 };
