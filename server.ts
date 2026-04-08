@@ -1,20 +1,86 @@
-import express from "express";
-import { createServer as createViteServer } from "vite";
-import path from "path";
-import fs from "fs";
-import { fileURLToPath } from "url";
-import { EventEmitter } from "events";
-import Database from "better-sqlite3";
-import multer from "multer";
+import dotenv from 'dotenv';
+import express from 'express';
+import { createServer as createViteServer } from 'vite';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+import { EventEmitter } from 'events';
+import Database from 'better-sqlite3';
+import multer from 'multer';
+import { applicationDefault, cert, getApps, initializeApp } from 'firebase-admin/app';
+import { FieldValue, getFirestore } from 'firebase-admin/firestore';
+import { getStorage } from 'firebase-admin/storage';
+
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const dbEvents = new EventEmitter();
 
-// Initialize SQLite Database
-const db = new Database("jksalon.db");
+const randomId = () => Math.random().toString(36).substring(2, 9).toUpperCase();
+const toMillis = (value: any) => {
+  if (!value) return 0;
+  if (typeof value === 'number') return value;
+  if (typeof value === 'string') {
+    const parsed = Date.parse(value);
+    return Number.isNaN(parsed) ? 0 : parsed;
+  }
+  if (typeof value?.toMillis === 'function') return value.toMillis();
+  if (value instanceof Date) return value.getTime();
+  return 0;
+};
 
-// Create tables if they don't exist
-db.exec(`
+const normalizeDoc = (doc: any) => {
+  const data = doc.data ? doc.data() : doc;
+  const normalized: Record<string, any> = { id: doc.id || data.id, ...data };
+  Object.keys(normalized).forEach((key) => {
+    const value = normalized[key];
+    if (value && typeof value.toDate === 'function') {
+      normalized[key] = value.toDate().toISOString();
+    }
+  });
+  return normalized;
+};
+
+const initFirestore = () => {
+  try {
+    if (getApps().length) return getFirestore();
+
+    const projectId = process.env.FIREBASE_PROJECT_ID || process.env.GCLOUD_PROJECT;
+    const serviceAccountRaw = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+    const storageBucket = process.env.FIREBASE_STORAGE_BUCKET;
+
+    if (serviceAccountRaw) {
+      const serviceAccount = JSON.parse(serviceAccountRaw);
+      initializeApp({
+        credential: cert(serviceAccount),
+        projectId: projectId || serviceAccount.project_id,
+        storageBucket,
+      });
+      return getFirestore();
+    }
+
+    if (projectId || process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+      initializeApp({ credential: applicationDefault(), projectId, storageBucket });
+      return getFirestore();
+    }
+
+    return null;
+  } catch (error) {
+    console.error('[BACKEND] Firestore init failed, using SQLite fallback:', error);
+    return null;
+  }
+};
+
+const firestore = initFirestore();
+const usingFirestore = !!firestore;
+const cloudStorage = getApps().length ? getStorage() : null;
+const usingCloudStorage = !!cloudStorage && !!process.env.FIREBASE_STORAGE_BUCKET;
+
+const sqlitePath = process.env.SQLITE_PATH || path.resolve(__dirname, 'jksalon.db');
+const sqliteDb = new Database(sqlitePath);
+
+sqliteDb.exec(`
   CREATE TABLE IF NOT EXISTS services (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
@@ -68,272 +134,448 @@ db.exec(`
   );
 `);
 
-// Seed initial data if empty
-// (Removed fake details - using only real data added via the app)
+const asyncHandler = (fn: any) => (req: express.Request, res: express.Response, next: express.NextFunction) =>
+  Promise.resolve(fn(req, res, next)).catch(next);
+
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = Number(process.env.PORT || 3000);
 
-  // Ensure uploads directory exists with absolute path
-  const uploadsDir = path.resolve(__dirname, "public", "uploads");
+  const uploadsDir = path.resolve(__dirname, 'public', 'uploads');
   if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 
-  // 1. STATICS (Highest priority)
-  app.use("/uploads", express.static(uploadsDir));
+  app.use('/uploads', express.static(uploadsDir));
 
-  // 2. FILE UPLOAD (Handled before global body-parsers to avoid stream conflicts)
-  const storage = multer.diskStorage({
+  const diskStorage = multer.diskStorage({
     destination: (_req, _file, cb) => cb(null, uploadsDir),
     filename: (_req, file, cb) => {
       const ext = path.extname(file.originalname).toLowerCase();
-      const name = `${Date.now()}-${Math.random().toString(36).substring(7)}${ext}`;
+      const name = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}${ext}`;
       cb(null, name);
     },
   });
 
   const upload = multer({
-    storage,
+    storage: usingCloudStorage ? multer.memoryStorage() : diskStorage,
     fileFilter: (_req, file, cb) => {
       const allowed = ['.png', '.jpg', '.jpeg', '.webp', '.mp4', '.mov', '.webm', '.m4v'];
       const ext = path.extname(file.originalname).toLowerCase();
       if (allowed.includes(ext)) return cb(null, true);
       cb(new Error(`Format ${ext} not supported`));
     },
-    limits: { fileSize: 200 * 1024 * 1024 }, // 200 MB
+    limits: { fileSize: 200 * 1024 * 1024 },
   });
 
-  app.post("/api/upload", (req, res) => {
-    console.log(`[PRO-LOG] Multi-part upload started: ${req.headers['content-length']} bytes`);
-    upload.single("image")(req, res, (err) => {
-      if (err) {
-        console.error("[PRO-LOG] Multer Error:", err);
-        return res.status(400).json({ success: false, error: err.message });
+  app.post('/api/upload', (req, res) => {
+    upload.single('image')(req, res, async (err) => {
+      if (err) return res.status(400).json({ success: false, error: err.message });
+      if (!req.file) return res.status(400).json({ success: false, error: 'No file received' });
+
+      try {
+        if (usingCloudStorage && cloudStorage && req.file.buffer) {
+          const bucket = cloudStorage.bucket(process.env.FIREBASE_STORAGE_BUCKET);
+          const ext = path.extname(req.file.originalname).toLowerCase();
+          const fileName = `uploads/${Date.now()}-${Math.random().toString(36).substring(2, 9)}${ext}`;
+          const file = bucket.file(fileName);
+
+          await file.save(req.file.buffer, {
+            resumable: false,
+            metadata: {
+              contentType: req.file.mimetype,
+            },
+          });
+
+          await file.makePublic();
+          const imageUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
+          return res.json({ success: true, imageUrl });
+        }
+
+        const imageUrl = `/uploads/${req.file.filename}`;
+        return res.json({ success: true, imageUrl });
+      } catch (uploadError: any) {
+        return res.status(500).json({ success: false, error: uploadError.message || 'Upload failed' });
       }
-      if (!req.file) return res.status(400).json({ success: false, error: "No file received" });
-      
-      const imageUrl = `/uploads/${req.file.filename}`;
-      console.log(`[PRO-LOG] File stored: ${imageUrl}`);
-      res.json({ success: true, imageUrl });
     });
   });
 
-  // 3. GLOBAL PARSERS (Applied after file upload)
   app.use(express.json({ limit: '100mb' }));
   app.use(express.urlencoded({ extended: true, limit: '100mb' }));
 
-  // API routes
-  app.get("/api/health", (req, res) => {
-    res.json({ status: "ok", message: "JK Salon API is running with SQLite" });
+  app.get('/api/health', (_req, res) => {
+    res.json({
+      status: 'ok',
+      database: usingFirestore ? 'firestore' : 'sqlite',
+      message: 'JK Salon API is running',
+    });
+  });
+
+  app.get('/api/services/stream', (req, res) => {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.write('data: connected\n\n');
+
+    const listener = () => {
+      res.write('data: updated\n\n');
+    };
+
+    dbEvents.on('services_updated', listener);
+    req.on('close', () => dbEvents.off('services_updated', listener));
+  });
+
+  app.get('/api/gallery/stream', (req, res) => {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.write('data: connected\n\n');
+
+    const listener = () => {
+      res.write('data: updated\n\n');
+    };
+
+    dbEvents.on('gallery_updated', listener);
+    req.on('close', () => dbEvents.off('gallery_updated', listener));
   });
 
   // Messages
-  app.get("/api/messages", (req, res) => {
-    const messages = db.prepare("SELECT * FROM messages ORDER BY createdAt DESC").all();
-    res.json(messages);
-  });
+  app.get('/api/messages', asyncHandler(async (_req, res) => {
+    if (usingFirestore && firestore) {
+      const snap = await firestore.collection('messages').get();
+      const messages = snap.docs.map(normalizeDoc).sort((a, b) => toMillis(b.createdAt) - toMillis(a.createdAt));
+      return res.json(messages);
+    }
 
-  app.post("/api/messages", (req, res) => {
+    const messages = sqliteDb.prepare('SELECT * FROM messages ORDER BY createdAt DESC').all();
+    return res.json(messages);
+  }));
+
+  app.post('/api/messages', asyncHandler(async (req, res) => {
     const { name, email, subject, message } = req.body;
-    const id = Math.random().toString(36).substring(7);
-    db.prepare("INSERT INTO messages (id, name, email, subject, message) VALUES (?, ?, ?, ?, ?)")
+    const id = randomId();
+
+    if (usingFirestore && firestore) {
+      await firestore.collection('messages').doc(id).set({
+        id,
+        name,
+        email,
+        subject: subject || '',
+        message: message || '',
+        status: 'Unread',
+        createdAt: FieldValue.serverTimestamp(),
+      });
+      return res.json({ success: true, id });
+    }
+
+    sqliteDb
+      .prepare('INSERT INTO messages (id, name, email, subject, message) VALUES (?, ?, ?, ?, ?)')
       .run(id, name, email, subject, message);
-    res.json({ success: true, id });
-  });
+    return res.json({ success: true, id });
+  }));
 
-  // Services API
-  app.get("/api/services", (req, res) => {
-    const services = db.prepare("SELECT * FROM services").all();
-    res.json(services);
-  });
+  // Services
+  app.get('/api/services', asyncHandler(async (_req, res) => {
+    if (usingFirestore && firestore) {
+      const snap = await firestore.collection('services').get();
+      return res.json(snap.docs.map(normalizeDoc));
+    }
 
-  // Basic SSE for real-time services sync
-  const dbEvents = new EventEmitter();
+    const services = sqliteDb.prepare('SELECT * FROM services').all();
+    return res.json(services);
+  }));
 
-  app.get("/api/services/stream", (req, res) => {
-    res.setHeader("Content-Type", "text/event-stream");
-    res.setHeader("Cache-Control", "no-cache");
-    res.setHeader("Connection", "keep-alive");
-    // Send an initial ping to establish connection
-    res.write("data: connected\n\n");
-
-    const listener = () => {
-      res.write("data: updated\n\n");
-    };
-    dbEvents.on("services_updated", listener);
-    req.on("close", () => {
-      dbEvents.off("services_updated", listener);
-    });
-  });
-
-  app.get("/api/gallery/stream", (req, res) => {
-    res.setHeader("Content-Type", "text/event-stream");
-    res.setHeader("Cache-Control", "no-cache");
-    res.setHeader("Connection", "keep-alive");
-    res.write("data: connected\n\n");
-
-    const listener = () => {
-      res.write("data: updated\n\n");
-    };
-    dbEvents.on("gallery_updated", listener);
-    req.on("close", () => {
-      dbEvents.off("gallery_updated", listener);
-    });
-  });
-
-  app.post("/api/services", (req, res) => {
+  app.post('/api/services', asyncHandler(async (req, res) => {
     const { name, category, price, duration, status, description, imageUrl } = req.body;
-    const id = Math.random().toString(36).substring(7).toUpperCase();
-    const insert = db.prepare(
-      "INSERT INTO services (id, name, category, price, duration, status, description, imageUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
-    );
-    insert.run(id, name, category, price, duration, status || 'Active', description || '', imageUrl || '');
-    dbEvents.emit("services_updated");
-    res.json({ success: true, id });
-  });
+    const id = randomId();
 
-  app.put("/api/services/:id", (req, res) => {
+    if (usingFirestore && firestore) {
+      await firestore.collection('services').doc(id).set({
+        id,
+        name,
+        category,
+        price: Number(price || 0),
+        duration: Number(duration || 0),
+        status: status || 'Active',
+        description: description || '',
+        imageUrl: imageUrl || '',
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+      dbEvents.emit('services_updated');
+      return res.json({ success: true, id });
+    }
+
+    sqliteDb
+      .prepare('INSERT INTO services (id, name, category, price, duration, status, description, imageUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
+      .run(id, name, category, price, duration, status || 'Active', description || '', imageUrl || '');
+    dbEvents.emit('services_updated');
+    return res.json({ success: true, id });
+  }));
+
+  app.put('/api/services/:id', asyncHandler(async (req, res) => {
     const { id } = req.params;
     const { name, category, price, duration, status, description, imageUrl } = req.body;
-    const update = db.prepare(
-      "UPDATE services SET name = ?, category = ?, price = ?, duration = ?, status = ?, description = ?, imageUrl = ? WHERE id = ?"
-    );
-    update.run(name, category, price, duration, status, description || '', imageUrl || '', id);
-    dbEvents.emit("services_updated");
-    res.json({ success: true });
-  });
 
-  app.delete("/api/services/:id", (req, res) => {
-    const { id } = req.params;
-    db.prepare("DELETE FROM services WHERE id = ?").run(id);
-    dbEvents.emit("services_updated");
-    res.json({ success: true });
-  });
+    if (usingFirestore && firestore) {
+      await firestore.collection('services').doc(id).set({
+        id,
+        name,
+        category,
+        price: Number(price || 0),
+        duration: Number(duration || 0),
+        status,
+        description: description || '',
+        imageUrl: imageUrl || '',
+        updatedAt: FieldValue.serverTimestamp(),
+      }, { merge: true });
+      dbEvents.emit('services_updated');
+      return res.json({ success: true });
+    }
 
-  app.patch("/api/services/:id/toggle", (req, res) => {
+    sqliteDb
+      .prepare('UPDATE services SET name = ?, category = ?, price = ?, duration = ?, status = ?, description = ?, imageUrl = ? WHERE id = ?')
+      .run(name, category, price, duration, status, description || '', imageUrl || '', id);
+    dbEvents.emit('services_updated');
+    return res.json({ success: true });
+  }));
+
+  app.delete('/api/services/:id', asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const service = db.prepare("SELECT status FROM services WHERE id = ?").get(id) as any;
+
+    if (usingFirestore && firestore) {
+      await firestore.collection('services').doc(id).delete();
+      dbEvents.emit('services_updated');
+      return res.json({ success: true });
+    }
+
+    sqliteDb.prepare('DELETE FROM services WHERE id = ?').run(id);
+    dbEvents.emit('services_updated');
+    return res.json({ success: true });
+  }));
+
+  app.patch('/api/services/:id/toggle', asyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    if (usingFirestore && firestore) {
+      const ref = firestore.collection('services').doc(id);
+      const docSnap = await ref.get();
+      const currentStatus = docSnap.exists ? docSnap.data()?.status : 'Active';
+      const newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
+      await ref.set({ status: newStatus, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
+      dbEvents.emit('services_updated');
+      return res.json({ success: true, status: newStatus });
+    }
+
+    const service = sqliteDb.prepare('SELECT status FROM services WHERE id = ?').get(id) as any;
     const newStatus = service?.status === 'Active' ? 'Inactive' : 'Active';
-    db.prepare("UPDATE services SET status = ? WHERE id = ?").run(newStatus, id);
-    dbEvents.emit("services_updated");
-    res.json({ success: true, status: newStatus });
-  });
+    sqliteDb.prepare('UPDATE services SET status = ? WHERE id = ?').run(newStatus, id);
+    dbEvents.emit('services_updated');
+    return res.json({ success: true, status: newStatus });
+  }));
 
-  // Bookings API
-  app.get("/api/bookings", (req, res) => {
-    const bookings = db.prepare("SELECT * FROM bookings ORDER BY createdAt DESC").all();
-    res.json(bookings);
-  });
+  // Bookings
+  app.get('/api/bookings', asyncHandler(async (_req, res) => {
+    if (usingFirestore && firestore) {
+      const snap = await firestore.collection('bookings').get();
+      const bookings = snap.docs.map(normalizeDoc).sort((a, b) => toMillis(b.createdAt) - toMillis(a.createdAt));
+      return res.json(bookings);
+    }
 
-  app.post("/api/bookings", (req, res) => {
+    const bookings = sqliteDb.prepare('SELECT * FROM bookings ORDER BY createdAt DESC').all();
+    return res.json(bookings);
+  }));
+
+  app.post('/api/bookings', asyncHandler(async (req, res) => {
     const { customerName, customerEmail, customerPhone, serviceName, date, time, amount } = req.body;
-    const id = Math.random().toString(36).substring(7).toUpperCase();
-    const insert = db.prepare("INSERT INTO bookings (id, customerName, customerEmail, customerPhone, serviceName, date, time, amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-    insert.run(id, customerName, customerEmail, customerPhone, serviceName, date, time, amount);
-    res.json({ success: true, id });
-  });
+    const id = randomId();
 
-  app.patch("/api/bookings/:id/status", (req, res) => {
+    if (usingFirestore && firestore) {
+      await firestore.collection('bookings').doc(id).set({
+        id,
+        customerName,
+        customerEmail,
+        customerPhone,
+        serviceName,
+        date,
+        time,
+        amount: Number(amount || 0),
+        status: 'Pending',
+        paymentStatus: 'Pending',
+        createdAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+      return res.json({ success: true, id });
+    }
+
+    sqliteDb
+      .prepare('INSERT INTO bookings (id, customerName, customerEmail, customerPhone, serviceName, date, time, amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
+      .run(id, customerName, customerEmail, customerPhone, serviceName, date, time, amount);
+    return res.json({ success: true, id });
+  }));
+
+  app.patch('/api/bookings/:id/status', asyncHandler(async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
-    const update = db.prepare("UPDATE bookings SET status = ? WHERE id = ?");
-    update.run(status, id);
-    res.json({ success: true });
-  });
 
-  app.delete("/api/bookings/:id", (req, res) => {
+    if (usingFirestore && firestore) {
+      await firestore.collection('bookings').doc(id).set({ status, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
+      return res.json({ success: true });
+    }
+
+    sqliteDb.prepare('UPDATE bookings SET status = ? WHERE id = ?').run(status, id);
+    return res.json({ success: true });
+  }));
+
+  app.delete('/api/bookings/:id', asyncHandler(async (req, res) => {
     const { id } = req.params;
-    db.prepare("DELETE FROM bookings WHERE id = ?").run(id);
-    res.json({ success: true });
-  });
 
-  // Reviews API
-  app.get("/api/reviews", (req, res) => {
-    const reviews = db.prepare("SELECT * FROM reviews").all();
-    res.json(reviews);
-  });
+    if (usingFirestore && firestore) {
+      await firestore.collection('bookings').doc(id).delete();
+      return res.json({ success: true });
+    }
 
-  app.post("/api/reviews", (req, res) => {
-    const { customerName, rating, comment, date, photoUrl } = req.body;
-    const id = Math.random().toString(36).substring(7).toUpperCase();
-    const insert = db.prepare("INSERT INTO reviews (id, customerName, rating, comment, date, approved, photoUrl) VALUES (?, ?, ?, ?, ?, 0, ?)");
-    insert.run(id, customerName, rating, comment, date, photoUrl);
-    res.json({ success: true, id });
-  });
+    sqliteDb.prepare('DELETE FROM bookings WHERE id = ?').run(id);
+    return res.json({ success: true });
+  }));
 
-  app.patch("/api/reviews/:id/approve", (req, res) => {
-    const { id } = req.params;
-    const update = db.prepare("UPDATE reviews SET approved = 1 WHERE id = ?");
-    update.run(id);
-    res.json({ success: true });
-  });
-
-  // Gallery API
-  app.get("/api/gallery", (req, res) => {
-    const gallery = db.prepare("SELECT * FROM gallery").all();
-    res.json(gallery);
-  });
-
-  app.post("/api/gallery", (req, res) => {
-    const { url, type, category } = req.body;
-    const id = Math.random().toString(36).substring(7).toUpperCase();
-    const insert = db.prepare("INSERT INTO gallery (id, url, type, category) VALUES (?, ?, ?, ?)");
-    insert.run(id, url, type, category);
-    dbEvents.emit("gallery_updated");
-    res.json({ success: true, id });
-  });
-
-  app.delete("/api/gallery/:id", (req, res) => {
-    const { id } = req.params;
-    db.prepare("DELETE FROM gallery WHERE id = ?").run(id);
-    dbEvents.emit("gallery_updated");
-    res.json({ success: true });
-  });
-
-  // Payment Simulation Endpoint
-  app.post("/api/payments/simulate", (req, res) => {
+  app.post('/api/payments/simulate', asyncHandler(async (req, res) => {
     const { amount, bookingId } = req.body;
-    console.log(`Simulating payment for booking ${bookingId} with amount ${amount}`);
-    
-    // Update booking status in DB
-    const update = db.prepare("UPDATE bookings SET paymentStatus = 'Paid', status = 'Confirmed' WHERE id = ?");
-    update.run(bookingId);
+
+    if (usingFirestore && firestore) {
+      await firestore.collection('bookings').doc(bookingId).set({
+        paymentStatus: 'Paid',
+        status: 'Confirmed',
+        amount: Number(amount || 0),
+        updatedAt: FieldValue.serverTimestamp(),
+      }, { merge: true });
+    } else {
+      sqliteDb.prepare("UPDATE bookings SET paymentStatus = 'Paid', status = 'Confirmed' WHERE id = ?").run(bookingId);
+    }
 
     setTimeout(() => {
-      res.json({ 
-        success: true, 
-        transactionId: `TXN_${Math.random().toString(36).substring(7).toUpperCase()}`,
-        status: 'paid'
+      res.json({
+        success: true,
+        transactionId: `TXN_${Math.random().toString(36).substring(2, 9).toUpperCase()}`,
+        status: 'paid',
       });
-    }, 1500);
-  });
+    }, 600);
+  }));
 
-  // Vite middleware for development
-  if (process.env.NODE_ENV !== "production") {
+  // Reviews
+  app.get('/api/reviews', asyncHandler(async (_req, res) => {
+    if (usingFirestore && firestore) {
+      const snap = await firestore.collection('reviews').get();
+      return res.json(snap.docs.map(normalizeDoc));
+    }
+
+    const reviews = sqliteDb.prepare('SELECT * FROM reviews').all();
+    return res.json(reviews);
+  }));
+
+  app.post('/api/reviews', asyncHandler(async (req, res) => {
+    const { customerName, rating, comment, date, photoUrl } = req.body;
+    const id = randomId();
+
+    if (usingFirestore && firestore) {
+      await firestore.collection('reviews').doc(id).set({
+        id,
+        customerName,
+        rating: Number(rating || 0),
+        comment,
+        date,
+        approved: false,
+        photoUrl: photoUrl || '',
+        createdAt: FieldValue.serverTimestamp(),
+      });
+      return res.json({ success: true, id });
+    }
+
+    sqliteDb
+      .prepare('INSERT INTO reviews (id, customerName, rating, comment, date, approved, photoUrl) VALUES (?, ?, ?, ?, ?, 0, ?)')
+      .run(id, customerName, rating, comment, date, photoUrl);
+    return res.json({ success: true, id });
+  }));
+
+  app.patch('/api/reviews/:id/approve', asyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    if (usingFirestore && firestore) {
+      await firestore.collection('reviews').doc(id).set({ approved: true }, { merge: true });
+      return res.json({ success: true });
+    }
+
+    sqliteDb.prepare('UPDATE reviews SET approved = 1 WHERE id = ?').run(id);
+    return res.json({ success: true });
+  }));
+
+  // Gallery
+  app.get('/api/gallery', asyncHandler(async (_req, res) => {
+    if (usingFirestore && firestore) {
+      const snap = await firestore.collection('gallery').get();
+      return res.json(snap.docs.map(normalizeDoc));
+    }
+
+    const gallery = sqliteDb.prepare('SELECT * FROM gallery').all();
+    return res.json(gallery);
+  }));
+
+  app.post('/api/gallery', asyncHandler(async (req, res) => {
+    const { url, type, category } = req.body;
+    const id = randomId();
+
+    if (usingFirestore && firestore) {
+      await firestore.collection('gallery').doc(id).set({
+        id,
+        url,
+        type,
+        category,
+        createdAt: FieldValue.serverTimestamp(),
+      });
+      dbEvents.emit('gallery_updated');
+      return res.json({ success: true, id });
+    }
+
+    sqliteDb.prepare('INSERT INTO gallery (id, url, type, category) VALUES (?, ?, ?, ?)').run(id, url, type, category);
+    dbEvents.emit('gallery_updated');
+    return res.json({ success: true, id });
+  }));
+
+  app.delete('/api/gallery/:id', asyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    if (usingFirestore && firestore) {
+      await firestore.collection('gallery').doc(id).delete();
+      dbEvents.emit('gallery_updated');
+      return res.json({ success: true });
+    }
+
+    sqliteDb.prepare('DELETE FROM gallery WHERE id = ?').run(id);
+    dbEvents.emit('gallery_updated');
+    return res.json({ success: true });
+  }));
+
+  if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
       server: { middlewareMode: true },
-      appType: "spa",
+      appType: 'spa',
     });
     app.use(vite.middlewares);
   } else {
-    // Serve static files in production
-    app.use(express.static(path.join(__dirname, "dist")));
-    app.get("*", (req, res) => {
-      res.sendFile(path.join(__dirname, "dist", "index.html"));
+    app.use(express.static(path.join(__dirname, 'dist')));
+    app.get('*', (_req, res) => {
+      res.sendFile(path.join(__dirname, 'dist', 'index.html'));
     });
   }
 
-  // Final Error Handler
-  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-    console.error("GLOBAL ERROR:", err);
-    res.status(500).json({ success: false, error: err.message || "Internal Server Error" });
+  app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    console.error('GLOBAL ERROR:', err);
+    res.status(500).json({ success: false, error: err.message || 'Internal Server Error' });
   });
 
-  const server = app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+  const server = app.listen(PORT, '0.0.0.0', () => {
+    console.log(`[BACKEND] Server running on http://localhost:${PORT}`);
+    console.log(`[BACKEND] Data mode: ${usingFirestore ? 'Firestore' : 'SQLite fallback'}`);
   });
 
-  // PROFESSIONAL FIX: Disable server timeouts for large video transfers
-  server.timeout = 0; 
+  server.timeout = 0;
   server.keepAliveTimeout = 60000;
 }
 

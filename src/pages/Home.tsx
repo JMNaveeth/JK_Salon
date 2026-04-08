@@ -86,83 +86,223 @@ const SectionHeading = ({ eyebrow, title, light = false }: { eyebrow: string; ti
 const ServiceCard = ({ service, idx }: { service: any; idx: number }) => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-60px" });
-  const imageUrl = service.imageUrl || "https://images.unsplash.com/photo-1621605815971-fbc98d665033?auto=format&fit=crop&q=80&w=1200";
-
+  const [hovered, setHovered] = useState(false);
+ 
+  const imageUrl =
+    service.imageUrl ||
+    "https://images.unsplash.com/photo-1621605815971-fbc98d665033?auto=format&fit=crop&q=80&w=1200";
+ 
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 70 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.8, delay: idx * 0.15, ease: [0.22, 1, 0.36, 1] }}
-      whileHover={{ y: -10 }}
-      className="group relative bg-white rounded-3xl overflow-hidden mx-auto w-full max-w-[350px]"
-      style={{ boxShadow: "0 6px 24px rgba(197,160,89,0.08), 0 1px 3px rgba(0,0,0,0.04)", border: "1px solid rgba(197,160,89,0.12)" }}
+      initial={{ opacity: 0, y: 80, scale: 0.94 }}
+      animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
+      transition={{ duration: 0.9, delay: idx * 0.15, ease: [0.22, 1, 0.36, 1] }}
+      onHoverStart={() => setHovered(true)}
+      onHoverEnd={() => setHovered(false)}
+      className="relative overflow-hidden mx-auto w-full max-w-[350px] cursor-pointer select-none"
+      style={{
+        borderRadius: "32px",
+        aspectRatio: "3 / 4.2",
+        boxShadow: hovered
+          ? `0 32px 80px rgba(0,0,0,0.22), 0 8px 32px rgba(197,160,89,0.22)`
+          : `0 16px 48px rgba(0,0,0,0.14), 0 4px 16px rgba(197,160,89,0.08)`,
+        transition: "box-shadow 0.5s ease",
+      }}
     >
-      {/* hover gold tint */}
+      {/* ── Full-bleed image with zoom ── */}
       <motion.div
-        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-3xl"
-        style={{ background: "linear-gradient(135deg,rgba(197,160,89,0.04) 0%,transparent 60%)" }}
-      />
-      {/* top gold reveal line */}
-      <div className="absolute top-0 left-0 right-0 h-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-        style={{ background: `linear-gradient(90deg,transparent,${GOLD},transparent)` }} />
-
-      <div className="relative aspect-[16/10] overflow-hidden">
+        className="absolute inset-0"
+        animate={{ scale: hovered ? 1.1 : 1 }}
+        transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+      >
         <img
           src={imageUrl}
           alt={service.name}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          className="w-full h-full object-cover"
           referrerPolicy="no-referrer"
         />
-        <div className="absolute inset-0" style={{ background: "linear-gradient(to top,rgba(0,0,0,0.28) 0%,transparent 55%)" }} />
-
-        <div className="absolute top-3 left-3 z-10">
-          <span
-            className="px-2.5 py-1 rounded-full text-[8px] font-black uppercase tracking-[0.25em] backdrop-blur-sm"
-            style={{ background: "rgba(255,255,255,0.9)", color: GOLD, border: "1px solid rgba(197,160,89,0.28)" }}
-          >
-            {service.category || "Service"}
-          </span>
-        </div>
-
+      </motion.div>
+ 
+      {/* ── Cinematic gradient vignette ── */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(to top, rgba(8,6,4,0.98) 0%, rgba(8,6,4,0.72) 38%, rgba(8,6,4,0.25) 62%, rgba(8,6,4,0.08) 100%)",
+        }}
+      />
+ 
+      {/* ── Gold shimmer line — top edge on hover ── */}
+      <motion.div
+        className="absolute top-0 left-0 right-0 h-[2.5px] origin-left pointer-events-none"
+        style={{
+          background: `linear-gradient(90deg, transparent 0%, ${GOLD} 30%, ${GOLD_LIGHT} 55%, ${GOLD} 75%, transparent 100%)`,
+          boxShadow: `0 0 12px ${GOLD}88`,
+        }}
+        initial={{ scaleX: 0 }}
+        animate={{ scaleX: hovered ? 1 : 0 }}
+        transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+      />
+ 
+      {/* ── Gold accent bar — bottom edge ── */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-[3px] pointer-events-none"
+        style={{
+          background: `linear-gradient(90deg, transparent, ${GOLD}, ${GOLD_LIGHT}, ${GOLD}, transparent)`,
+          opacity: 0.6,
+        }}
+      />
+ 
+      {/* ── Oversized index watermark ── */}
+      <div
+        className="absolute top-2 right-4 font-serif leading-none pointer-events-none"
+        style={{
+          fontSize: "clamp(80px, 22vw, 110px)",
+          fontWeight: 900,
+          color: "rgba(197,160,89,0.10)",
+          lineHeight: 1,
+          userSelect: "none",
+        }}
+      >
+        {String(idx + 1).padStart(2, "0")}
+      </div>
+ 
+      {/* ── Top badges ── */}
+      <div className="absolute top-5 left-5 z-20 flex flex-col gap-2">
+        <motion.span
+          className="px-3 py-[5px] rounded-full text-[9px] font-black uppercase tracking-[0.35em] backdrop-blur-md inline-block"
+          style={{
+            background: "rgba(197,160,89,0.18)",
+            color: GOLD_LIGHT,
+            border: `1px solid rgba(197,160,89,0.45)`,
+            boxShadow: `0 4px 16px rgba(197,160,89,0.15)`,
+          }}
+          animate={{ opacity: hovered ? 0.75 : 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          {service.category || "Service"}
+        </motion.span>
+ 
         {service.duration && (
-          <div className="absolute top-3 right-3 z-10">
-            <span
-              className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[8px] font-bold backdrop-blur-sm"
-              style={{ background: "rgba(255,255,255,0.9)", color: "#555", border: "1px solid rgba(0,0,0,0.06)" }}
-            >
-              <Clock className="h-3 w-3" style={{ color: GOLD }} />
-              {service.duration} mins
-            </span>
-          </div>
+          <span
+            className="flex items-center gap-1.5 px-3 py-[5px] rounded-full text-[9px] font-semibold backdrop-blur-md self-start"
+            style={{
+              background: "rgba(255,255,255,0.10)",
+              color: "rgba(255,255,255,0.80)",
+              border: "1px solid rgba(255,255,255,0.14)",
+            }}
+          >
+            <Clock className="h-2.5 w-2.5 shrink-0" style={{ color: GOLD }} />
+            {service.duration} min
+          </span>
         )}
       </div>
-
-      <div className="p-5 sm:p-6 flex flex-col">
-        <h3 className="text-xl sm:text-2xl font-serif font-bold text-[#1A1A1A] mb-2">{service.name}</h3>
-        <p className="text-zinc-500 text-sm leading-relaxed mb-4 line-clamp-2 min-h-[40px]">
-          {service.description || "Premium grooming service with expert care and precision styling."}
-        </p>
-
-        <div className="flex items-center justify-between pt-4" style={{ borderTop: "1px solid rgba(197,160,89,0.12)" }}>
-          <div className="flex items-baseline gap-1">
-            <span className="text-xs text-zinc-400 font-medium">LKR</span>
-            <span className="text-3xl font-black tracking-tight" style={{ color: GOLD }}>{Number(service.price).toLocaleString()}</span>
+ 
+      {/* ── Bottom sliding reveal panel ── */}
+      <div className="absolute bottom-0 left-0 right-0 z-10 px-6 pb-6 pt-4">
+ 
+        {/* Thin gold rule */}
+        <motion.div
+          className="mb-3"
+          style={{ height: "1px", background: `linear-gradient(90deg, ${GOLD}, ${GOLD_LIGHT} 40%, transparent)` }}
+          initial={{ scaleX: 0, originX: 0 }}
+          animate={{ scaleX: hovered ? 1 : 0.28 }}
+          transition={{ duration: 0.5 }}
+        />
+ 
+        {/* Service name */}
+        <h3
+          className="font-serif text-white font-bold leading-tight tracking-tight mb-1"
+          style={{ fontSize: "clamp(1.35rem, 4vw, 1.6rem)" }}
+        >
+          {service.name}
+        </h3>
+ 
+        {/* Description — slides up on hover */}
+        <motion.p
+          className="text-white/55 text-xs leading-relaxed line-clamp-2 overflow-hidden"
+          initial={{ height: 0, opacity: 0, marginBottom: 0 }}
+          animate={
+            hovered
+              ? { height: "auto", opacity: 1, marginBottom: 14 }
+              : { height: 0, opacity: 0, marginBottom: 0 }
+          }
+          transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
+        >
+          {service.description ||
+            "Premium grooming service with expert care and precision styling."}
+        </motion.p>
+ 
+        {/* Price + CTA */}
+        <div className="flex items-end justify-between gap-3 mt-3">
+          {/* Price block */}
+          <div>
+            <span
+              className="block text-[8px] uppercase tracking-[0.38em] mb-0.5"
+              style={{ color: "rgba(197,160,89,0.60)" }}
+            >
+              From
+            </span>
+            <div className="flex items-baseline gap-1">
+              <span
+                className="text-[10px] font-bold"
+                style={{ color: GOLD }}
+              >
+                LKR
+              </span>
+              <motion.span
+                className="font-black tracking-tight leading-none"
+                style={{ fontSize: "clamp(1.6rem, 5vw, 2rem)", color: "#ffffff" }}
+                animate={{ scale: hovered ? 1.06 : 1 }}
+                transition={{ duration: 0.3 }}
+              >
+                {Number(service.price).toLocaleString()}
+              </motion.span>
+            </div>
           </div>
-
-          <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+ 
+          {/* Reserve button */}
+          <motion.div
+            whileHover={{ scale: 1.06 }}
+            whileTap={{ scale: 0.95 }}
+            className="shrink-0"
+          >
             <Link
               to={`/booking?service=${service.id || service._id || ""}`}
-              className="group/btn px-4 py-2.5 rounded-xl text-[11px] font-bold tracking-wider uppercase inline-flex items-center justify-center gap-2 relative overflow-hidden"
-              style={{ background: `linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`, color: "#fff", boxShadow: "0 6px 20px rgba(197,160,89,0.35)" }}
+              className="relative overflow-hidden flex items-center gap-2 px-5 py-3 rounded-2xl text-[10px] font-black tracking-widest uppercase text-white"
+              style={{
+                background: `linear-gradient(135deg, ${GOLD} 0%, ${GOLD_LIGHT} 100%)`,
+                boxShadow: `0 8px 28px rgba(197,160,89,0.50)`,
+              }}
             >
               <span className="relative z-10">Reserve</span>
-              <ArrowRight className="relative z-10 h-3 w-3 group-hover/btn:translate-x-1 transition-transform" />
-              <motion.div className="absolute inset-0 bg-white/15" initial={{ x: "-110%" }} whileHover={{ x: "110%" }} transition={{ duration: 0.5 }} />
+              <ArrowRight className="relative z-10 h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+              {/* shimmer sweep */}
+              <motion.div
+                className="absolute inset-0 bg-white/20"
+                initial={{ x: "-110%" }}
+                animate={hovered ? { x: "110%" } : { x: "-110%" }}
+                transition={{ duration: 0.45, ease: "easeInOut" }}
+              />
             </Link>
           </motion.div>
         </div>
       </div>
+ 
+      {/* ── Hover gold corner glow ── */}
+      <motion.div
+        className="absolute bottom-0 left-0 pointer-events-none"
+        style={{
+          width: 220,
+          height: 220,
+          borderRadius: "50%",
+          background: `radial-gradient(ellipse at 30% 80%, rgba(197,160,89,0.22) 0%, transparent 65%)`,
+          filter: "blur(20px)",
+        }}
+        animate={{ opacity: hovered ? 1 : 0 }}
+        transition={{ duration: 0.5 }}
+      />
     </motion.div>
   );
 };
