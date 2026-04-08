@@ -3,9 +3,11 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Scissors, Calendar, Clock, User, CreditCard, CheckCircle, ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
 import { format, addDays, startOfToday, isSameDay } from 'date-fns';
+import { doc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { cn } from '@/src/utils/cn';
 import { api } from '../services/api';
 import { simulatePayment } from '../api/bookingApi';
+import { db } from '../firebase/firebase';
 
 const timeSlots = [
   '09:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', 
@@ -78,24 +80,48 @@ const Booking = () => {
 
   const handleBooking = async () => {
     try {
-      const response = await api.createBooking({
+      const bookingPayload = {
         customerName: formData.name,
         customerEmail: formData.email,
         customerPhone: formData.phone,
         serviceName: selectedService?.name,
         date: format(formData.date, 'yyyy-MM-dd'),
         time: formData.timeSlot,
-        amount: selectedService?.price
+        amount: selectedService?.price,
+      };
+
+      const response = await api.createBooking({
+        ...bookingPayload,
       });
 
       if (response.success) {
+        const bookingRef = doc(db, 'bookings', response.id);
+
+        await setDoc(bookingRef, {
+          id: response.id,
+          ...bookingPayload,
+          status: 'Pending',
+          paymentStatus: 'Pending',
+          source: 'web',
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        }, { merge: true });
+
         // Simulate payment
-        await simulatePayment(response.id, selectedService?.price || 0);
+        const paymentResult = await simulatePayment(response.id, selectedService?.price || 0);
+
+        await updateDoc(bookingRef, {
+          status: 'Confirmed',
+          paymentStatus: 'Paid',
+          transactionId: paymentResult?.transactionId || null,
+          updatedAt: serverTimestamp(),
+        });
+
         setStep(5); // Success step
       }
     } catch (error) {
       console.error('Booking failed:', error);
-      alert('Something went wrong. Please try again.');
+      alert('Something went wrong while saving your booking. Please try again.');
     }
   };
 
