@@ -58,9 +58,12 @@ const AdminLayout = () => {
         isSidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="h-full flex flex-col p-6">
-          <div className="flex items-center space-x-2 mb-12">
-            <Scissors className="h-8 w-8 text-[#C5A059]" />
-            <span className="text-xl font-bold tracking-tighter text-white uppercase">Admin Panel</span>
+          <div className="mb-12">
+            <img
+              src="/jk_logo.png"
+              alt="JK Salon Admin"
+              className="h-14 w-auto object-contain"
+            />
           </div>
 
           <nav className="flex-1 space-y-2">

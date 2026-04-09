@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Scissors, Menu, X, LogOut } from 'lucide-react';
+import { Menu, X, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/src/utils/cn';
 
@@ -26,11 +26,12 @@ const Navbar = ({ onLogout }: { onLogout?: () => void }) => {
         <div className="flex items-center justify-between h-20">
 
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <Scissors className="h-8 w-8 text-[#C5A059]" />
-            <span className="text-2xl font-bold tracking-tighter transition-colors duration-300 text-white">
-              JK SALON
-            </span>
+          <Link to="/" className="flex items-center">
+            <img
+              src="/jk_logo.png"
+              alt="JK Salon"
+              className="h-10 sm:h-11 w-auto object-contain"
+            />
           </Link>
 
           {/* Desktop Nav */}
