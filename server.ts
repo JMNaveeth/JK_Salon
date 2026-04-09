@@ -18,6 +18,7 @@ const __dirname = path.dirname(__filename);
 const dbEvents = new EventEmitter();
 
 const randomId = () => Math.random().toString(36).substring(2, 9).toUpperCase();
+const randomSCode = () => `S-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 const toMillis = (value: any) => {
   if (!value) return 0;
   if (typeof value === 'number') return value;
@@ -100,6 +101,7 @@ sqliteDb.exec(`
     serviceName TEXT NOT NULL,
     date TEXT NOT NULL,
     time TEXT NOT NULL,
+    sCode TEXT UNIQUE,
     status TEXT DEFAULT 'Pending',
     paymentStatus TEXT DEFAULT 'Pending',
     amount INTEGER NOT NULL,
@@ -133,6 +135,33 @@ sqliteDb.exec(`
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
   );
 `);
+
+try {
+  const bookingColumns = sqliteDb.prepare("PRAGMA table_info(bookings)").all() as Array<{ name: string }>;
+  if (!bookingColumns.some((column) => column.name === 'sCode')) {
+    sqliteDb.prepare('ALTER TABLE bookings ADD COLUMN sCode TEXT').run();
+  }
+  sqliteDb.prepare('CREATE UNIQUE INDEX IF NOT EXISTS idx_bookings_sCode ON bookings(sCode)').run();
+} catch (error) {
+  console.error('[BACKEND] Failed to ensure bookings.sCode column exists:', error);
+}
+
+const createUniqueSCode = async () => {
+  for (let attempt = 0; attempt < 12; attempt += 1) {
+    const candidate = randomSCode();
+
+    if (usingFirestore && firestore) {
+      const snap = await firestore.collection('bookings').where('sCode', '==', candidate).limit(1).get();
+      if (snap.empty) return candidate;
+      continue;
+    }
+
+    const existing = sqliteDb.prepare('SELECT id FROM bookings WHERE sCode = ? LIMIT 1').get(candidate);
+    if (!existing) return candidate;
+  }
+
+  return `S-${Date.now().toString(36).toUpperCase()}`;
+};
 
 const asyncHandler = (fn: any) => (req: express.Request, res: express.Response, next: express.NextFunction) =>
   Promise.resolve(fn(req, res, next)).catch(next);
@@ -386,10 +415,12 @@ async function startServer() {
   app.post('/api/bookings', asyncHandler(async (req, res) => {
     const { customerName, customerEmail, customerPhone, serviceName, date, time, amount } = req.body;
     const id = randomId();
+    const sCode = await createUniqueSCode();
 
     if (usingFirestore && firestore) {
       await firestore.collection('bookings').doc(id).set({
         id,
+        sCode,
         customerName,
         customerEmail,
         customerPhone,
@@ -402,13 +433,13 @@ async function startServer() {
         createdAt: FieldValue.serverTimestamp(),
         updatedAt: FieldValue.serverTimestamp(),
       });
-      return res.json({ success: true, id });
+      return res.json({ success: true, id, sCode });
     }
 
     sqliteDb
-      .prepare('INSERT INTO bookings (id, customerName, customerEmail, customerPhone, serviceName, date, time, amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
-      .run(id, customerName, customerEmail, customerPhone, serviceName, date, time, amount);
-    return res.json({ success: true, id });
+      .prepare('INSERT INTO bookings (id, customerName, customerEmail, customerPhone, serviceName, date, time, sCode, amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)')
+      .run(id, customerName, customerEmail, customerPhone, serviceName, date, time, sCode, amount);
+    return res.json({ success: true, id, sCode });
   }));
 
   app.patch('/api/bookings/:id/status', asyncHandler(async (req, res) => {

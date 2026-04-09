@@ -207,6 +207,11 @@ const BookingManagement = () => {
                         <span className={cn("px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border", getStatusColor(booking.status))}>
                           {booking.status}
                         </span>
+                        {booking.sCode && (
+                          <span className="text-[10px] font-black uppercase tracking-widest text-[#C5A059] bg-[#C5A059]/10 border border-[#C5A059]/20 px-2.5 py-1 rounded-full">
+                            {booking.sCode}
+                          </span>
+                        )}
                         {booking.paymentStatus === 'Paid' && (
                           <span className="text-[10px] font-bold text-[#C5A059] uppercase tracking-wider flex items-center gap-1">
                             <CheckCircle2 className="w-3 h-3" /> Paid
@@ -285,6 +290,22 @@ const BookingManagement = () => {
                     <span className="text-xs font-bold uppercase tracking-wider">Paid Offline/Online</span>
                   </div>
                 )}
+              </div>
+
+              {/* Booking Code */}
+              <div>
+                <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
+                  <CreditCard className="h-3 w-3" /> Booking Code
+                </h3>
+                <div className="bg-black/40 border border-white/5 rounded-2xl p-4 flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-xs text-zinc-500 mb-1">Customer S-code</p>
+                    <p className="text-xl font-black tracking-[0.25em] text-[#C5A059] font-mono">{viewBooking.sCode || 'N/A'}</p>
+                  </div>
+                  <div className="px-3 py-1.5 rounded-full bg-[#C5A059]/10 border border-[#C5A059]/20 text-[10px] font-bold uppercase tracking-widest text-[#C5A059]">
+                    Verify at check-in
+                  </div>
+                </div>
               </div>
 
               {/* Customer Info */}

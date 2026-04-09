@@ -445,6 +445,8 @@ const Booking = () => {
   const [loading, setLoading]   = React.useState(true);
   const [paying, setPaying]     = React.useState(false);
   const [payMethod, setPayMethod] = React.useState<'payhere' | 'genie'>('payhere');
+  const [sCode, setSCode]       = React.useState('');
+  const [bookingConfirmed, setBookingConfirmed] = React.useState(false);
   const [formData, setFormData] = React.useState({
     serviceId: initialServiceId || '',
     date: startOfToday(),
@@ -484,6 +486,7 @@ const Booking = () => {
   const handleBooking = async () => {
     try {
       setPaying(true);
+      setBookingConfirmed(false);
       const bookingPayload = {
         customerName: formData.name,
         customerEmail: formData.email,
@@ -495,19 +498,26 @@ const Booking = () => {
       };
       const response = await api.createBooking({ ...bookingPayload });
       if (response.success) {
+        const generatedSCode = response.sCode || '';
+        setSCode(generatedSCode);
+        setBookingConfirmed(true);
         const bookingRef = doc(db, 'bookings', response.id);
         await setDoc(bookingRef, {
-          id: response.id, ...bookingPayload,
+          id: response.id,
+          sCode: generatedSCode,
+          ...bookingPayload,
           status: 'Pending', paymentStatus: 'Pending',
           source: 'web', createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
         }, { merge: true });
+
+        setStep(5);
+
         const paymentResult = await simulatePayment(response.id, selectedService?.price || 0);
         await updateDoc(bookingRef, {
           status: 'Confirmed', paymentStatus: 'Paid',
           transactionId: paymentResult?.transactionId || null,
           updatedAt: serverTimestamp(),
         });
-        setStep(5);
       }
     } catch (error) {
       console.error('Booking failed:', error);
@@ -541,7 +551,6 @@ const Booking = () => {
 
   /* ── Success screen ── */
   if (step === 5) {
-    const refNum = `JK-${Date.now().toString(36).toUpperCase()}`;
     return (
       <div className="min-h-screen flex items-center justify-center px-4 py-16 relative overflow-hidden" style={{ background: BG }}>
         {/* ambient */}
@@ -591,7 +600,7 @@ const Booking = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
               >
-                Booking Confirmed
+                {bookingConfirmed ? 'Booking Received' : 'Booking Confirmed'}
               </motion.h2>
               <motion.p
                 className="text-xs tracking-[0.3em] uppercase"
@@ -641,8 +650,8 @@ const Booking = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.9 }}
               >
-                <p className="text-[9px] uppercase tracking-[0.4em] mb-1 font-bold" style={{ color: TEXT_MID }}>Booking Reference</p>
-                <p className="text-xl font-black tracking-widest" style={{ color: GOLD, fontFamily: 'monospace' }}>{refNum}</p>
+                <p className="text-[9px] uppercase tracking-[0.4em] mb-1 font-bold" style={{ color: TEXT_MID }}>S-code</p>
+                <p className="text-xl font-black tracking-widest" style={{ color: GOLD, fontFamily: 'monospace' }}>{sCode || 'Pending...'}</p>
               </motion.div>
 
               <motion.p
@@ -652,7 +661,7 @@ const Booking = () => {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 1 }}
               >
-                Confirmation sent to {formData.email}
+                {bookingConfirmed ? 'Your S-code is ready now. Confirmation will update after payment.' : `Confirmation sent to ${formData.email}`}
               </motion.p>
 
               <motion.div
