@@ -268,9 +268,6 @@ const ServiceSelectCard = ({
 const SummaryPanel = ({
   step, formData, selectedService,
 }: { step: number; formData: any; selectedService: any }) => {
-  const imageUrl = selectedService?.imageUrl ||
-    'https://images.unsplash.com/photo-1585747860715-2ba37e788b70?auto=format&fit=crop&q=80&w=800';
-
   return (
     <div
       className="relative flex flex-col h-full overflow-hidden"
@@ -291,49 +288,6 @@ const SummaryPanel = ({
             <p className="font-black text-sm tracking-widest uppercase" style={{ color: TEXT }}>JK Salon</p>
             <p className="text-[9px] uppercase tracking-[0.35em]" style={{ color: GOLD }}>Colombo</p>
           </div>
-        </div>
-      </div>
-
-      {/* service image preview */}
-      <div className="relative mx-6 rounded-2xl overflow-hidden mb-6" style={{ aspectRatio: '16/9' }}>
-        <AnimatePresence mode="wait">
-          <motion.img
-            key={selectedService?.id || 'default'}
-            src={imageUrl}
-            alt=""
-            className="w-full h-full object-cover"
-            referrerPolicy="no-referrer"
-            initial={{ opacity: 0, scale: 1.08 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.6 }}
-          />
-        </AnimatePresence>
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(to top,rgba(8,7,10,0.85) 0%,transparent 55%)' }} />
-        <div className="absolute bottom-3 left-3 right-3">
-          <AnimatePresence mode="wait">
-            {selectedService ? (
-              <motion.div
-                key={selectedService.id}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <p className="text-white font-bold text-sm" style={{ fontFamily: 'serif' }}>{selectedService.name}</p>
-              </motion.div>
-            ) : (
-              <motion.p
-                key="placeholder"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-sm font-bold"
-                style={{ color: TEXT_MID, fontFamily: 'serif' }}
-              >
-                Select a service…
-              </motion.p>
-            )}
-          </AnimatePresence>
         </div>
       </div>
 
