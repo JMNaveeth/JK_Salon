@@ -114,63 +114,63 @@ const DashboardOverview = () => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-5 md:space-y-8">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-end gap-4">
+      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-end gap-3 md:gap-4">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="h-4 w-4" style={{ color: GOLD }} />
-            <span className="text-[10px] font-bold uppercase tracking-[0.25em]" style={{ color: GOLD }}>
+            <Sparkles className="h-3.5 w-3.5 md:h-4 md:w-4" style={{ color: GOLD }} />
+            <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.25em]" style={{ color: GOLD }}>
               JK Salon Dashboard
             </span>
           </div>
-          <h1 className="text-3xl lg:text-4xl font-bold text-white tracking-tighter">
+          <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white tracking-tighter">
             {greeting()},{' '}
             <span style={{ color: GOLD }}>{user?.displayName || 'Admin'}</span>
           </h1>
-          <p className="text-zinc-500 text-sm mt-1.5">Here's an overview of your salon today.</p>
+          <p className="text-zinc-500 text-xs md:text-sm mt-1 md:mt-1.5">Here's an overview of your salon today.</p>
         </div>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-5">
         {stats.map((stat) => (
           <div
             key={stat.name}
-            className="group relative p-6 rounded-2xl border transition-all duration-300 hover:scale-[1.02] hover:shadow-lg cursor-default"
+            className="group relative p-4 md:p-5 lg:p-6 rounded-2xl border transition-all duration-300 hover:scale-[1.02] hover:shadow-lg cursor-default"
             style={{
               background: stat.bg,
               borderColor: stat.border,
             }}
           >
-            <div className="flex justify-between items-start mb-5">
+            <div className="flex justify-between items-start mb-3 md:mb-5">
               <div
-                className="w-11 h-11 rounded-xl flex items-center justify-center"
+                className="w-10 md:w-11 h-10 md:h-11 rounded-xl flex items-center justify-center"
                 style={{ background: stat.bg, border: `1px solid ${stat.border}` }}
               >
-                <stat.icon className="h-5 w-5" style={{ color: stat.color }} />
+                <stat.icon className="h-4 md:h-5 w-4 md:w-5" style={{ color: stat.color }} />
               </div>
               <ArrowUpRight
-                className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="h-3 md:h-4 w-3 md:w-4 opacity-0 group-hover:opacity-100 transition-opacity"
                 style={{ color: stat.color }}
               />
             </div>
-            <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-[0.2em]">{stat.name}</p>
-            <p className="text-2xl font-bold text-white mt-1 tracking-tight">{stat.value}</p>
+            <p className="text-zinc-500 text-[9px] md:text-[10px] font-bold uppercase tracking-[0.2em]">{stat.name}</p>
+            <p className="text-xl md:text-2xl font-bold text-white mt-1 tracking-tight">{stat.value}</p>
           </div>
         ))}
       </div>
 
       {/* Two-column layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
         {/* Recent Bookings */}
-        <div className="lg:col-span-2 bg-zinc-900/40 border border-white/5 rounded-2xl overflow-hidden">
-          <div className="p-5 border-b border-white/5 flex justify-between items-center">
-            <div className="flex items-center gap-2.5">
-              <Calendar className="h-4 w-4" style={{ color: GOLD }} />
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Recent Bookings</h3>
+        <div className="md:col-span-2 bg-zinc-900/40 border border-white/5 rounded-2xl overflow-hidden">
+          <div className="p-3 md:p-5 border-b border-white/5 flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-3.5 md:h-4 w-3.5 md:w-4" style={{ color: GOLD }} />
+              <h3 className="text-xs md:text-sm font-bold text-white uppercase tracking-wider">Recent Bookings</h3>
             </div>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-600">
+            <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-zinc-600">
               {data.bookings.length} total
             </span>
           </div>
@@ -184,62 +184,62 @@ const DashboardOverview = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-600 border-b border-white/5">
-                    <th className="px-5 py-3.5">Customer</th>
-                    <th className="px-5 py-3.5">Service</th>
-                    <th className="px-5 py-3.5">Date</th>
-                    <th className="px-5 py-3.5">Status</th>
-                    <th className="px-5 py-3.5 text-right">Amount</th>
+                  <tr className="text-[8px] md:text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-600 border-b border-white/5">
+                    <th className="px-2 md:px-5 py-2.5 md:py-3.5">Customer</th>
+                    <th className="px-2 md:px-5 py-2.5 md:py-3.5 hidden sm:table-cell">Service</th>
+                    <th className="px-2 md:px-5 py-2.5 md:py-3.5 hidden md:table-cell">Date</th>
+                    <th className="px-2 md:px-5 py-2.5 md:py-3.5">Status</th>
+                    <th className="px-2 md:px-5 py-2.5 md:py-3.5 text-right hidden sm:table-cell">Amount</th>
                   </tr>
                 </thead>
-                <tbody className="text-sm">
+                <tbody className="text-xs md:text-sm">
                   {data.bookings.slice(0, 6).map((booking, idx) => (
                     <tr
                       key={idx}
                       className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors"
                     >
-                      <td className="px-5 py-4">
-                        <div className="flex items-center gap-3">
+                      <td className="px-2 md:px-5 py-2 md:py-4">
+                        <div className="flex items-center gap-2">
                           <div
-                            className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
+                            className="w-7 md:w-8 h-7 md:h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
                             style={{ background: `linear-gradient(135deg, ${GOLD}, ${GOLD_LIGHT})` }}
                           >
                             {booking.customerName?.[0]?.toUpperCase() || '?'}
                           </div>
-                          <div>
-                            <p className="font-semibold text-white text-sm">{booking.customerName}</p>
-                            <p className="text-[11px] text-zinc-600">{booking.customerEmail}</p>
+                          <div className="min-w-0">
+                            <p className="font-semibold text-white text-xs md:text-sm truncate">{booking.customerName}</p>
+                            <p className="text-[9px] md:text-[11px] text-zinc-600 truncate">{booking.customerEmail}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="px-5 py-4 text-zinc-400">{booking.serviceName}</td>
-                      <td className="px-5 py-4">
-                        <div className="flex items-center gap-1.5 text-zinc-400">
-                          <Clock className="h-3.5 w-3.5 text-zinc-600" />
+                      <td className="px-2 md:px-5 py-2 md:py-4 text-zinc-400 hidden sm:table-cell text-xs md:text-sm">{booking.serviceName}</td>
+                      <td className="px-2 md:px-5 py-2 md:py-4 hidden md:table-cell">
+                        <div className="flex items-center gap-1 text-zinc-400 text-xs md:text-sm">
+                          <Clock className="h-3 w-3 text-zinc-600" />
                           <span>{booking.date}</span>
-                          {booking.time && <span className="text-zinc-600">• {booking.time}</span>}
+                          {booking.time && <span className="text-zinc-600 hidden lg:inline">• {booking.time}</span>}
                         </div>
                       </td>
-                      <td className="px-5 py-4">
+                      <td className="px-2 md:px-5 py-2 md:py-4">
                         <span
                           className={cn(
-                            'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider',
+                            'inline-flex items-center gap-1 px-2 md:px-2.5 py-1 rounded-full text-[8px] md:text-[10px] font-bold uppercase tracking-wider whitespace-nowrap border shadow-sm',
                             booking.status === 'Confirmed'
-                              ? 'bg-emerald-500/10 text-emerald-400'
+                              ? 'bg-emerald-500/85 text-white border-emerald-300/95'
                               : booking.status === 'Pending'
-                              ? 'bg-amber-500/10 text-amber-400'
-                              : 'bg-red-500/10 text-red-400'
+                              ? 'bg-amber-500/85 text-white border-amber-200/95'
+                              : 'bg-red-500/85 text-white border-red-200/95'
                           )}
                         >
                           {booking.status === 'Confirmed' ? (
-                            <CheckCircle2 className="h-3 w-3" />
+                            <CheckCircle2 className="h-2.5 md:h-3 w-2.5 md:w-3" />
                           ) : (
-                            <AlertCircle className="h-3 w-3" />
+                            <AlertCircle className="h-2.5 md:h-3 w-2.5 md:w-3" />
                           )}
                           {booking.status}
                         </span>
                       </td>
-                      <td className="px-5 py-4 text-right font-bold text-white">
+                      <td className="px-2 md:px-5 py-2 md:py-4 text-right font-bold text-white hidden sm:table-cell text-xs md:text-sm">
                         Rs. {booking.amount?.toLocaleString()}
                       </td>
                     </tr>
@@ -251,18 +251,18 @@ const DashboardOverview = () => {
         </div>
 
         {/* Sidebar Cards */}
-        <div className="space-y-6">
+        <div className="space-y-4 md:space-y-6">
           {/* Quick Stats Card */}
-          <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-5">
-            <div className="flex items-center gap-2.5 mb-5">
-              <BarChart3 className="h-4 w-4" style={{ color: GOLD }} />
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Quick Stats</h3>
+          <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-4 md:p-5">
+            <div className="flex items-center gap-2 mb-4 md:mb-5">
+              <BarChart3 className="h-3.5 md:h-4 w-3.5 md:w-4" style={{ color: GOLD }} />
+              <h3 className="text-xs md:text-sm font-bold text-white uppercase tracking-wider">Quick Stats</h3>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3 md:space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-zinc-500 text-sm">Confirmed</span>
-                <span className="font-bold text-emerald-400 text-sm">{confirmedBookings.length}</span>
+                <span className="text-zinc-500 text-xs md:text-sm">Confirmed</span>
+                <span className="font-bold text-emerald-400 text-xs md:text-sm">{confirmedBookings.length}</span>
               </div>
               <div className="w-full h-1.5 rounded-full bg-zinc-800 overflow-hidden">
                 <div
@@ -274,9 +274,9 @@ const DashboardOverview = () => {
                 />
               </div>
 
-              <div className="flex justify-between items-center">
-                <span className="text-zinc-500 text-sm">Pending</span>
-                <span className="font-bold text-amber-400 text-sm">{pendingBookings.length}</span>
+              <div className="flex justify-between items-center pt-2 md:pt-3 border-t border-white/5">
+                <span className="text-zinc-500 text-xs md:text-sm">Pending</span>
+                <span className="font-bold text-amber-400 text-xs md:text-sm">{pendingBookings.length}</span>
               </div>
               <div className="w-full h-1.5 rounded-full bg-zinc-800 overflow-hidden">
                 <div
@@ -288,43 +288,43 @@ const DashboardOverview = () => {
                 />
               </div>
 
-              <div className="flex justify-between items-center pt-2 border-t border-white/5">
-                <span className="text-zinc-500 text-sm">Active Services</span>
-                <span className="font-bold text-white text-sm">
+              <div className="flex justify-between items-center pt-2 md:pt-3 border-t border-white/5">
+                <span className="text-zinc-500 text-xs md:text-sm">Active Services</span>
+                <span className="font-bold text-white text-xs md:text-sm">
                   {data.services.filter((s) => s.status === 'Active').length}
                 </span>
               </div>
 
               <div className="flex justify-between items-center">
-                <span className="text-zinc-500 text-sm">Total Reviews</span>
-                <span className="font-bold text-white text-sm">{data.reviews.length}</span>
+                <span className="text-zinc-500 text-xs md:text-sm">Total Reviews</span>
+                <span className="font-bold text-white text-xs md:text-sm">{data.reviews.length}</span>
               </div>
             </div>
           </div>
 
           {/* Recent Messages Card */}
-          <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-5">
-            <div className="flex items-center gap-2.5 mb-5">
-              <MessageSquare className="h-4 w-4" style={{ color: GOLD }} />
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Recent Messages</h3>
+          <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-4 md:p-5">
+            <div className="flex items-center gap-2 mb-4 md:mb-5">
+              <MessageSquare className="h-3.5 md:h-4 w-3.5 md:w-4" style={{ color: GOLD }} />
+              <h3 className="text-xs md:text-sm font-bold text-white uppercase tracking-wider">Recent Messages</h3>
             </div>
 
             {data.messages.length === 0 ? (
-              <p className="text-zinc-600 text-sm text-center py-4">No messages yet</p>
+              <p className="text-zinc-600 text-xs md:text-sm text-center py-4">No messages yet</p>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2 md:space-y-3">
                 {data.messages.slice(0, 4).map((msg, idx) => (
                   <div
                     key={idx}
-                    className="p-3 rounded-xl bg-zinc-800/40 border border-white/[0.03] hover:border-white/[0.08] transition-colors"
+                    className="p-2.5 md:p-3 rounded-xl bg-zinc-800/40 border border-white/[0.03] hover:border-white/[0.08] transition-colors"
                   >
-                    <div className="flex items-center justify-between mb-1.5">
-                      <p className="text-white text-sm font-semibold truncate max-w-[140px]">{msg.name}</p>
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-white text-xs md:text-sm font-semibold truncate max-w-[120px] md:max-w-[140px]">{msg.name}</p>
                       {msg.status === 'Unread' && (
                         <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
                       )}
                     </div>
-                    <p className="text-zinc-500 text-xs line-clamp-2 leading-relaxed">
+                    <p className="text-zinc-500 text-[11px] md:text-xs line-clamp-2 leading-relaxed">
                       {msg.subject || msg.message}
                     </p>
                   </div>
