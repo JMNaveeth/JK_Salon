@@ -19,13 +19,13 @@ import { db } from '../firebase/firebase';
 const GOLD       = '#C5A059';
 const GOLD_LIGHT = '#E8C97A';
 const GOLD_DIM   = '#5C4A25';
-const BG         = '#08070A';
-const BG2        = '#0D0C0F';
-const PANEL      = '#0F0E12';
-const BORDER     = 'rgba(197,160,89,0.13)';
+const BG         = '#FDFAF5';
+const BG2        = '#FFFFFF';
+const PANEL      = '#FFFFFF';
+const BORDER     = 'rgba(197,160,89,0.24)';
 const BORDER_HI  = 'rgba(197,160,89,0.38)';
-const TEXT       = '#F2EDE4';
-const TEXT_MID   = 'rgba(242,237,228,0.42)';
+const TEXT       = '#1E1A14';
+const TEXT_MID   = 'rgba(30,26,20,0.56)';
 
 const timeSlots = [
   '09:00 AM','10:00 AM','11:00 AM','12:00 PM',
@@ -78,7 +78,7 @@ const FloatInput = ({
         onBlur={() => setFocused(false)}
         className="w-full pt-6 pb-3 px-4 rounded-2xl text-sm outline-none transition-all duration-300"
         style={{
-          background: 'rgba(255,255,255,0.03)',
+          background: 'rgba(0,0,0,0.02)',
           border: `1px solid ${focused ? BORDER_HI : BORDER}`,
           color: TEXT,
           boxShadow: focused ? `0 0 0 3px rgba(197,160,89,0.07), inset 0 1px 0 rgba(197,160,89,0.06)` : 'none',
@@ -107,7 +107,7 @@ const MiniCalendar = ({
   const leadingBlanks = getDay(start); // 0=Sun
 
   return (
-    <div className="rounded-2xl p-5" style={{ background: 'rgba(255,255,255,0.025)', border: `1px solid ${BORDER}` }}>
+    <div className="rounded-2xl p-5" style={{ background: 'rgba(0,0,0,0.015)', border: `1px solid ${BORDER}` }}>
       {/* Month nav */}
       <div className="flex items-center justify-between mb-5">
         <button
@@ -156,7 +156,7 @@ const MiniCalendar = ({
               onClick={() => onSelect(day)}
               className="relative flex items-center justify-center rounded-xl text-sm font-bold transition-all duration-200 h-9"
               style={{
-                color: past ? 'rgba(255,255,255,0.12)' : isSel ? '#fff' : isToday ? GOLD : TEXT,
+                color: past ? 'rgba(30,26,20,0.25)' : isSel ? '#fff' : isToday ? GOLD : TEXT,
                 background: isSel
                   ? `linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`
                   : isToday ? 'rgba(197,160,89,0.10)' : 'transparent',
@@ -299,7 +299,7 @@ const SummaryPanel = ({
 
       {/* booking details */}
       <div className="mx-6 rounded-2xl p-4 space-y-3 mb-6"
-        style={{ background: 'rgba(255,255,255,0.025)', border: `1px solid ${BORDER}` }}>
+        style={{ background: 'rgba(0,0,0,0.015)', border: `1px solid ${BORDER}` }}>
         {[
           { icon: Scissors, label: 'Service',  value: selectedService?.name          || '—' },
           { icon: Calendar, label: 'Date',     value: formData.date ? format(formData.date, 'MMM dd, yyyy') : '—' },
@@ -347,10 +347,10 @@ const SummaryPanel = ({
                       ? `linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`
                       : active
                         ? `rgba(197,160,89,0.15)`
-                        : 'rgba(255,255,255,0.04)',
+                        : 'rgba(0,0,0,0.03)',
                     border: active
                       ? `1.5px solid ${GOLD}`
-                      : done ? 'none' : `1px solid rgba(255,255,255,0.08)`,
+                      : done ? 'none' : `1px solid rgba(0,0,0,0.08)`,
                     boxShadow: active ? `0 0 16px rgba(197,160,89,0.35)` : 'none',
                   }}
                   animate={{ scale: active ? [1, 1.12, 1] : 1 }}
@@ -363,7 +363,7 @@ const SummaryPanel = ({
                 </motion.div>
                 {!isLast && (
                   <div className="w-px flex-1 my-0.5" style={{ minHeight: 20,
-                    background: done ? `linear-gradient(to bottom,${GOLD_DIM},${GOLD_DIM})` : 'rgba(255,255,255,0.06)' }} />
+                    background: done ? `linear-gradient(to bottom,${GOLD_DIM},${GOLD_DIM})` : 'rgba(0,0,0,0.08)' }} />
                 )}
               </div>
               <div className="pb-4 pt-1">
@@ -384,7 +384,7 @@ const SummaryPanel = ({
           { icon: Star, label: 'Premium' },
         ].map(({ icon: Icon, label }) => (
           <div key={label} className="flex-1 flex items-center gap-2 px-3 py-2 rounded-xl"
-            style={{ background: 'rgba(255,255,255,0.025)', border: `1px solid ${BORDER}` }}>
+            style={{ background: 'rgba(0,0,0,0.015)', border: `1px solid ${BORDER}` }}>
             <Icon className="h-3 w-3 flex-shrink-0" style={{ color: GOLD }} />
             <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: TEXT_MID }}>{label}</span>
           </div>
@@ -400,7 +400,7 @@ const MobileSummaryCard = ({
   return (
     <div
       className="lg:hidden mx-4 mt-4 mb-3 rounded-3xl overflow-hidden"
-      style={{ border: `1px solid ${BORDER}`, background: 'rgba(255,255,255,0.02)' }}
+      style={{ border: `1px solid ${BORDER}`, background: 'rgba(255,255,255,0.75)' }}
     >
       <div className="px-4 pt-4 pb-3" style={{ background: `linear-gradient(180deg, rgba(197,160,89,0.08), rgba(255,255,255,0.01))` }}>
         <div className="flex items-center gap-3 mb-4">
@@ -411,7 +411,7 @@ const MobileSummaryCard = ({
             <Scissors className="h-5 w-5 text-white" />
           </div>
           <div className="min-w-0">
-            <p className="font-black text-sm tracking-[0.25em] uppercase text-white truncate">JK Salon</p>
+            <p className="font-black text-sm tracking-[0.25em] uppercase truncate" style={{ color: TEXT }}>JK Salon</p>
             <p className="text-[9px] uppercase tracking-[0.45em]" style={{ color: GOLD }}>Colombo</p>
           </div>
         </div>
@@ -426,7 +426,7 @@ const MobileSummaryCard = ({
             <div
               key={label}
               className="rounded-2xl p-3"
-              style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${BORDER}` }}
+              style={{ background: 'rgba(255,255,255,0.9)', border: `1px solid ${BORDER}` }}
             >
               <p className="text-[8px] uppercase tracking-[0.35em] font-black mb-1" style={{ color: TEXT_MID }}>{label}</p>
               <p className="text-xs font-bold leading-tight break-words" style={{ color: TEXT }}>{value}</p>
@@ -716,8 +716,8 @@ const Booking = () => {
               <React.Fragment key={s.id}>
                 <div className="flex flex-col items-center gap-1 min-w-[64px] shrink-0">
                   <div className={cn('w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300')} style={{
-                    background: step >= s.id ? `linear-gradient(135deg,${GOLD},${GOLD_LIGHT})` : 'rgba(255,255,255,0.05)',
-                    border: step >= s.id ? 'none' : `1px solid rgba(255,255,255,0.08)`,
+                    background: step >= s.id ? `linear-gradient(135deg,${GOLD},${GOLD_LIGHT})` : 'rgba(0,0,0,0.03)',
+                    border: step >= s.id ? 'none' : `1px solid rgba(0,0,0,0.08)`,
                     boxShadow: step === s.id ? `0 0 16px rgba(197,160,89,0.4)` : 'none',
                   }}>
                     {step > s.id ? <CheckCircle className="h-4 w-4 text-white" strokeWidth={2.5} /> : <s.icon className="h-3.5 w-3.5" style={{ color: step >= s.id ? '#fff' : TEXT_MID }} />}
@@ -725,7 +725,7 @@ const Booking = () => {
                   <span className="text-[8px] font-black uppercase tracking-widest text-center leading-tight" style={{ color: step >= s.id ? GOLD : TEXT_MID }}>{s.title}</span>
                 </div>
                 {i < steps.length - 1 && (
-                  <div className="w-8 shrink-0 h-px mt-4" style={{ background: step > s.id ? `linear-gradient(90deg,${GOLD_DIM},${GOLD_DIM})` : 'rgba(255,255,255,0.06)' }} />
+                  <div className="w-8 shrink-0 h-px mt-4" style={{ background: step > s.id ? `linear-gradient(90deg,${GOLD_DIM},${GOLD_DIM})` : 'rgba(0,0,0,0.08)' }} />
                 )}
               </React.Fragment>
             ))}
@@ -799,7 +799,7 @@ const Booking = () => {
                             whileTap={{ scale: 0.97 }}
                             className="py-3 px-3 rounded-xl text-xs font-bold transition-all duration-200 relative overflow-hidden"
                             style={{
-                              background: sel ? `linear-gradient(135deg,${GOLD},${GOLD_LIGHT})` : 'rgba(255,255,255,0.03)',
+                              background: sel ? `linear-gradient(135deg,${GOLD},${GOLD_LIGHT})` : 'rgba(0,0,0,0.03)',
                               border: `1px solid ${sel ? GOLD : BORDER}`,
                               color: sel ? '#fff' : TEXT_MID,
                               boxShadow: sel ? `0 6px 20px rgba(197,160,89,0.35)` : 'none',
@@ -893,7 +893,7 @@ const Booking = () => {
                       { label: 'Client', value: formData.name },
                     ].map(({ label, value }, i, arr) => (
                       <div key={label} className="flex justify-between items-center py-2.5"
-                        style={{ borderBottom: i < arr.length - 1 ? `1px solid rgba(255,255,255,0.05)` : 'none' }}>
+                        style={{ borderBottom: i < arr.length - 1 ? `1px solid rgba(0,0,0,0.06)` : 'none' }}>
                         <span className="text-[10px] uppercase tracking-[0.3em] font-bold" style={{ color: TEXT_MID }}>{label}</span>
                         <span className="text-xs font-bold" style={{ color: TEXT }}>{value}</span>
                       </div>
@@ -933,14 +933,14 @@ const Booking = () => {
                         whileTap={{ scale: 0.97 }}
                         className="py-4 px-4 rounded-2xl transition-all duration-200 text-left"
                         style={{
-                          background: payMethod === method ? 'rgba(197,160,89,0.10)' : 'rgba(255,255,255,0.025)',
+                          background: payMethod === method ? 'rgba(197,160,89,0.10)' : 'rgba(0,0,0,0.02)',
                           border: `1.5px solid ${payMethod === method ? GOLD : BORDER}`,
                           boxShadow: payMethod === method ? `0 4px 20px rgba(197,160,89,0.15)` : 'none',
                         }}
                       >
                         <div className="flex items-center justify-between mb-2">
                           <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center"
-                            style={{ borderColor: payMethod === method ? GOLD : 'rgba(255,255,255,0.15)' }}>
+                            style={{ borderColor: payMethod === method ? GOLD : 'rgba(0,0,0,0.15)' }}>
                             {payMethod === method && (
                               <div className="w-2.5 h-2.5 rounded-full" style={{ background: GOLD }} />
                             )}
@@ -1000,7 +1000,7 @@ const Booking = () => {
               style={{
                 background: canNext()
                   ? `linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`
-                  : 'rgba(255,255,255,0.06)',
+                  : 'rgba(0,0,0,0.08)',
                 boxShadow: canNext() ? `0 10px 32px rgba(197,160,89,0.42)` : 'none',
                 color: canNext() ? '#fff' : TEXT_MID,
                 cursor: canNext() ? 'pointer' : 'not-allowed',
