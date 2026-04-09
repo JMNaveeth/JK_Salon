@@ -64,7 +64,6 @@ const Lightbox = ({ item, onClose }: { item: any; onClose: () => void }) => (
         {item.type === 'video' ? (
           <video
             src={item.url}
-            controls
             autoPlay
             className="w-full max-h-[75vh] outline-none"
             style={{ display: 'block' }}
