@@ -214,7 +214,7 @@ const BookingManagement = () => {
                           {booking.status}
                         </span>
                         {resolveSCode(booking) !== 'N/A' && (
-                          <span className="text-[10px] font-black uppercase tracking-widest text-[#C5A059] bg-[#C5A059]/10 border border-[#C5A059]/20 px-2.5 py-1 rounded-full">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-white bg-[#C5A059]/85 border border-[#f5deb1] px-2.5 py-1 rounded-full shadow-sm">
                             {resolveSCode(booking)}
                           </span>
                         )}
@@ -303,12 +303,12 @@ const BookingManagement = () => {
                 <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
                   <CreditCard className="h-3 w-3" /> Booking Code
                 </h3>
-                <div className="bg-black/40 border border-white/5 rounded-2xl p-4 flex items-center justify-between gap-4">
+                <div className="bg-[#C5A059]/20 border border-[#C5A059]/50 rounded-2xl p-4 flex items-center justify-between gap-4 shadow-sm">
                   <div>
-                    <p className="text-xs text-zinc-500 mb-1">Customer S-code</p>
-                    <p className="text-xl font-black tracking-[0.25em] text-[#C5A059] font-mono">{resolveSCode(viewBooking)}</p>
+                    <p className="text-xs text-zinc-400 mb-1 font-semibold">Customer S-code</p>
+                    <p className="text-2xl font-black tracking-[0.25em] text-[#C5A059] font-mono" style={{ letterSpacing: '0.15em' }}>{resolveSCode(viewBooking)}</p>
                   </div>
-                  <div className="px-3 py-1.5 rounded-full bg-[#C5A059]/10 border border-[#C5A059]/20 text-[10px] font-bold uppercase tracking-widest text-[#C5A059]">
+                  <div className="px-3 py-1.5 rounded-full bg-[#C5A059]/85 border border-[#f5deb1] text-[10px] font-bold uppercase tracking-widest text-white shadow-sm">
                     Verify at check-in
                   </div>
                 </div>
