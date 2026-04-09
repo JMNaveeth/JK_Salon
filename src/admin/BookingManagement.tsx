@@ -89,11 +89,11 @@ const BookingManagement = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Confirmed': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
-      case 'Pending': return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
-      case 'Cancelled': return 'bg-red-500/10 text-red-500 border-red-500/20';
-      case 'Completed': return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
-      default: return 'bg-white/5 text-zinc-400 border-white/10';
+      case 'Confirmed': return 'bg-emerald-500/85 text-white border-emerald-300/95 font-semibold';
+      case 'Pending': return 'bg-amber-500/85 text-white border-amber-200/95 font-semibold';
+      case 'Cancelled': return 'bg-red-500/85 text-white border-red-200/95 font-semibold';
+      case 'Completed': return 'bg-blue-500/85 text-white border-blue-200/95 font-semibold';
+      default: return 'bg-zinc-700/85 text-white border-zinc-300/80 font-semibold';
     }
   };
 
@@ -112,7 +112,7 @@ const BookingManagement = () => {
       {toast && (
         <div className={cn(
           "fixed top-6 right-6 z-[100] flex items-center gap-3 px-5 py-3.5 rounded-xl text-sm font-bold shadow-2xl border animate-in slide-in-from-right",
-          toast.type === 'success' ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-red-500/10 text-red-400 border-red-500/20"
+          toast.type === 'success' ? "bg-emerald-500/85 text-white border-emerald-300/95" : "bg-red-500/85 text-white border-red-200/95"
         )}>
           {toast.type === 'success' ? <CheckCircle2 className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
           {toast.message}
@@ -228,23 +228,23 @@ const BookingManagement = () => {
 
                     {/* Quick Actions */}
                     <td className="px-6 py-4">
-                      <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex justify-end gap-1 opacity-100 transition-opacity">
                         {booking.status === 'Pending' && (
-                          <button onClick={() => updateStatus(booking.id, 'Confirmed')} className="p-2 rounded-lg hover:bg-emerald-500/10 text-zinc-500 hover:text-emerald-400 transition-colors" title="Confirm Booking">
+                          <button onClick={() => updateStatus(booking.id, 'Confirmed')} className="p-2 rounded-lg bg-emerald-500/85 hover:bg-emerald-500 text-white border border-emerald-300/95 transition-colors shadow-sm" title="Confirm Booking">
                             <Check className="h-4 w-4" />
                           </button>
                         )}
                         {booking.status === 'Confirmed' && (
-                          <button onClick={() => updateStatus(booking.id, 'Completed')} className="p-2 rounded-lg hover:bg-blue-500/10 text-zinc-500 hover:text-blue-400 transition-colors" title="Mark Completed">
+                          <button onClick={() => updateStatus(booking.id, 'Completed')} className="p-2 rounded-lg bg-blue-500/85 hover:bg-blue-500 text-white border border-blue-200/95 transition-colors shadow-sm" title="Mark Completed">
                             <CheckCircle2 className="h-4 w-4" />
                           </button>
                         )}
                         {(booking.status === 'Pending' || booking.status === 'Confirmed') && (
-                          <button onClick={() => updateStatus(booking.id, 'Cancelled')} className="p-2 rounded-lg hover:bg-amber-500/10 text-zinc-500 hover:text-amber-500 transition-colors" title="Cancel Booking">
+                          <button onClick={() => updateStatus(booking.id, 'Cancelled')} className="p-2 rounded-lg bg-amber-500/85 hover:bg-amber-500 text-white border border-amber-200/95 transition-colors shadow-sm" title="Cancel Booking">
                             <X className="h-4 w-4" />
                           </button>
                         )}
-                        <button onClick={() => setViewBooking(booking)} className="p-2 rounded-lg hover:bg-white/10 text-zinc-500 hover:text-white transition-colors ml-2 border border-white/5 bg-black" title="View Full Details">
+                        <button onClick={() => setViewBooking(booking)} className="p-2 rounded-lg bg-[#C5A059]/85 hover:bg-[#C5A059] text-white transition-colors ml-2 border border-[#f5deb1] shadow-sm" title="View Full Details">
                           <Eye className="h-4 w-4" />
                         </button>
                       </div>

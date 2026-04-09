@@ -230,8 +230,8 @@ const ServiceManagement = () => {
           className={cn(
             'fixed top-6 right-6 z-[100] flex items-center gap-3 px-5 py-3.5 rounded-xl text-sm font-bold shadow-2xl border animate-in slide-in-from-right',
             toast.type === 'success'
-              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-              : 'bg-red-500/10 text-red-400 border-red-500/20'
+              ? 'bg-emerald-500/85 text-white border-emerald-300/95'
+              : 'bg-red-500/85 text-white border-red-200/95'
           )}
         >
           {toast.type === 'success' ? <CheckCircle className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
@@ -368,10 +368,10 @@ const ServiceManagement = () => {
                       <button
                         onClick={() => handleToggleStatus(service.id)}
                         className={cn(
-                          'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all hover:scale-105',
+                          'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all hover:scale-105 border',
                           service.status === 'Active'
-                            ? 'bg-emerald-500/10 text-emerald-400'
-                            : 'bg-zinc-500/10 text-zinc-500'
+                            ? 'bg-emerald-500/85 text-white border-emerald-300/90 hover:bg-emerald-500 shadow-sm'
+                            : 'bg-zinc-600/85 text-white border-zinc-300/80 hover:bg-zinc-600 shadow-sm'
                         )}
                       >
                         {service.status === 'Active' ? (
@@ -383,20 +383,20 @@ const ServiceManagement = () => {
                       </button>
                     </td>
                     <td className="px-5 py-4 text-right">
-                      <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex justify-end gap-1 opacity-100 transition-opacity">
                         <button
                           onClick={() => openEditModal(service)}
-                          className="p-2 rounded-lg hover:bg-[#C5A059]/10 transition-colors"
+                          className="p-2 rounded-lg bg-[#C5A059]/85 hover:bg-[#C5A059] transition-colors border border-[#f5deb1] shadow-sm"
                           title="Edit"
                         >
-                          <Edit2 className="h-4 w-4" style={{ color: GOLD }} />
+                          <Edit2 className="h-4 w-4 text-white" />
                         </button>
                         <button
                           onClick={() => setDeleteId(service.id)}
-                          className="p-2 rounded-lg hover:bg-red-500/10 transition-colors"
+                          className="p-2 rounded-lg bg-red-500/85 hover:bg-red-500 transition-colors border border-red-200/90 shadow-sm"
                           title="Delete"
                         >
-                          <Trash2 className="h-4 w-4 text-red-500" />
+                          <Trash2 className="h-4 w-4 text-white" />
                         </button>
                       </div>
                     </td>
