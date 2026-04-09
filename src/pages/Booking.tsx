@@ -434,6 +434,50 @@ const SummaryPanel = ({
   );
 };
 
+const MobileSummaryCard = ({
+  formData, selectedService,
+}: { formData: any; selectedService: any }) => {
+  return (
+    <div
+      className="lg:hidden mx-4 mt-4 mb-3 rounded-3xl overflow-hidden"
+      style={{ border: `1px solid ${BORDER}`, background: 'rgba(255,255,255,0.02)' }}
+    >
+      <div className="px-4 pt-4 pb-3" style={{ background: `linear-gradient(180deg, rgba(197,160,89,0.08), rgba(255,255,255,0.01))` }}>
+        <div className="flex items-center gap-3 mb-4">
+          <div
+            className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0"
+            style={{ background: `linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`, boxShadow: `0 8px 22px rgba(197,160,89,0.32)` }}
+          >
+            <Scissors className="h-5 w-5 text-white" />
+          </div>
+          <div className="min-w-0">
+            <p className="font-black text-sm tracking-[0.25em] uppercase text-white truncate">JK Salon</p>
+            <p className="text-[9px] uppercase tracking-[0.45em]" style={{ color: GOLD }}>Colombo</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2">
+          {[
+            { label: 'Service', value: selectedService?.name || '—' },
+            { label: 'Date', value: formData.date ? format(formData.date, 'MMM dd, yyyy') : '—' },
+            { label: 'Time', value: formData.timeSlot || '—' },
+            { label: 'Amount', value: selectedService ? `LKR ${Number(selectedService.price).toLocaleString()}` : '—' },
+          ].map(({ label, value }) => (
+            <div
+              key={label}
+              className="rounded-2xl p-3"
+              style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${BORDER}` }}
+            >
+              <p className="text-[8px] uppercase tracking-[0.35em] font-black mb-1" style={{ color: TEXT_MID }}>{label}</p>
+              <p className="text-xs font-bold leading-tight break-words" style={{ color: TEXT }}>{value}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 /* ══════════════════════════════════════════════════════════════
    BOOKING PAGE
 ══════════════════════════════════════════════════════════════ */
@@ -684,7 +728,9 @@ const Booking = () => {
      MAIN BOOKING LAYOUT (split panel)
   ══════════════════════════════════════════════════════════ */
   return (
-    <div className="min-h-screen flex" style={{ background: BG, paddingTop: 64 }}>
+    <div className="min-h-screen flex flex-col lg:flex-row" style={{ background: BG, paddingTop: 64 }}>
+
+      <MobileSummaryCard formData={formData} selectedService={selectedService} />
 
       {/* ── LEFT SUMMARY PANEL (desktop only) ─────────────────── */}
       <div className="hidden lg:block w-80 xl:w-96 flex-shrink-0 sticky top-16 h-[calc(100vh-64px)] overflow-y-auto">
@@ -692,27 +738,25 @@ const Booking = () => {
       </div>
 
       {/* ── RIGHT STEP CONTENT ────────────────────────────────── */}
-      <div className="flex-1 min-h-[calc(100vh-64px)] flex flex-col">
+      <div className="flex-1 min-h-[calc(100vh-64px)] flex flex-col w-full">
 
         {/* mobile progress bar */}
-        <div className="lg:hidden px-6 pt-8 pb-6">
-          <div className="flex items-center gap-2">
+        <div className="lg:hidden px-4 sm:px-6 pt-2 pb-5">
+          <div className="flex items-start gap-2 overflow-x-auto pb-1">
             {steps.map((s, i) => (
               <React.Fragment key={s.id}>
-                <div className="flex flex-col items-center gap-1">
-                  <div className={cn(
-                    'w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300',
-                  )} style={{
+                <div className="flex flex-col items-center gap-1 min-w-[64px] shrink-0">
+                  <div className={cn('w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300')} style={{
                     background: step >= s.id ? `linear-gradient(135deg,${GOLD},${GOLD_LIGHT})` : 'rgba(255,255,255,0.05)',
                     border: step >= s.id ? 'none' : `1px solid rgba(255,255,255,0.08)`,
                     boxShadow: step === s.id ? `0 0 16px rgba(197,160,89,0.4)` : 'none',
                   }}>
                     {step > s.id ? <CheckCircle className="h-4 w-4 text-white" strokeWidth={2.5} /> : <s.icon className="h-3.5 w-3.5" style={{ color: step >= s.id ? '#fff' : TEXT_MID }} />}
                   </div>
-                  <span className="text-[8px] font-black uppercase tracking-widest" style={{ color: step >= s.id ? GOLD : TEXT_MID }}>{s.title}</span>
+                  <span className="text-[8px] font-black uppercase tracking-widest text-center leading-tight" style={{ color: step >= s.id ? GOLD : TEXT_MID }}>{s.title}</span>
                 </div>
                 {i < steps.length - 1 && (
-                  <div className="flex-1 h-px mb-4" style={{ background: step > s.id ? `linear-gradient(90deg,${GOLD_DIM},${GOLD_DIM})` : 'rgba(255,255,255,0.06)' }} />
+                  <div className="w-8 shrink-0 h-px mt-4" style={{ background: step > s.id ? `linear-gradient(90deg,${GOLD_DIM},${GOLD_DIM})` : 'rgba(255,255,255,0.06)' }} />
                 )}
               </React.Fragment>
             ))}
@@ -720,7 +764,7 @@ const Booking = () => {
         </div>
 
         {/* step content area */}
-        <div className="flex-1 px-6 sm:px-10 lg:px-14 xl:px-20 py-10">
+        <div className="flex-1 px-4 sm:px-6 lg:px-14 xl:px-20 py-4 sm:py-8 lg:py-10">
           <AnimatePresence mode="wait">
 
             {/* ── STEP 1: Service ── */}
@@ -729,12 +773,12 @@ const Booking = () => {
                 initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }}
                 transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
               >
-                <div className="mb-8">
-                  <p className="text-[10px] font-black uppercase tracking-[0.45em] mb-3" style={{ color: GOLD }}>Step 1 of 4</p>
-                  <h2 className="font-serif text-3xl sm:text-4xl font-bold mb-2" style={{ color: TEXT }}>Choose Your Service</h2>
-                  <p className="text-sm" style={{ color: TEXT_MID }}>Select the grooming service you'd like to book.</p>
+                <div className="mb-6 sm:mb-8 max-w-xl">
+                  <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.45em] mb-2 sm:mb-3" style={{ color: GOLD }}>Step 1 of 4</p>
+                  <h2 className="font-serif text-2xl sm:text-4xl font-bold mb-2" style={{ color: TEXT }}>Choose Your Service</h2>
+                  <p className="text-sm leading-relaxed max-w-lg" style={{ color: TEXT_MID }}>Select the grooming service you'd like to book.</p>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
                   {services.map((service, idx) => (
                     <ServiceSelectCard
                       key={service.id}
@@ -754,13 +798,13 @@ const Booking = () => {
                 initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }}
                 transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
               >
-                <div className="mb-8">
-                  <p className="text-[10px] font-black uppercase tracking-[0.45em] mb-3" style={{ color: GOLD }}>Step 2 of 4</p>
-                  <h2 className="font-serif text-3xl sm:text-4xl font-bold mb-2" style={{ color: TEXT }}>Pick Date & Time</h2>
-                  <p className="text-sm" style={{ color: TEXT_MID }}>Choose a date and your preferred time slot.</p>
+                <div className="mb-6 sm:mb-8 max-w-xl">
+                  <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.45em] mb-2 sm:mb-3" style={{ color: GOLD }}>Step 2 of 4</p>
+                  <h2 className="font-serif text-2xl sm:text-4xl font-bold mb-2" style={{ color: TEXT }}>Pick Date & Time</h2>
+                  <p className="text-sm leading-relaxed" style={{ color: TEXT_MID }}>Choose a date and your preferred time slot.</p>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                   {/* calendar */}
                   <div>
                     <p className="text-[9px] font-black uppercase tracking-[0.4em] mb-3" style={{ color: TEXT_MID }}>Select Date</p>
@@ -772,7 +816,7 @@ const Booking = () => {
                     <p className="text-[9px] font-black uppercase tracking-[0.4em] mb-3" style={{ color: TEXT_MID }}>
                       Select Time · {format(formData.date, 'EEE, MMM dd')}
                     </p>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-2.5">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-2 sm:gap-2.5">
                       {timeSlots.map((slot, i) => {
                         const sel = formData.timeSlot === slot;
                         return (
@@ -817,19 +861,19 @@ const Booking = () => {
                 transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
                 className="max-w-lg"
               >
-                <div className="mb-8">
-                  <p className="text-[10px] font-black uppercase tracking-[0.45em] mb-3" style={{ color: GOLD }}>Step 3 of 4</p>
-                  <h2 className="font-serif text-3xl sm:text-4xl font-bold mb-2" style={{ color: TEXT }}>Your Details</h2>
-                  <p className="text-sm" style={{ color: TEXT_MID }}>We'll use these to confirm your booking.</p>
+                <div className="mb-6 sm:mb-8">
+                  <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.45em] mb-2 sm:mb-3" style={{ color: GOLD }}>Step 3 of 4</p>
+                  <h2 className="font-serif text-2xl sm:text-4xl font-bold mb-2" style={{ color: TEXT }}>Your Details</h2>
+                  <p className="text-sm leading-relaxed" style={{ color: TEXT_MID }}>We'll use these to confirm your booking.</p>
                 </div>
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   <FloatInput label="Full Name" value={formData.name} onChange={v => setFormData({ ...formData, name: v })} placeholder="John Doe" />
                   <FloatInput label="Email Address" type="email" value={formData.email} onChange={v => setFormData({ ...formData, email: v })} placeholder="john@example.com" />
                   <FloatInput label="Phone Number" type="tel" value={formData.phone} onChange={v => setFormData({ ...formData, phone: v })} placeholder="+94 77 123 4567" />
                 </div>
 
                 {/* privacy note */}
-                <div className="mt-6 flex items-start gap-3 p-4 rounded-xl"
+                <div className="mt-5 sm:mt-6 flex items-start gap-3 p-4 rounded-xl"
                   style={{ background: 'rgba(197,160,89,0.05)', border: `1px solid rgba(197,160,89,0.12)` }}>
                   <Shield className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: GOLD }} />
                   <p className="text-[10px] leading-relaxed" style={{ color: TEXT_MID }}>
@@ -846,10 +890,10 @@ const Booking = () => {
                 transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
                 className="max-w-lg"
               >
-                <div className="mb-8">
-                  <p className="text-[10px] font-black uppercase tracking-[0.45em] mb-3" style={{ color: GOLD }}>Step 4 of 4</p>
-                  <h2 className="font-serif text-3xl sm:text-4xl font-bold mb-2" style={{ color: TEXT }}>Confirm & Pay</h2>
-                  <p className="text-sm" style={{ color: TEXT_MID }}>Review your booking and complete payment.</p>
+                <div className="mb-6 sm:mb-8">
+                  <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.45em] mb-2 sm:mb-3" style={{ color: GOLD }}>Step 4 of 4</p>
+                  <h2 className="font-serif text-2xl sm:text-4xl font-bold mb-2" style={{ color: TEXT }}>Confirm & Pay</h2>
+                  <p className="text-sm leading-relaxed" style={{ color: TEXT_MID }}>Review your booking and complete payment.</p>
                 </div>
 
                 {/* receipt card with perforated divider */}
@@ -911,7 +955,7 @@ const Booking = () => {
                 {/* payment method selector */}
                 <div className="mb-6">
                   <p className="text-[9px] font-black uppercase tracking-[0.4em] mb-3" style={{ color: TEXT_MID }}>Payment Method</p>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {(['payhere', 'genie'] as const).map((method) => (
                       <motion.button
                         key={method}
@@ -957,18 +1001,18 @@ const Booking = () => {
         </div>
 
         {/* ── Navigation bar ── */}
-        <div className="sticky bottom-0 px-6 sm:px-10 lg:px-14 xl:px-20 py-5"
+        <div className="sticky bottom-0 px-4 sm:px-6 lg:px-14 xl:px-20 py-4 sm:py-5"
           style={{
             background: `linear-gradient(to top,${BG} 60%,transparent 100%)`,
             borderTop: `1px solid ${BORDER}`,
           }}>
-          <div className="flex items-center justify-between max-w-2xl">
+          <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 max-w-2xl">
             {step > 1 ? (
               <motion.button
                 onClick={prevStep}
                 whileHover={{ x: -3 }}
                 whileTap={{ scale: 0.97 }}
-                className="flex items-center gap-2 text-sm font-bold transition-all"
+                className="flex items-center justify-center gap-2 text-sm font-bold transition-all rounded-full py-3 sm:py-0"
                 style={{ color: TEXT_MID }}
                 onMouseEnter={e => (e.currentTarget.style.color = TEXT)}
                 onMouseLeave={e => (e.currentTarget.style.color = TEXT_MID)}
@@ -983,7 +1027,7 @@ const Booking = () => {
               disabled={!canNext() || paying}
               whileHover={canNext() ? { scale: 1.03 } : {}}
               whileTap={canNext() ? { scale: 0.97 } : {}}
-              className="relative overflow-hidden flex items-center gap-2.5 px-10 py-4 rounded-full text-sm font-black tracking-wider uppercase text-white transition-all"
+              className="relative overflow-hidden flex items-center justify-center gap-2.5 px-8 sm:px-10 py-4 rounded-full text-sm font-black tracking-wider uppercase text-white transition-all w-full sm:w-auto"
               style={{
                 background: canNext()
                   ? `linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`
