@@ -91,9 +91,6 @@ const GalleryCard = ({ item, idx, onClick }: { item: any; idx: number; onClick: 
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-50px' });
 
-  // alternate tall cards for masonry feel
-  const isTall = idx % 5 === 1 || idx % 5 === 3;
-
   return (
     <motion.div
       ref={ref}
@@ -102,11 +99,11 @@ const GalleryCard = ({ item, idx, onClick }: { item: any; idx: number; onClick: 
       transition={{ duration: 0.7, delay: (idx % 3) * 0.1, ease: [0.22, 1, 0.36, 1] }}
       whileHover={{ y: -6, boxShadow: '0 30px 60px rgba(197,160,89,0.15)' }}
       onClick={onClick}
-      className={`group relative overflow-hidden rounded-3xl cursor-pointer bg-white ${isTall ? 'row-span-2' : ''}`}
+      className="group relative overflow-hidden rounded-3xl cursor-pointer bg-white"
       style={{
         border: '1px solid rgba(197,160,89,0.12)',
         boxShadow: '0 4px 24px rgba(197,160,89,0.07)',
-        aspectRatio: isTall ? '3/4' : '1/1',
+        aspectRatio: '1/1',
       }}
     >
       {/* top gold reveal */}
