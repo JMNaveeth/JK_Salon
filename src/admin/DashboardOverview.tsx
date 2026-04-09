@@ -8,13 +8,13 @@ import {
   DollarSign,
   ArrowUpRight,
   Loader2,
-  MessageSquare,
-  Star,
   Clock,
   CheckCircle2,
   AlertCircle,
   Sparkles,
   BarChart3,
+  Scissors,
+  MessageSquare,
 } from 'lucide-react';
 
 const GOLD = '#C5A059';
@@ -60,6 +60,8 @@ const DashboardOverview = () => {
     ? (data.reviews.reduce((sum, r) => sum + r.rating, 0) / data.reviews.length).toFixed(1)
     : '0.0';
 
+    const activeServices = data.services.filter((s) => s.status === 'Active').length;
+
   const stats = [
     {
       name: 'Total Revenue',
@@ -78,20 +80,20 @@ const DashboardOverview = () => {
       border: 'rgba(197, 160, 89, 0.15)',
     },
     {
-      name: 'Unread Messages',
-      value: unreadMessages.length.toString(),
-      icon: MessageSquare,
-      color: '#3B82F6',
-      bg: 'rgba(59, 130, 246, 0.08)',
-      border: 'rgba(59, 130, 246, 0.15)',
+      name: 'Pending Action',
+      value: pendingBookings.length.toString(),
+      icon: AlertCircle,
+      color: '#F97316',
+      bg: 'rgba(249, 115, 22, 0.08)',
+      border: 'rgba(249, 115, 22, 0.15)',
     },
     {
-      name: 'Avg. Rating',
-      value: avgRating,
-      icon: Star,
-      color: '#F59E0B',
-      bg: 'rgba(245, 158, 11, 0.08)',
-      border: 'rgba(245, 158, 11, 0.15)',
+      name: 'Active Services',
+      value: activeServices.toString(),
+      icon: Scissors,
+      color: '#8B5CF6',
+      bg: 'rgba(139, 92, 246, 0.08)',
+      border: 'rgba(139, 92, 246, 0.15)',
     },
   ];
 
