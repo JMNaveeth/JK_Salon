@@ -7,6 +7,12 @@ import { api } from '../services/api';
 const GOLD = '#C5A059';
 const GOLD_LIGHT = '#E8C97A';
 
+const resolveSCode = (booking: any) => {
+  if (booking?.sCode && String(booking.sCode).trim()) return String(booking.sCode).trim().toUpperCase();
+  if (booking?.id && String(booking.id).trim()) return `S-${String(booking.id).trim().toUpperCase()}`;
+  return 'N/A';
+};
+
 const BookingManagement = () => {
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -207,9 +213,9 @@ const BookingManagement = () => {
                         <span className={cn("px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border", getStatusColor(booking.status))}>
                           {booking.status}
                         </span>
-                        {booking.sCode && (
+                        {resolveSCode(booking) !== 'N/A' && (
                           <span className="text-[10px] font-black uppercase tracking-widest text-[#C5A059] bg-[#C5A059]/10 border border-[#C5A059]/20 px-2.5 py-1 rounded-full">
-                            {booking.sCode}
+                            {resolveSCode(booking)}
                           </span>
                         )}
                         {booking.paymentStatus === 'Paid' && (
@@ -300,7 +306,7 @@ const BookingManagement = () => {
                 <div className="bg-black/40 border border-white/5 rounded-2xl p-4 flex items-center justify-between gap-4">
                   <div>
                     <p className="text-xs text-zinc-500 mb-1">Customer S-code</p>
-                    <p className="text-xl font-black tracking-[0.25em] text-[#C5A059] font-mono">{viewBooking.sCode || 'N/A'}</p>
+                    <p className="text-xl font-black tracking-[0.25em] text-[#C5A059] font-mono">{resolveSCode(viewBooking)}</p>
                   </div>
                   <div className="px-3 py-1.5 rounded-full bg-[#C5A059]/10 border border-[#C5A059]/20 text-[10px] font-bold uppercase tracking-widest text-[#C5A059]">
                     Verify at check-in

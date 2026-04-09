@@ -40,6 +40,12 @@ const steps = [
   { id: 4, title: 'Payment',  icon: CreditCard},
 ];
 
+const resolveSCode = (code?: string, bookingId?: string) => {
+  if (code && String(code).trim()) return String(code).trim().toUpperCase();
+  if (bookingId && String(bookingId).trim()) return `S-${String(bookingId).trim().toUpperCase()}`;
+  return '';
+};
+
 /* ─── Floating label input ─────────────────────────────────── */
 const FloatInput = ({
   label, type = 'text', value, onChange, placeholder,
@@ -498,7 +504,7 @@ const Booking = () => {
       };
       const response = await api.createBooking({ ...bookingPayload });
       if (response.success) {
-        const generatedSCode = response.sCode || '';
+        const generatedSCode = resolveSCode(response.sCode, response.id);
         setSCode(generatedSCode);
         setBookingConfirmed(true);
         const bookingRef = doc(db, 'bookings', response.id);
@@ -651,7 +657,7 @@ const Booking = () => {
                 transition={{ delay: 0.9 }}
               >
                 <p className="text-[9px] uppercase tracking-[0.4em] mb-1 font-bold" style={{ color: TEXT_MID }}>S-code</p>
-                <p className="text-xl font-black tracking-widest" style={{ color: GOLD, fontFamily: 'monospace' }}>{sCode || 'Pending...'}</p>
+                <p className="text-xl font-black tracking-widest" style={{ color: GOLD, fontFamily: 'monospace' }}>{sCode || 'S-CODE-N/A'}</p>
               </motion.div>
 
               <motion.p
