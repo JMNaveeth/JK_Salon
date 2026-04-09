@@ -61,6 +61,7 @@ const AppContent = () => {
     ['/login', '/register'].includes(location.pathname) ||
     location.pathname.startsWith('/admin') ||
     (!!loading || !user) && location.pathname === '/';
+  const hideFooter = hideChrome || location.pathname === '/booking';
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -88,7 +89,7 @@ const AppContent = () => {
           <Route path="/admin/*" element={<AdminRoute><AdminLayout /></AdminRoute>} />
         </Routes>
       </main>
-      {!hideChrome && <Footer />}
+      {!hideFooter && <Footer />}
     </div>
   );
 };
