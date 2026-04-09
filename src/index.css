@@ -48,3 +48,45 @@ input, select, textarea {
   scrollbar-width: thin;
   scrollbar-color: #C5A059 transparent;
 }
+
+/* Admin light theme overrides (applies only inside .admin-light wrapper) */
+.admin-light {
+  color: #201a12;
+}
+
+.admin-light [class*="bg-zinc-950"],
+.admin-light [class*="bg-zinc-900"],
+.admin-light [class*="bg-zinc-800"],
+.admin-light [class*="bg-black"] {
+  background-color: #ffffff !important;
+}
+
+.admin-light [class*="border-white"] {
+  border-color: rgba(197, 160, 89, 0.22) !important;
+}
+
+.admin-light [class*="text-white"] {
+  color: #201a12 !important;
+}
+
+.admin-light [class*="text-zinc-600"],
+.admin-light [class*="text-zinc-500"],
+.admin-light [class*="text-zinc-400"] {
+  color: #6d6457 !important;
+}
+
+.admin-light [class*="hover:bg-zinc-900"],
+.admin-light [class*="hover:bg-zinc-800"],
+.admin-light [class*="hover:bg-white/10"],
+.admin-light [class*="hover:bg-white/5"] {
+  background-color: #f4eee4 !important;
+}
+
+/* Keep contrast for action/status buttons on colored backgrounds */
+.admin-light [class*="bg-\[\#C5A059\]"],
+.admin-light [class*="bg-red-"],
+.admin-light [class*="bg-emerald-"],
+.admin-light [class*="bg-blue-"],
+.admin-light [class*="bg-amber-"] {
+  color: #ffffff !important;
+}

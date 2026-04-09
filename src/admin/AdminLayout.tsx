@@ -30,7 +30,7 @@ const AdminLayout = () => {
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
 
-  if (loading) return <div className="min-h-screen bg-black flex items-center justify-center text-white">Loading...</div>;
+  if (loading) return <div className="min-h-screen bg-[#FDFAF5] flex items-center justify-center text-zinc-800">Loading...</div>;
   if (!user) return <Navigate to="/admin/login" />;
 
   const handleLogout = async () => {
@@ -51,10 +51,10 @@ const AdminLayout = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div className="min-h-screen bg-black flex">
+    <div className="admin-light min-h-screen bg-[#FDFAF5] flex">
       {/* Sidebar */}
       <aside className={cn(
-        "fixed inset-y-0 left-0 z-50 w-64 bg-zinc-950 border-r border-white/5 transition-transform duration-300 lg:translate-x-0 lg:static",
+        "fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-[#C5A059]/20 transition-transform duration-300 lg:translate-x-0 lg:static",
         isSidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="h-full flex flex-col p-6">
@@ -76,7 +76,7 @@ const AdminLayout = () => {
                   "flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all",
                   isActive(item.path)
                     ? "bg-[#C5A059] text-white shadow-lg shadow-[#C5A059]/20"
-                    : "text-zinc-500 hover:text-white hover:bg-zinc-900"
+                    : "text-zinc-600 hover:text-zinc-900 hover:bg-[#F6F1E8]"
                 )}
               >
                 <item.icon className="h-5 w-5" />
@@ -97,17 +97,17 @@ const AdminLayout = () => {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-20 bg-zinc-950 border-b border-white/5 flex items-center justify-between px-6 lg:px-10">
+        <header className="h-20 bg-white border-b border-[#C5A059]/20 flex items-center justify-between px-6 lg:px-10">
           <button
             onClick={() => setIsSidebarOpen(true)}
-            className="lg:hidden text-zinc-400 p-2"
+            className="lg:hidden text-zinc-600 p-2"
           >
             <Menu className="h-6 w-6" />
           </button>
 
           <div className="flex items-center space-x-4">
             <div className="text-right hidden sm:block">
-              <p className="text-sm font-bold text-white">{user.email}</p>
+              <p className="text-sm font-bold text-zinc-900">{user.email}</p>
               <p className="text-[10px] text-zinc-500 uppercase tracking-widest">Salon Manager</p>
             </div>
             <div className="w-10 h-10 rounded-full bg-[#C5A059] flex items-center justify-center text-white font-bold">
@@ -133,7 +133,7 @@ const AdminLayout = () => {
       {/* Mobile Overlay */}
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
