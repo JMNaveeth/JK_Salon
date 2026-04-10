@@ -24,6 +24,13 @@ import ReviewManagement from './ReviewManagement';
 import MessageManagement from './MessageManagement';
 import ContentManagement from './ContentManagement';
 
+const isReviewPending = (review: any) => {
+  const approved = review?.approved;
+  if (approved === true || approved === 1) return false;
+  if (typeof approved === 'string' && approved.trim().toLowerCase() === 'true') return false;
+  return true;
+};
+
 const AdminLayout = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
@@ -34,7 +41,7 @@ const AdminLayout = () => {
   const fetchPendingReviews = React.useCallback(async () => {
     try {
       const reviews = await fetch('/api/reviews').then((res) => res.json());
-      setPendingReviewCount(reviews.filter((review: any) => !review.approved).length);
+      setPendingReviewCount(reviews.filter((review: any) => isReviewPending(review)).length);
     } catch (error) {
       console.error('Failed to fetch pending reviews:', error);
     }
@@ -50,7 +57,25 @@ const AdminLayout = () => {
       }
     };
 
-    return () => source.close();
+    source.onerror = () => {
+      source.close();
+    };
+
+    const poll = window.setInterval(fetchPendingReviews, 10000);
+    const onWindowFocus = () => fetchPendingReviews();
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') fetchPendingReviews();
+    };
+
+    window.addEventListener('focus', onWindowFocus);
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
+    return () => {
+      source.close();
+      window.clearInterval(poll);
+      window.removeEventListener('focus', onWindowFocus);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+    };
   }, [fetchPendingReviews]);
 
   if (loading) return <div className="min-h-screen bg-[#FDFAF5] flex items-center justify-center text-zinc-800">Loading...</div>;
