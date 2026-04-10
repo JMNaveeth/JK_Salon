@@ -38,6 +38,7 @@ export interface Review {
   comment: string;
   date: string;
   approved: boolean;
+  serviceName?: string;
   photoUrl?: string;
 }
 

@@ -453,6 +453,10 @@ const Booking = () => {
   const [payMethod, setPayMethod] = React.useState<'payhere' | 'genie'>('payhere');
   const [sCode, setSCode]       = React.useState('');
   const [bookingConfirmed, setBookingConfirmed] = React.useState(false);
+  const [reviewRating, setReviewRating] = React.useState(5);
+  const [reviewComment, setReviewComment] = React.useState('');
+  const [reviewSubmitting, setReviewSubmitting] = React.useState(false);
+  const [reviewSubmitted, setReviewSubmitted] = React.useState(false);
   const [formData, setFormData] = React.useState({
     serviceId: initialServiceId || '',
     date: startOfToday(),
@@ -530,6 +534,28 @@ const Booking = () => {
       alert('Something went wrong. Please try again.');
     } finally {
       setPaying(false);
+    }
+  };
+
+  const handleReviewSubmit = async () => {
+    if (!reviewComment.trim()) return;
+
+    try {
+      setReviewSubmitting(true);
+      await api.createReview({
+        customerName: formData.name,
+        rating: reviewRating,
+        comment: reviewComment.trim(),
+        date: new Date().toISOString(),
+        serviceName: selectedService?.name || '',
+        photoUrl: '',
+      });
+      setReviewSubmitted(true);
+    } catch (error) {
+      console.error('Failed to submit review:', error);
+      alert('Could not submit your review. Please try again.');
+    } finally {
+      setReviewSubmitting(false);
     }
   };
 
@@ -676,6 +702,57 @@ const Booking = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 1.1 }}
               >
+                <div className="mt-4 rounded-2xl p-4 text-left" style={{ background: 'rgba(197,160,89,0.06)', border: `1px solid rgba(197,160,89,0.16)` }}>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Star className="h-4 w-4" style={{ color: GOLD }} />
+                    <p className="text-xs font-black uppercase tracking-[0.3em]" style={{ color: TEXT }}>Leave a Review</p>
+                  </div>
+
+                  {reviewSubmitted ? (
+                    <div className="rounded-xl px-4 py-3 text-sm font-semibold" style={{ background: 'rgba(34,197,94,0.08)', color: '#15803D', border: '1px solid rgba(34,197,94,0.18)' }}>
+                      Thanks. Your review has been sent to the shop owner.
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        {[1, 2, 3, 4, 5].map((value) => {
+                          const active = value <= reviewRating;
+                          return (
+                            <button
+                              key={value}
+                              type="button"
+                              onClick={() => setReviewRating(value)}
+                              className="transition-transform hover:scale-105"
+                              aria-label={`Set rating to ${value}`}
+                            >
+                              <Star className="h-5 w-5" style={{ color: active ? GOLD : 'rgba(30,26,20,0.18)', fill: active ? GOLD : 'transparent' }} />
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      <textarea
+                        value={reviewComment}
+                        onChange={(e) => setReviewComment(e.target.value)}
+                        rows={4}
+                        placeholder="Tell the owner what you liked about the service..."
+                        className="w-full rounded-2xl px-4 py-3 text-sm outline-none resize-none"
+                        style={{ background: 'rgba(255,255,255,0.85)', border: `1px solid ${BORDER}`, color: TEXT }}
+                      />
+
+                      <button
+                        type="button"
+                        onClick={handleReviewSubmit}
+                        disabled={reviewSubmitting || !reviewComment.trim()}
+                        className="w-full py-3 rounded-2xl text-sm font-black uppercase tracking-[0.25em] text-white disabled:opacity-60 disabled:cursor-not-allowed"
+                        style={{ background: `linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`, boxShadow: `0 10px 24px rgba(197,160,89,0.28)` }}
+                      >
+                        {reviewSubmitting ? 'Sending Review...' : 'Submit Review'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+
                 <motion.button
                   onClick={() => navigate('/')}
                   whileHover={{ scale: 1.03 }}

@@ -115,6 +115,7 @@ sqliteDb.exec(`
     comment TEXT NOT NULL,
     date TEXT NOT NULL,
     approved BOOLEAN DEFAULT 0,
+    serviceName TEXT,
     photoUrl TEXT
   );
 
@@ -144,6 +145,15 @@ try {
   sqliteDb.prepare('CREATE UNIQUE INDEX IF NOT EXISTS idx_bookings_sCode ON bookings(sCode)').run();
 } catch (error) {
   console.error('[BACKEND] Failed to ensure bookings.sCode column exists:', error);
+}
+
+try {
+  const reviewColumns = sqliteDb.prepare('PRAGMA table_info(reviews)').all() as Array<{ name: string }>;
+  if (!reviewColumns.some((column) => column.name === 'serviceName')) {
+    sqliteDb.prepare('ALTER TABLE reviews ADD COLUMN serviceName TEXT').run();
+  }
+} catch (error) {
+  console.error('[BACKEND] Failed to ensure reviews.serviceName column exists:', error);
 }
 
 const createUniqueSCode = async () => {
@@ -501,8 +511,22 @@ async function startServer() {
     return res.json(reviews);
   }));
 
+  app.get('/api/reviews/stream', (req, res) => {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.write('data: connected\n\n');
+
+    const listener = () => {
+      res.write('data: updated\n\n');
+    };
+
+    dbEvents.on('reviews_updated', listener);
+    req.on('close', () => dbEvents.off('reviews_updated', listener));
+  });
+
   app.post('/api/reviews', asyncHandler(async (req, res) => {
-    const { customerName, rating, comment, date, photoUrl } = req.body;
+    const { customerName, rating, comment, date, photoUrl, serviceName } = req.body;
     const id = randomId();
 
     if (usingFirestore && firestore) {
@@ -513,15 +537,18 @@ async function startServer() {
         comment,
         date,
         approved: false,
+        serviceName: serviceName || '',
         photoUrl: photoUrl || '',
         createdAt: FieldValue.serverTimestamp(),
       });
+      dbEvents.emit('reviews_updated');
       return res.json({ success: true, id });
     }
 
     sqliteDb
-      .prepare('INSERT INTO reviews (id, customerName, rating, comment, date, approved, photoUrl) VALUES (?, ?, ?, ?, ?, 0, ?)')
-      .run(id, customerName, rating, comment, date, photoUrl);
+      .prepare('INSERT INTO reviews (id, customerName, rating, comment, date, approved, serviceName, photoUrl) VALUES (?, ?, ?, ?, ?, 0, ?, ?)')
+      .run(id, customerName, rating, comment, date, serviceName || '', photoUrl);
+    dbEvents.emit('reviews_updated');
     return res.json({ success: true, id });
   }));
 
@@ -530,10 +557,12 @@ async function startServer() {
 
     if (usingFirestore && firestore) {
       await firestore.collection('reviews').doc(id).set({ approved: true }, { merge: true });
+      dbEvents.emit('reviews_updated');
       return res.json({ success: true });
     }
 
     sqliteDb.prepare('UPDATE reviews SET approved = 1 WHERE id = ?').run(id);
+    dbEvents.emit('reviews_updated');
     return res.json({ success: true });
   }));
 

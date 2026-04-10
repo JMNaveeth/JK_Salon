@@ -7,18 +7,28 @@ const ReviewManagement = () => {
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const fetchReviews = async () => {
+    try {
+      const data = await api.getReviews();
+      setReviews(data);
+    } catch (error) {
+      console.error('Failed to fetch reviews:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchReviews = async () => {
-      try {
-        const data = await api.getReviews();
-        setReviews(data);
-      } catch (error) {
-        console.error('Failed to fetch reviews:', error);
-      } finally {
-        setLoading(false);
+    fetchReviews();
+
+    const source = new EventSource('/api/reviews/stream');
+    source.onmessage = (event) => {
+      if (event.data === 'updated') {
+        fetchReviews();
       }
     };
-    fetchReviews();
+
+    return () => source.close();
   }, []);
 
   const handleApprove = async (id: string) => {
@@ -57,6 +67,9 @@ const ReviewManagement = () => {
                 </div>
                 <div>
                   <h3 className="text-white font-bold">{review.customerName}</h3>
+                  {review.serviceName && (
+                    <p className="text-[10px] uppercase tracking-[0.25em] text-zinc-500 mt-1">{review.serviceName}</p>
+                  )}
                   <div className="flex space-x-1 mt-1">
                     {[...Array(5)].map((_, i) => (
                       <Star key={i} className={cn("h-3 w-3", i < review.rating ? "fill-[#C5A059] text-[#C5A059]" : "text-zinc-700")} />
