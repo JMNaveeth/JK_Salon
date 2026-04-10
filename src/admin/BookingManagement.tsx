@@ -43,6 +43,14 @@ const BookingManagement = () => {
 
   useEffect(() => {
     fetchBookings();
+    const source = new EventSource('/api/bookings/stream');
+    source.onmessage = (event) => {
+      if (event.data === 'updated') fetchBookings();
+    };
+    source.onerror = () => {
+      source.close();
+    };
+    return () => source.close();
   }, []);
 
   const updateStatus = async (id: string, newStatus: string) => {

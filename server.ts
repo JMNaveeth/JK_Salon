@@ -19,6 +19,7 @@ const dbEvents = new EventEmitter();
 
 const randomId = () => Math.random().toString(36).substring(2, 9).toUpperCase();
 const randomSCode = () => `S-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+const generateSCode = () => `S-${Math.floor(10000 + Math.random() * 90000)}`;
 const toMillis = (value: any) => {
   if (!value) return 0;
   if (typeof value === 'number') return value;
@@ -29,6 +30,25 @@ const toMillis = (value: any) => {
   if (typeof value?.toMillis === 'function') return value.toMillis();
   if (value instanceof Date) return value.getTime();
   return 0;
+};
+
+const normalizeTimeSlot = (timeValue: string) => {
+  const match = String(timeValue || '').trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i);
+  if (!match) return String(timeValue || '').trim();
+  let hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  const period = match[3]?.toUpperCase();
+  if (period === 'PM' && hours < 12) hours += 12;
+  if (period === 'AM' && hours === 12) hours = 0;
+  const hh = String(hours).padStart(2, '0');
+  const mm = String(minutes).padStart(2, '0');
+  return `${hh}:${mm}`;
+};
+
+const createSlotDocId = (date: string, timeValue: string) => {
+  const cleanDate = String(date || '').trim();
+  const normalizedTime = normalizeTimeSlot(timeValue);
+  return `${cleanDate}_${normalizedTime}`;
 };
 
 const normalizeDoc = (doc: any) => {
@@ -143,6 +163,9 @@ try {
     sqliteDb.prepare('ALTER TABLE bookings ADD COLUMN sCode TEXT').run();
   }
   sqliteDb.prepare('CREATE UNIQUE INDEX IF NOT EXISTS idx_bookings_sCode ON bookings(sCode)').run();
+  sqliteDb
+    .prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_bookings_slot_active ON bookings(date, time) WHERE status != 'Cancelled'")
+    .run();
 } catch (error) {
   console.error('[BACKEND] Failed to ensure bookings.sCode column exists:', error);
 }
@@ -422,33 +445,80 @@ async function startServer() {
     return res.json(bookings);
   }));
 
+  app.get('/api/bookings/stream', (req, res) => {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.write('data: connected\n\n');
+
+    const listener = () => {
+      res.write('data: updated\n\n');
+    };
+
+    dbEvents.on('bookings_updated', listener);
+    req.on('close', () => dbEvents.off('bookings_updated', listener));
+  });
+
   app.post('/api/bookings', asyncHandler(async (req, res) => {
-    const { customerName, customerEmail, customerPhone, serviceName, date, time, amount } = req.body;
-    const id = randomId();
-    const sCode = await createUniqueSCode();
+    const { customerName, customerEmail, customerPhone, serviceName, date, amount } = req.body;
+    const timeSlot = req.body?.timeSlot || req.body?.time;
+
+    if (!date || !timeSlot) {
+      return res.status(400).json({ success: false, error: 'Date and time slot are required' });
+    }
+
+    const id = createSlotDocId(date, timeSlot);
+    const sCode = generateSCode();
 
     if (usingFirestore && firestore) {
-      await firestore.collection('bookings').doc(id).set({
-        id,
-        sCode,
-        customerName,
-        customerEmail,
-        customerPhone,
-        serviceName,
-        date,
-        time,
-        amount: Number(amount || 0),
-        status: 'Pending',
-        paymentStatus: 'Pending',
-        createdAt: FieldValue.serverTimestamp(),
-        updatedAt: FieldValue.serverTimestamp(),
-      });
-      return res.json({ success: true, id, sCode });
+      const bookingRef = firestore.collection('bookings').doc(id);
+
+      try {
+        await firestore.runTransaction(async (transaction) => {
+          const existing = await transaction.get(bookingRef);
+          if (existing.exists) {
+            throw new Error('Slot already booked');
+          }
+
+          transaction.set(bookingRef, {
+            id,
+            sCode,
+            customerName,
+            customerEmail,
+            customerPhone,
+            serviceName,
+            date,
+            time: timeSlot,
+            timeSlot,
+            amount: Number(amount || 0),
+            status: 'Pending',
+            paymentStatus: 'Pending',
+            createdAt: FieldValue.serverTimestamp(),
+            updatedAt: FieldValue.serverTimestamp(),
+          });
+        });
+
+        dbEvents.emit('bookings_updated');
+        return res.json({ success: true, id, sCode });
+      } catch (error: any) {
+        if (String(error?.message || '').toLowerCase().includes('slot already booked')) {
+          return res.status(409).json({ success: false, error: 'Slot already booked' });
+        }
+        throw error;
+      }
+    }
+
+    const existing = sqliteDb
+      .prepare("SELECT id FROM bookings WHERE date = ? AND time = ? AND status != 'Cancelled' LIMIT 1")
+      .get(date, timeSlot);
+    if (existing) {
+      return res.status(409).json({ success: false, error: 'Slot already booked' });
     }
 
     sqliteDb
       .prepare('INSERT INTO bookings (id, customerName, customerEmail, customerPhone, serviceName, date, time, sCode, amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)')
-      .run(id, customerName, customerEmail, customerPhone, serviceName, date, time, sCode, amount);
+      .run(id, customerName, customerEmail, customerPhone, serviceName, date, timeSlot, sCode, amount);
+    dbEvents.emit('bookings_updated');
     return res.json({ success: true, id, sCode });
   }));
 
@@ -458,10 +528,12 @@ async function startServer() {
 
     if (usingFirestore && firestore) {
       await firestore.collection('bookings').doc(id).set({ status, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
+      dbEvents.emit('bookings_updated');
       return res.json({ success: true });
     }
 
     sqliteDb.prepare('UPDATE bookings SET status = ? WHERE id = ?').run(status, id);
+    dbEvents.emit('bookings_updated');
     return res.json({ success: true });
   }));
 
@@ -470,10 +542,12 @@ async function startServer() {
 
     if (usingFirestore && firestore) {
       await firestore.collection('bookings').doc(id).delete();
+      dbEvents.emit('bookings_updated');
       return res.json({ success: true });
     }
 
     sqliteDb.prepare('DELETE FROM bookings WHERE id = ?').run(id);
+    dbEvents.emit('bookings_updated');
     return res.json({ success: true });
   }));
 
@@ -487,8 +561,10 @@ async function startServer() {
         amount: Number(amount || 0),
         updatedAt: FieldValue.serverTimestamp(),
       }, { merge: true });
+      dbEvents.emit('bookings_updated');
     } else {
       sqliteDb.prepare("UPDATE bookings SET paymentStatus = 'Paid', status = 'Confirmed' WHERE id = ?").run(bookingId);
+      dbEvents.emit('bookings_updated');
     }
 
     setTimeout(() => {

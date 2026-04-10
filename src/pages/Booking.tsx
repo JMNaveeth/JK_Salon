@@ -9,7 +9,7 @@ import {
   format, addDays, startOfToday, isSameDay,
   startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths, isBefore,
 } from 'date-fns';
-import { doc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import { cn } from '@/src/utils/cn';
 import { api } from '../services/api';
 import { simulatePayment } from '../api/bookingApi';
@@ -45,6 +45,8 @@ const resolveSCode = (code?: string, bookingId?: string) => {
   if (bookingId && String(bookingId).trim()) return `S-${String(bookingId).trim().toUpperCase()}`;
   return '';
 };
+
+const normalizeStatus = (status?: string) => (status || '').trim().toLowerCase();
 
 /* ─── Floating label input ─────────────────────────────────── */
 const FloatInput = ({
@@ -457,6 +459,9 @@ const Booking = () => {
   const [reviewComment, setReviewComment] = React.useState('');
   const [reviewSubmitting, setReviewSubmitting] = React.useState(false);
   const [reviewSubmitted, setReviewSubmitted] = React.useState(false);
+  const [bookedSlots, setBookedSlots] = React.useState<Set<string>>(new Set());
+  const [slotAvailabilityLoading, setSlotAvailabilityLoading] = React.useState(false);
+  const [slotError, setSlotError] = React.useState('');
   const [formData, setFormData] = React.useState({
     serviceId: initialServiceId || '',
     date: startOfToday(),
@@ -481,16 +486,85 @@ const Booking = () => {
     return () => source.close();
   }, []);
 
+  React.useEffect(() => {
+    const selectedDate = format(formData.date, 'yyyy-MM-dd');
+    setSlotAvailabilityLoading(true);
+
+    const q = query(collection(db, 'bookings'), where('date', '==', selectedDate));
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const activeSlots = new Set<string>();
+        snapshot.docs.forEach((docSnap) => {
+          const data = docSnap.data() as any;
+          const status = normalizeStatus(data?.status);
+          if (status !== 'cancelled') {
+            const slot = String(data?.timeSlot || data?.time || '').trim();
+            if (slot) activeSlots.add(slot);
+          }
+        });
+        setBookedSlots(activeSlots);
+
+        if (formData.timeSlot && activeSlots.has(formData.timeSlot)) {
+          setFormData((prev) => ({ ...prev, timeSlot: '' }));
+          setSlotError('Please select a valid time slot');
+        }
+        setSlotAvailabilityLoading(false);
+      },
+      async () => {
+        // Fallback for local/server-only mode while still preferring Firebase listener.
+        try {
+          const allBookings = await api.getBookings();
+          const activeSlots = new Set<string>();
+          allBookings
+            .filter((booking: any) => booking.date === selectedDate && normalizeStatus(booking.status) !== 'cancelled')
+            .forEach((booking: any) => {
+              const slot = String(booking?.timeSlot || booking?.time || '').trim();
+              if (slot) activeSlots.add(slot);
+            });
+          setBookedSlots(activeSlots);
+        } catch (error) {
+          console.error('Failed to load slot availability:', error);
+          setBookedSlots(new Set());
+        } finally {
+          setSlotAvailabilityLoading(false);
+        }
+      }
+    );
+
+    return () => unsubscribe();
+  }, [formData.date]);
+
   const selectedService = services.find(s => s.id === formData.serviceId);
+
+  const isSlotBooked = (slot: string) => bookedSlots.has(slot);
+
+  const onSelectSlot = (slot: string) => {
+    if (isSlotBooked(slot)) {
+      setSlotError('Please select a valid time slot');
+      return;
+    }
+    setSlotError('');
+    setFormData({ ...formData, timeSlot: slot });
+  };
 
   const nextStep = () => setStep(s => s + 1);
   const prevStep = () => setStep(s => s - 1);
 
   const canNext = () => {
     if (step === 1) return !!formData.serviceId;
-    if (step === 2) return !!formData.timeSlot;
+    if (step === 2) return !!formData.date && !!formData.timeSlot && !isSlotBooked(formData.timeSlot);
     if (step === 3) return !!(formData.name && formData.email && formData.phone);
     return true;
+  };
+
+  const handleContinue = () => {
+    if (step === 2 && (!formData.date || !formData.timeSlot || isSlotBooked(formData.timeSlot))) {
+      setSlotError('Please select a valid time slot');
+      return;
+    }
+    setSlotError('');
+    nextStep();
   };
 
   const handleBooking = async () => {
@@ -498,12 +572,13 @@ const Booking = () => {
       setPaying(true);
       setBookingConfirmed(false);
       const bookingPayload = {
+        userId: formData.email || formData.phone || 'guest-user',
         customerName: formData.name,
         customerEmail: formData.email,
         customerPhone: formData.phone,
         serviceName: selectedService?.name,
         date: format(formData.date, 'yyyy-MM-dd'),
-        time: formData.timeSlot,
+        timeSlot: formData.timeSlot,
         amount: selectedService?.price,
       };
       const response = await api.createBooking({ ...bookingPayload });
@@ -511,25 +586,23 @@ const Booking = () => {
         const generatedSCode = resolveSCode(response.sCode, response.id);
         setSCode(generatedSCode);
         setBookingConfirmed(true);
-        const bookingRef = doc(db, 'bookings', response.id);
-        await setDoc(bookingRef, {
-          id: response.id,
-          sCode: generatedSCode,
-          ...bookingPayload,
-          status: 'Pending', paymentStatus: 'Pending',
-          source: 'web', createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
-        }, { merge: true });
 
         setStep(5);
 
         const paymentResult = await simulatePayment(response.id, selectedService?.price || 0);
-        await updateDoc(bookingRef, {
-          status: 'Confirmed', paymentStatus: 'Paid',
-          transactionId: paymentResult?.transactionId || null,
-          updatedAt: serverTimestamp(),
-        });
+        if (paymentResult?.transactionId) {
+          console.info('Payment transaction:', paymentResult.transactionId);
+        }
+      } else {
+        alert(response?.error || 'Booking failed. Please try another slot.');
       }
-    } catch (error) {
+    } catch (error: any) {
+      const message = String(error?.message || '').toLowerCase();
+      if (message.includes('slot already booked')) {
+        setSlotError('Please select a valid time slot');
+        alert('This slot was just booked by another customer. Please pick another time slot.');
+        return;
+      }
       console.error('Booking failed:', error);
       alert('Something went wrong. Please try again.');
     } finally {
@@ -862,27 +935,38 @@ const Booking = () => {
                     <p className="text-[9px] font-black uppercase tracking-[0.4em] mb-3" style={{ color: TEXT_MID }}>
                       Select Time · {format(formData.date, 'EEE, MMM dd')}
                     </p>
+                    {slotAvailabilityLoading && (
+                      <p className="text-[10px] mb-2" style={{ color: TEXT_MID }}>Checking real-time availability...</p>
+                    )}
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-2 sm:gap-2.5">
                       {timeSlots.map((slot, i) => {
                         const sel = formData.timeSlot === slot;
+                        const booked = isSlotBooked(slot);
                         return (
                           <motion.button
                             key={slot}
-                            onClick={() => setFormData({ ...formData, timeSlot: slot })}
+                            onClick={() => onSelectSlot(slot)}
+                            disabled={booked}
                             initial={{ opacity: 0, y: 12 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: i * 0.04 }}
-                            whileHover={{ y: -2 }}
-                            whileTap={{ scale: 0.97 }}
+                            whileHover={booked ? {} : { y: -2 }}
+                            whileTap={booked ? {} : { scale: 0.97 }}
                             className="py-3 px-3 rounded-xl text-xs font-bold transition-all duration-200 relative overflow-hidden"
                             style={{
-                              background: sel ? `linear-gradient(135deg,${GOLD},${GOLD_LIGHT})` : 'rgba(0,0,0,0.03)',
-                              border: `1px solid ${sel ? GOLD : BORDER}`,
-                              color: sel ? '#fff' : TEXT_MID,
+                              background: booked
+                                ? 'rgba(239,68,68,0.10)'
+                                : sel
+                                ? `linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`
+                                : 'rgba(0,0,0,0.03)',
+                              border: `1px solid ${booked ? 'rgba(239,68,68,0.35)' : sel ? GOLD : BORDER}`,
+                              color: booked ? '#B91C1C' : sel ? '#fff' : TEXT_MID,
                               boxShadow: sel ? `0 6px 20px rgba(197,160,89,0.35)` : 'none',
+                              cursor: booked ? 'not-allowed' : 'pointer',
+                              opacity: booked ? 0.78 : 1,
                             }}
                           >
-                            {sel && (
+                            {sel && !booked && (
                               <motion.div
                                 className="absolute inset-0 bg-white/15"
                                 initial={{ x: '-110%' }}
@@ -890,11 +974,14 @@ const Booking = () => {
                                 transition={{ duration: 0.5 }}
                               />
                             )}
-                            <span className="relative z-10">{slot}</span>
+                            <span className="relative z-10">{slot} {booked ? '❌' : '✅'}</span>
                           </motion.button>
                         );
                       })}
                     </div>
+                    {slotError && (
+                      <p className="mt-3 text-xs font-semibold" style={{ color: '#B91C1C' }}>{slotError}</p>
+                    )}
                   </div>
                 </div>
               </motion.div>
@@ -1069,7 +1156,7 @@ const Booking = () => {
             ) : <div />}
 
             <motion.button
-              onClick={step === 4 ? handleBooking : nextStep}
+              onClick={step === 4 ? handleBooking : handleContinue}
               disabled={!canNext() || paying}
               whileHover={canNext() ? { scale: 1.03 } : {}}
               whileTap={canNext() ? { scale: 0.97 } : {}}
