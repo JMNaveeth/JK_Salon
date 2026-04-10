@@ -47,10 +47,10 @@ const SocialIcon = ({ href, icon: Icon, label }: { href: string; icon: any; labe
     rel="noreferrer"
     whileHover={{ y: -4, scale: 1.1 }}
     whileTap={{ scale: 0.95 }}
-    className="group relative w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-300"
+    className="group relative w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center transition-all duration-300"
     style={{
-      background: 'rgba(255,255,255,0.04)',
-      border: '1px solid rgba(255,255,255,0.06)',
+      background: 'rgba(197,160,89,0.08)',
+      border: '1px solid rgba(197,160,89,0.18)',
     }}
     aria-label={label}
   >
@@ -58,7 +58,7 @@ const SocialIcon = ({ href, icon: Icon, label }: { href: string; icon: any; labe
       className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
       style={{ background: `linear-gradient(135deg, ${GOLD}30, ${GOLD_LIGHT}20)`, border: `1px solid ${GOLD}40` }}
     />
-    <Icon className="h-[18px] w-[18px] relative z-10 text-zinc-400 group-hover:text-white transition-colors duration-300" />
+    <Icon className="h-[17px] w-[17px] sm:h-[18px] sm:w-[18px] relative z-10 text-zinc-500 group-hover:text-[#C5A059] transition-colors duration-300" />
   </motion.a>
 );
 
@@ -66,7 +66,7 @@ const FooterLink = ({ to, children }: { to: string; children: React.ReactNode })
   <li>
     <Link
       to={to}
-      className="group inline-flex items-center gap-1.5 text-[13px] text-zinc-500 hover:text-white transition-all duration-300"
+      className="group inline-flex items-center gap-1.5 py-1 text-[13px] text-zinc-600 hover:text-zinc-900 transition-all duration-300"
     >
       <span
         className="w-0 group-hover:w-4 overflow-hidden transition-all duration-300 opacity-0 group-hover:opacity-100"
@@ -89,7 +89,7 @@ const ContactLine = ({ icon: Icon, children }: { icon: any; children: React.Reac
     >
       <Icon className="h-3.5 w-3.5" style={{ color: GOLD }} />
     </div>
-    <span className="text-[13px] text-zinc-500 leading-relaxed group-hover:text-zinc-300 transition-colors duration-300">
+    <span className="text-[13px] text-zinc-600 leading-relaxed group-hover:text-zinc-900 transition-colors duration-300">
       {children}
     </span>
   </li>
@@ -101,7 +101,7 @@ const Footer = () => {
   const inView = useInView(ref, { once: true, margin: '-80px' });
 
   return (
-    <footer className="relative overflow-hidden" style={{ background: 'white' }}>
+    <footer className="relative overflow-hidden" style={{ background: '#FDFBF7' }}>
       {/* Decorative Top Border */}
       <div className="h-px w-full" style={{ background: `linear-gradient(90deg, transparent, ${GOLD}40, transparent)` }} />
 
@@ -115,21 +115,21 @@ const Footer = () => {
       <div
         className="absolute inset-0 pointer-events-none opacity-[0.02]"
         style={{
-          backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
+          backgroundImage: `linear-gradient(rgba(197,160,89,0.12) 1px, transparent 1px), linear-gradient(90deg, rgba(197,160,89,0.12) 1px, transparent 1px)`,
           backgroundSize: '60px 60px',
         }}
       />
 
-      <div ref={ref} className="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 pt-10 lg:pt-14 pb-8">
+      <div ref={ref} className="relative z-10 max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 pt-8 sm:pt-10 lg:pt-14 pb-8">
 
         {/* Main Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8 lg:gap-12">
           {/* Brand Column */}
           <motion.div
             initial={{ opacity: 0, y: 25 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ delay: 0.1, duration: 0.7 }}
-            className="space-y-6 lg:col-span-1"
+            className="space-y-5 rounded-2xl border border-[#C5A059]/15 bg-white/70 p-4 sm:p-0 sm:border-0 sm:bg-transparent lg:col-span-1"
           >
             <Link to="/" className="inline-flex items-center gap-2.5 group">
               <div
@@ -138,11 +138,11 @@ const Footer = () => {
               >
                 <Scissors className="h-5 w-5 text-white" />
               </div>
-              <span className="text-xl font-bold tracking-tight text-white">
-                JK <span className="font-light text-zinc-400">SALON</span>
+              <span className="text-xl font-bold tracking-tight text-zinc-900">
+                JK <span className="font-light text-zinc-500">SALON</span>
               </span>
             </Link>
-            <p className="text-[13px] text-zinc-500 leading-[1.8] max-w-[260px]">
+            <p className="text-[13px] text-zinc-600 leading-[1.8] max-w-[280px]">
               Premium grooming and styling services for the modern individual. Where precision meets luxury.
             </p>
             <div className="flex gap-2.5">
@@ -157,6 +157,7 @@ const Footer = () => {
             initial={{ opacity: 0, y: 25 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ delay: 0.2, duration: 0.7 }}
+            className="rounded-2xl border border-[#C5A059]/15 bg-white/70 p-4 sm:p-0 sm:border-0 sm:bg-transparent"
           >
             <h4
               className="text-[10px] font-bold uppercase tracking-[0.3em] mb-6"
@@ -178,6 +179,7 @@ const Footer = () => {
             initial={{ opacity: 0, y: 25 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ delay: 0.3, duration: 0.7 }}
+            className="rounded-2xl border border-[#C5A059]/15 bg-white/70 p-4 sm:p-0 sm:border-0 sm:bg-transparent"
           >
             <h4
               className="text-[10px] font-bold uppercase tracking-[0.3em] mb-6"
@@ -203,6 +205,7 @@ const Footer = () => {
             initial={{ opacity: 0, y: 25 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ delay: 0.4, duration: 0.7 }}
+            className="rounded-2xl border border-[#C5A059]/15 bg-white/70 p-4 sm:p-0 sm:border-0 sm:bg-transparent"
           >
             <h4
               className="text-[10px] font-bold uppercase tracking-[0.3em] mb-6"
@@ -218,11 +221,11 @@ const Footer = () => {
               ].map((item) => (
                 <div
                   key={item.day}
-                  className="flex justify-between items-center py-2.5 px-3.5 rounded-xl transition-all duration-300 hover:bg-white/[0.03]"
-                  style={{ border: '1px solid rgba(255,255,255,0.03)' }}
+                  className="flex justify-between items-center py-2.5 px-3.5 rounded-xl transition-all duration-300 hover:bg-[#C5A059]/[0.05]"
+                  style={{ border: '1px solid rgba(197,160,89,0.12)' }}
                 >
-                  <span className="text-[13px] text-zinc-500">{item.day}</span>
-                  <span className="text-[13px] text-zinc-300 font-medium">{item.time}</span>
+                  <span className="text-[13px] text-zinc-600">{item.day}</span>
+                  <span className="text-[13px] text-zinc-800 font-medium">{item.time}</span>
                 </div>
               ))}
             </div>
@@ -258,10 +261,10 @@ const Footer = () => {
           initial={{ opacity: 0 }}
           animate={inView ? { opacity: 1 } : {}}
           transition={{ delay: 0.6, duration: 0.7 }}
-          className="mt-16 lg:mt-20 pt-7 flex flex-col sm:flex-row items-center justify-between gap-4"
-          style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
+          className="mt-10 sm:mt-14 lg:mt-20 pt-6 sm:pt-7 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4"
+          style={{ borderTop: '1px solid rgba(197,160,89,0.15)' }}
         >
-          <p className="text-[11px] text-zinc-600 tracking-wide">
+          <p className="text-[11px] text-zinc-600 tracking-wide text-center sm:text-left">
             © {new Date().getFullYear()} JK Salon. All rights reserved.
           </p>
           <p className="text-[11px] text-zinc-700 flex items-center gap-1.5">
