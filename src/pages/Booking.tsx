@@ -47,6 +47,7 @@ const resolveSCode = (code?: string, bookingId?: string) => {
 };
 
 const normalizeStatus = (status?: string) => (status || '').trim().toLowerCase();
+const normalizeSlotLabel = (slot?: string) => String(slot || '').trim().toUpperCase().replace(/\s+/g, ' ');
 
 /* ─── Floating label input ─────────────────────────────────── */
 const FloatInput = ({
@@ -489,6 +490,36 @@ const Booking = () => {
   React.useEffect(() => {
     const selectedDate = format(formData.date, 'yyyy-MM-dd');
     setSlotAvailabilityLoading(true);
+    let firebaseSlots = new Set<string>();
+    let apiSlots = new Set<string>();
+
+    const mergeAndApply = () => {
+      const merged = new Set<string>([...firebaseSlots, ...apiSlots]);
+      setBookedSlots(merged);
+      if (formData.timeSlot && merged.has(normalizeSlotLabel(formData.timeSlot))) {
+        setFormData((prev) => ({ ...prev, timeSlot: '' }));
+        setSlotError('Please select a valid time slot');
+      }
+    };
+
+    const fetchSlotsFromApi = async () => {
+      try {
+        const allBookings = await api.getBookings();
+        const slots = new Set<string>();
+        allBookings
+          .filter((booking: any) => booking.date === selectedDate && normalizeStatus(booking.status) !== 'cancelled')
+          .forEach((booking: any) => {
+            const slot = normalizeSlotLabel(booking?.timeSlot || booking?.time);
+            if (slot) slots.add(slot);
+          });
+        apiSlots = slots;
+        mergeAndApply();
+      } catch (error) {
+        console.error('Failed to load slot availability:', error);
+      } finally {
+        setSlotAvailabilityLoading(false);
+      }
+    };
 
     const q = query(collection(db, 'bookings'), where('date', '==', selectedDate));
     const unsubscribe = onSnapshot(
@@ -499,45 +530,40 @@ const Booking = () => {
           const data = docSnap.data() as any;
           const status = normalizeStatus(data?.status);
           if (status !== 'cancelled') {
-            const slot = String(data?.timeSlot || data?.time || '').trim();
+            const slot = normalizeSlotLabel(data?.timeSlot || data?.time);
             if (slot) activeSlots.add(slot);
           }
         });
-        setBookedSlots(activeSlots);
-
-        if (formData.timeSlot && activeSlots.has(formData.timeSlot)) {
-          setFormData((prev) => ({ ...prev, timeSlot: '' }));
-          setSlotError('Please select a valid time slot');
-        }
+        firebaseSlots = activeSlots;
+        mergeAndApply();
         setSlotAvailabilityLoading(false);
       },
-      async () => {
-        // Fallback for local/server-only mode while still preferring Firebase listener.
-        try {
-          const allBookings = await api.getBookings();
-          const activeSlots = new Set<string>();
-          allBookings
-            .filter((booking: any) => booking.date === selectedDate && normalizeStatus(booking.status) !== 'cancelled')
-            .forEach((booking: any) => {
-              const slot = String(booking?.timeSlot || booking?.time || '').trim();
-              if (slot) activeSlots.add(slot);
-            });
-          setBookedSlots(activeSlots);
-        } catch (error) {
-          console.error('Failed to load slot availability:', error);
-          setBookedSlots(new Set());
-        } finally {
-          setSlotAvailabilityLoading(false);
-        }
+      () => {
+        setSlotAvailabilityLoading(false);
       }
     );
 
-    return () => unsubscribe();
+    fetchSlotsFromApi();
+    const source = new EventSource('/api/bookings/stream');
+    source.onmessage = (event) => {
+      if (event.data === 'updated') fetchSlotsFromApi();
+    };
+    source.onerror = () => {
+      source.close();
+    };
+
+    const polling = window.setInterval(fetchSlotsFromApi, 10000);
+
+    return () => {
+      unsubscribe();
+      source.close();
+      window.clearInterval(polling);
+    };
   }, [formData.date]);
 
   const selectedService = services.find(s => s.id === formData.serviceId);
 
-  const isSlotBooked = (slot: string) => bookedSlots.has(slot);
+  const isSlotBooked = (slot: string) => bookedSlots.has(normalizeSlotLabel(slot));
 
   const onSelectSlot = (slot: string) => {
     if (isSlotBooked(slot)) {
