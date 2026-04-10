@@ -181,7 +181,7 @@ const ReviewManagement = () => {
                     ) : (
                       <div className="inline-flex items-center rounded-2xl border border-emerald-300/80 bg-emerald-500/85 px-4 py-3 text-xs font-black uppercase tracking-[0.3em] text-white shadow-sm">
                         <CheckCircle2 className="mr-2 h-4 w-4" />
-                        Published
+                        Approved
                       </div>
                     )}
 

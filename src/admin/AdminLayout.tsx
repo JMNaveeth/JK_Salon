@@ -31,12 +31,20 @@ const isReviewPending = (review: any) => {
   return true;
 };
 
+const normalizeStatus = (status?: string) => (status || '').trim().toLowerCase();
+
+const shouldCountBookingBadge = (booking: any) => {
+  const status = normalizeStatus(booking?.status);
+  return status === 'pending' || status === 'confirmed';
+};
+
 const AdminLayout = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
   const [pendingReviewCount, setPendingReviewCount] = React.useState(0);
+  const [bookingBadgeCount, setBookingBadgeCount] = React.useState(0);
 
   const fetchPendingReviews = React.useCallback(async () => {
     try {
@@ -77,6 +85,46 @@ const AdminLayout = () => {
       document.removeEventListener('visibilitychange', onVisibilityChange);
     };
   }, [fetchPendingReviews]);
+
+  const fetchBookingBadgeCount = React.useCallback(async () => {
+    try {
+      const bookings = await fetch('/api/bookings').then((res) => res.json());
+      setBookingBadgeCount(bookings.filter((booking: any) => shouldCountBookingBadge(booking)).length);
+    } catch (error) {
+      console.error('Failed to fetch booking badge count:', error);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    fetchBookingBadgeCount();
+
+    const source = new EventSource('/api/bookings/stream');
+    source.onmessage = (event) => {
+      if (event.data === 'updated') {
+        fetchBookingBadgeCount();
+      }
+    };
+
+    source.onerror = () => {
+      source.close();
+    };
+
+    const poll = window.setInterval(fetchBookingBadgeCount, 10000);
+    const onWindowFocus = () => fetchBookingBadgeCount();
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') fetchBookingBadgeCount();
+    };
+
+    window.addEventListener('focus', onWindowFocus);
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
+    return () => {
+      source.close();
+      window.clearInterval(poll);
+      window.removeEventListener('focus', onWindowFocus);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+    };
+  }, [fetchBookingBadgeCount]);
 
   if (loading) return <div className="min-h-screen bg-[#FDFAF5] flex items-center justify-center text-zinc-800">Loading...</div>;
   if (!user) return <Navigate to="/admin/login" />;
@@ -137,6 +185,16 @@ const AdminLayout = () => {
                     )}
                   >
                     {pendingReviewCount}
+                  </span>
+                )}
+                {item.name === 'Bookings' && bookingBadgeCount > 0 && (
+                  <span
+                    className={cn(
+                      'min-w-6 h-6 px-2 inline-flex items-center justify-center rounded-full text-[10px] font-black',
+                      isActive(item.path) ? 'bg-white text-[#C5A059]' : 'bg-[#C5A059] text-white'
+                    )}
+                  >
+                    {bookingBadgeCount}
                   </span>
                 )}
               </Link>
