@@ -579,6 +579,7 @@ const Booking = () => {
         serviceName: selectedService?.name,
         date: format(formData.date, 'yyyy-MM-dd'),
         timeSlot: formData.timeSlot,
+        time: formData.timeSlot,
         amount: selectedService?.price,
       };
       const response = await api.createBooking({ ...bookingPayload });
