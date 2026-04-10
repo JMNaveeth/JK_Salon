@@ -19,11 +19,15 @@ import {
   getOwnerProfile,
   saveOwnerProfile,
 } from '../utils/ownerProfile';
+import { api } from '../services/api';
 
 const ContentManagement = () => {
   const [activeSection, setActiveSection] = React.useState<'owner' | 'shop' | 'contact' | 'social'>('owner');
   const [saved, setSaved] = React.useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = React.useState(false);
+  const [uploadError, setUploadError] = React.useState('');
   const [profile, setProfile] = React.useState<OwnerProfile>(() => ({ ...defaultOwnerProfile, ...getOwnerProfile() }));
+  const ownerPhotoInputRef = React.useRef<HTMLInputElement | null>(null);
 
   const updateField = (field: keyof OwnerProfile, value: string) => {
     setSaved(false);
@@ -34,6 +38,29 @@ const ContentManagement = () => {
     saveOwnerProfile(profile);
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
+  };
+
+  const handleOwnerPhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploadError('');
+    setUploadingPhoto(true);
+
+    try {
+      const result = await api.uploadImage(file);
+      if (!result?.success || !result?.imageUrl) {
+        throw new Error(result?.error || 'Upload failed');
+      }
+      updateField('profileImageUrl', result.imageUrl);
+    } catch (error: any) {
+      setUploadError(error?.message || 'Failed to upload image');
+    } finally {
+      setUploadingPhoto(false);
+      if (ownerPhotoInputRef.current) {
+        ownerPhotoInputRef.current.value = '';
+      }
+    }
   };
 
   const sectionButton = (id: 'owner' | 'shop' | 'contact' | 'social', label: string, Icon: React.ComponentType<any>) => (
@@ -131,21 +158,32 @@ const ContentManagement = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-widest text-zinc-500">Owner Photo URL</label>
+                  <label className="text-xs font-bold uppercase tracking-widest text-zinc-500">Owner Photo</label>
                   <div className="flex items-center gap-4">
                     <div className="w-20 h-20 rounded-xl overflow-hidden border border-[#C5A059]/25 bg-[#F5EEE0]">
                       <img src={profile.profileImageUrl} alt="Owner" className="w-full h-full object-cover" />
                     </div>
-                    <div className="flex-1">
-                      <input
-                        type="text"
-                        value={profile.profileImageUrl}
-                        onChange={(e) => updateField('profileImageUrl', e.target.value)}
-                        className="w-full bg-[#FDFBF7] border border-[#C5A059]/25 rounded-xl px-4 py-3 text-zinc-900 focus:border-[#C5A059] outline-none transition-all"
-                      />
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => ownerPhotoInputRef.current?.click()}
+                      disabled={uploadingPhoto}
+                      className="px-4 py-3 rounded-xl border border-[#f5deb1] bg-[#C5A059]/90 text-white text-xs font-bold shadow-[0_10px_24px_rgba(197,160,89,0.35)] hover:bg-[#B48F48] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      {uploadingPhoto ? 'Uploading...' : 'Upload Image'}
+                    </button>
                     <Camera className="h-5 w-5 text-[#C5A059]" />
+                    <input
+                      ref={ownerPhotoInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleOwnerPhotoUpload}
+                    />
                   </div>
+                  <p className="text-[11px] text-zinc-500">Upload directly from your device. Manual URL editing is disabled.</p>
+                  {uploadError && (
+                    <p className="text-xs text-red-600 font-medium">{uploadError}</p>
+                  )}
                 </div>
               </div>
             )}
