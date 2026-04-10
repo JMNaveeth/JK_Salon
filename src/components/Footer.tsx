@@ -5,6 +5,12 @@ import {
   Scissors, Instagram, Facebook, Twitter, Mail, Phone,
   MapPin, Clock, Heart, ArrowRight
 } from 'lucide-react';
+import {
+  OwnerProfile,
+  defaultOwnerProfile,
+  getOwnerProfile,
+  subscribeOwnerProfileChanges,
+} from '../utils/ownerProfile';
 
 /* ── Real-time shop status based on Sri Lanka time (Asia/Colombo, UTC+5:30) ── */
 const useSalonStatus = () => {
@@ -99,6 +105,20 @@ const Footer = () => {
   const isOpen = useSalonStatus();
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
+  const [ownerProfile, setOwnerProfile] = useState<OwnerProfile>(() => ({ ...defaultOwnerProfile, ...getOwnerProfile() }));
+
+  useEffect(() => {
+    const unsubscribe = subscribeOwnerProfileChanges((profile) => {
+      setOwnerProfile({ ...defaultOwnerProfile, ...profile });
+    });
+
+    return unsubscribe;
+  }, []);
+
+  const openingHoursList = ownerProfile.openingHours
+    .split(',')
+    .map((slot) => slot.trim())
+    .filter(Boolean);
 
   return (
     <footer className="relative overflow-hidden" style={{ background: '#FDFBF7' }}>
@@ -139,16 +159,16 @@ const Footer = () => {
                 <Scissors className="h-5 w-5 text-white" />
               </div>
               <span className="text-xl font-bold tracking-tight text-zinc-900">
-                JK <span className="font-light text-zinc-500">SALON</span>
+                {ownerProfile.shopName}
               </span>
             </Link>
             <p className="text-[13px] text-zinc-600 leading-[1.8] max-w-[280px]">
-              Premium grooming and styling services for the modern individual. Where precision meets luxury.
+              {ownerProfile.bio}
             </p>
             <div className="flex gap-2.5">
-              <SocialIcon href="#" icon={Instagram} label="Instagram" />
-              <SocialIcon href="#" icon={Facebook} label="Facebook" />
-              <SocialIcon href="#" icon={Twitter} label="Twitter" />
+              <SocialIcon href={ownerProfile.instagram || '#'} icon={Instagram} label="Instagram" />
+              <SocialIcon href={ownerProfile.facebook || '#'} icon={Facebook} label="Facebook" />
+              <SocialIcon href={ownerProfile.website || '#'} icon={Twitter} label="Website" />
             </div>
           </motion.div>
 
@@ -189,13 +209,13 @@ const Footer = () => {
             </h4>
             <ul className="space-y-4">
               <ContactLine icon={MapPin}>
-                123 Salon Street,<br />Colombo 07, Sri Lanka
+                {ownerProfile.shopAddress}
               </ContactLine>
               <ContactLine icon={Phone}>
-                +94 759560114
+                {ownerProfile.contactPhone}
               </ContactLine>
               <ContactLine icon={Mail}>
-                hello@jksalon.com
+                {ownerProfile.email}
               </ContactLine>
             </ul>
           </motion.div>
@@ -214,18 +234,13 @@ const Footer = () => {
               Opening Hours
             </h4>
             <div className="space-y-3">
-              {[
-                { day: 'Mon – Fri', time: '9:00 AM – 8:00 PM' },
-                { day: 'Saturday', time: '9:00 AM – 6:00 PM' },
-                { day: 'Sunday', time: '10:00 AM – 4:00 PM' },
-              ].map((item) => (
+              {openingHoursList.map((item) => (
                 <div
-                  key={item.day}
+                  key={item}
                   className="flex justify-between items-center py-2.5 px-3.5 rounded-xl transition-all duration-300 hover:bg-[#C5A059]/[0.05]"
                   style={{ border: '1px solid rgba(197,160,89,0.12)' }}
                 >
-                  <span className="text-[13px] text-zinc-600">{item.day}</span>
-                  <span className="text-[13px] text-zinc-800 font-medium">{item.time}</span>
+                  <span className="text-[13px] text-zinc-700 font-medium">{item}</span>
                 </div>
               ))}
             </div>

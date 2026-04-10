@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { motion, useInView } from 'motion/react';
 import {
   Phone, Mail, MapPin, Clock, MessageSquare,
@@ -6,6 +6,14 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { api } from '../services/api';
+import {
+  OwnerProfile,
+  defaultOwnerProfile,
+  getOwnerProfile,
+  subscribeOwnerProfileChanges,
+  toTelLink,
+  toWhatsAppLink,
+} from '../utils/ownerProfile';
 
 const GOLD = '#C5A059';
 const GOLD_LIGHT = '#E8C97A';
@@ -181,6 +189,15 @@ const Contact = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [ownerProfile, setOwnerProfile] = useState<OwnerProfile>(() => ({ ...defaultOwnerProfile, ...getOwnerProfile() }));
+
+  useEffect(() => {
+    const unsubscribe = subscribeOwnerProfileChanges((profile) => {
+      setOwnerProfile({ ...defaultOwnerProfile, ...profile });
+    });
+
+    return unsubscribe;
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -213,29 +230,40 @@ const Contact = () => {
   const formRef = useRef(null);
   const formInView = useInView(formRef, { once: true, margin: '-60px' });
 
+  const openingHourRows = ownerProfile.openingHours
+    .split(',')
+    .map((slot) => slot.trim())
+    .filter(Boolean);
+
+  const encodedAddress = encodeURIComponent(ownerProfile.shopAddress || 'Colombo, Sri Lanka');
+  const mapOpenUrl = ownerProfile.googleMapsUrl?.trim() || `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
+  const mapEmbedSrc = ownerProfile.googleMapsUrl?.includes('/maps/embed')
+    ? ownerProfile.googleMapsUrl
+    : `https://www.google.com/maps?q=${encodedAddress}&output=embed`;
+
   const infoCards = [
     {
       icon: Phone,
       title: 'Call Us',
-      lines: ['+94 759560114', '+94 759560114'],
-      action: { label: 'Call Now', href: 'tel:+94759560114' },
+      lines: [ownerProfile.contactPhone, ownerProfile.whatsapp],
+      action: { label: 'Call Now', href: toTelLink(ownerProfile.contactPhone) },
     },
     {
       icon: MessageSquare,
       title: 'WhatsApp',
-      lines: ['+94 759560114', 'Available 9am – 8pm'],
-      action: { label: 'Chat Now', href: 'https://wa.me/94759560114' },
+      lines: [ownerProfile.whatsapp, 'Fast replies during business hours'],
+      action: { label: 'Chat Now', href: toWhatsAppLink(ownerProfile.whatsapp) },
     },
     {
       icon: Mail,
       title: 'Email Us',
-      lines: ['hello@jksalon.com', 'support@jksalon.com'],
-      action: { label: 'Send Email', href: 'mailto:hello@jksalon.com' },
+      lines: [ownerProfile.email, ownerProfile.website],
+      action: { label: 'Send Email', href: `mailto:${ownerProfile.email}` },
     },
     {
       icon: Clock,
       title: 'Opening Hours',
-      lines: ['Mon – Fri: 9:00am – 8:00pm', 'Sat – Sun: 9:00am – 6:00pm'],
+      lines: openingHourRows.length ? openingHourRows : [ownerProfile.openingHours],
     },
   ];
 
@@ -486,8 +514,8 @@ const Contact = () => {
 
                     <p className="text-center text-[10px] text-zinc-400 uppercase tracking-widest">
                       Or call us directly at{' '}
-                      <a href="tel:+94759560114" className="font-bold" style={{ color: GOLD }}>
-                        +94 759560114
+                      <a href={toTelLink(ownerProfile.contactPhone)} className="font-bold" style={{ color: GOLD }}>
+                        {ownerProfile.contactPhone}
                       </a>
                     </p>
                   </form>
@@ -513,7 +541,7 @@ const Contact = () => {
                 <div className="absolute inset-0 z-10 pointer-events-none transition-opacity duration-500 opacity-20 lg:group-hover:opacity-0"
                   style={{ background: 'linear-gradient(to bottom right, rgba(197,160,89,0.4), transparent)' }} />
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d63371.81529707!2d79.8211859!3d6.9218374!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ae2593cf65a1e9d%3A0x53139987a6691ff3!2sColombo!5e0!3m2!1sen!2slk!4v1647856456789!5m2!1sen!2slk"
+                  src={mapEmbedSrc}
                   width="100%"
                   height="100%"
                   style={{ border: 0, filter: 'grayscale(0.2) saturate(1.1) contrast(1.05)' }}
@@ -523,6 +551,15 @@ const Contact = () => {
                   title="JK Salon Location"
                   className="transition-all duration-700"
                 />
+                <a
+                  href={mapOpenUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="absolute bottom-4 right-4 z-20 px-4 py-2 rounded-xl text-xs font-bold text-white"
+                  style={{ background: `linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`, boxShadow: `0 8px 22px rgba(197,160,89,0.35)` }}
+                >
+                  Open in Maps
+                </a>
               </div>
 
               

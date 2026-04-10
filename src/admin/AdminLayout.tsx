@@ -68,7 +68,7 @@ const AdminLayout = () => {
     { name: 'Gallery', icon: ImageIcon, path: '/admin/gallery' },
     { name: 'Reviews', icon: Star, path: '/admin/reviews' },
     { name: 'Messages', icon: Mail, path: '/admin/messages' },
-    { name: 'Content', icon: Settings, path: '/admin/content' },
+    { name: 'Owner Profile', icon: Settings, path: '/admin/content' },
   ];
 
   const isActive = (path: string) => location.pathname === path;

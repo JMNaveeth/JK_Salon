@@ -14,8 +14,12 @@ import {
   Zap,
 } from "lucide-react";
 import { api } from "../services/api";
-
-const ownerImg = "/hani.jpeg";
+import {
+  OwnerProfile,
+  defaultOwnerProfile,
+  getOwnerProfile,
+  subscribeOwnerProfileChanges,
+} from "../utils/ownerProfile";
 
 const GOLD = "#C5A059";
 const GOLD_LIGHT = "#E8C97A";
@@ -345,6 +349,7 @@ const WhyCard = ({ icon, title, desc, idx }: { icon: React.ReactNode; title: str
 ══════════════════════════════════════════════════════════════ */
 const Home = () => {
   const [services, setServices] = useState<any[]>([]);
+  const [ownerProfile, setOwnerProfile] = useState<OwnerProfile>(() => ({ ...defaultOwnerProfile, ...getOwnerProfile() }));
 
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
@@ -374,6 +379,14 @@ const Home = () => {
     return () => {
       source.close();
     };
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = subscribeOwnerProfileChanges((profile) => {
+      setOwnerProfile({ ...defaultOwnerProfile, ...profile });
+    });
+
+    return unsubscribe;
   }, []);
 
   const whyItems = [
@@ -481,7 +494,7 @@ const Home = () => {
               </div>
               <div>
                 <p className="text-[#1A1A1A] text-xs font-bold leading-none mb-1">Master Stylist</p>
-                <p className="text-zinc-500 text-[10px]">10+ Years Experience</p>
+                <p className="text-zinc-500 text-[10px]">{ownerProfile.yearsExperience}+ Years Experience</p>
               </div>
             </motion.div>
 
@@ -524,12 +537,12 @@ const Home = () => {
               whileHover={{ scale: 1.025, boxShadow: `0 0 0 2.5px rgba(197,160,89,0.65), 0 50px 100px rgba(197,160,89,0.22), 0 20px 60px rgba(0,0,0,0.1)` }}
               transition={{ duration: 0.5 }}
             >
-              <img src={ownerImg} alt="JK Salon Owner" className="w-full h-full object-cover object-top" />
+              <img src={ownerProfile.profileImageUrl} alt={`${ownerProfile.shopName} owner`} className="w-full h-full object-cover object-top" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to top,rgba(197,160,89,0.25) 0%,transparent 40%)" }} />
               <div className="absolute bottom-0 left-0 right-0 px-6 pb-6 pt-10">
                 <div className="backdrop-blur-sm rounded-xl px-4 py-3" style={{ background: "rgba(255,255,255,0.88)", border: "1px solid rgba(197,160,89,0.2)" }}>
-                  <p className="text-[#1A1A1A] font-bold text-sm tracking-widest uppercase leading-none">JK Salon</p>
-                  <p className="text-[10px] tracking-[0.3em] mt-1" style={{ color: GOLD }}>Owner · Colombo</p>
+                  <p className="text-[#1A1A1A] font-bold text-sm tracking-widest uppercase leading-none">{ownerProfile.shopName}</p>
+                  <p className="text-[10px] tracking-[0.3em] mt-1" style={{ color: GOLD }}>{ownerProfile.ownerName} · {ownerProfile.role}</p>
                 </div>
               </div>
             </motion.div>
@@ -549,7 +562,7 @@ const Home = () => {
               transition={{ delay: 0.25, duration: 0.7 }}
             >
               <span className="w-10 h-px" style={{ background: `linear-gradient(90deg,transparent,${GOLD})` }} />
-              <span className="text-[10px] font-bold uppercase tracking-[0.5em]" style={{ color: GOLD }}>Premium Grooming &amp; Styling</span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.5em]" style={{ color: GOLD }}>{ownerProfile.shopName}</span>
               <span className="w-10 h-px" style={{ background: `linear-gradient(90deg,${GOLD},transparent)` }} />
             </motion.div>
 
@@ -581,7 +594,7 @@ const Home = () => {
               initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.72, duration: 0.8 }}
             >
-              Experience the pinnacle of luxury grooming. Our expert stylists combine traditional techniques with modern trends to craft your perfect look.
+              {ownerProfile.bio}
             </motion.p>
 
             {/* CTA buttons — both golden */}

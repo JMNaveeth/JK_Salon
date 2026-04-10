@@ -1,7 +1,13 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion, useInView } from 'motion/react';
 import { ShieldCheck, Users, Award, History, ArrowRight, Star, Scissors, Quote } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import {
+  OwnerProfile,
+  defaultOwnerProfile,
+  getOwnerProfile,
+  subscribeOwnerProfileChanges,
+} from '../utils/ownerProfile';
 
 const GOLD = '#C5A059';
 const GOLD_LIGHT = '#E8C97A';
@@ -142,14 +148,23 @@ const StatBlock = ({ value, label, delay }: { value: string; label: string; dela
 const About = () => {
   const storyRef = useRef(null);
   const storyInView = useInView(storyRef, { once: true, margin: '-80px' });
+  const [ownerProfile, setOwnerProfile] = useState<OwnerProfile>(() => ({ ...defaultOwnerProfile, ...getOwnerProfile() }));
+
+  useEffect(() => {
+    const unsubscribe = subscribeOwnerProfileChanges((profile) => {
+      setOwnerProfile({ ...defaultOwnerProfile, ...profile });
+    });
+
+    return unsubscribe;
+  }, []);
 
   const team = [
     {
-      name: 'Jayantha Kumara',
-      role: 'Founder & Master Stylist',
-      bio: 'With over 15 years of experience, Jayantha founded JK Salon with a passion for precision grooming and luxury experiences.',
-      exp: '15+ Years',
-      img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=800',
+      name: ownerProfile.ownerName,
+      role: ownerProfile.role,
+      bio: ownerProfile.bio,
+      exp: `${ownerProfile.yearsExperience}+ Years`,
+      img: ownerProfile.profileImageUrl,
     },
     {
       name: 'Sameera Perera',
@@ -214,7 +229,7 @@ const About = () => {
             transition={{ duration: 0.7 }}
           >
             <span className="w-8 h-px" style={{ background: GOLD }} />
-            <span className="text-[10px] font-bold uppercase tracking-[0.5em]" style={{ color: GOLD }}>JK Salon · Est. 2014</span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.5em]" style={{ color: GOLD }}>{ownerProfile.shopName} · Est. 2014</span>
             <span className="w-8 h-px" style={{ background: GOLD }} />
           </motion.div>
 
@@ -237,7 +252,7 @@ const About = () => {
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.7 }}
           >
-            A decade of crafting confidence, one perfect cut at a time — Colombo's most trusted luxury grooming destination.
+            {ownerProfile.bio}
           </motion.p>
         </div>
       </section>
@@ -323,7 +338,7 @@ const About = () => {
                 
               </h2>
               <p className="text-zinc-500 leading-relaxed">
-                JK Salon started with a simple vision: to create a sanctuary where grooming meets luxury. Over the past decade, we have grown from a small neighbourhood barber shop to Colombo's premier destination for modern grooming.
+                {ownerProfile.shopName} started with a simple vision: to create a sanctuary where grooming meets luxury. Today, {ownerProfile.ownerName} and team continue to deliver trusted grooming experiences for modern clients.
               </p>
               
 
@@ -333,7 +348,7 @@ const About = () => {
                 <p className="text-[#1A1A1A] font-serif text-lg italic leading-relaxed">
                   "Every client deserves to leave feeling like the best version of themselves."
                 </p>
-                <p className="text-xs font-bold uppercase tracking-widest mt-2" style={{ color: GOLD }}>— Jayantha Kumara, Founder</p>
+                <p className="text-xs font-bold uppercase tracking-widest mt-2" style={{ color: GOLD }}>— {ownerProfile.ownerName}, {ownerProfile.role}</p>
               </div>
 
               {/* stats row */}
@@ -425,11 +440,11 @@ const About = () => {
             >
               Come Experience{' '}
               <span style={{ background: `linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-                JK Salon
+                {ownerProfile.shopName}
               </span>
             </h2>
             <p className="text-zinc-500 text-base leading-relaxed mb-10">
-              Join thousands of satisfied clients and discover what makes JK Salon Colombo's most trusted grooming destination.
+              Join our satisfied clients and discover what makes {ownerProfile.shopName} a trusted grooming destination.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.96 }}>
