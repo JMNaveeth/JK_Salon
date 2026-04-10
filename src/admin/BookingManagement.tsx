@@ -295,28 +295,28 @@ const BookingManagement = () => {
               {/* Status Banner */}
               <div className={cn("p-4 rounded-2xl border flex items-center justify-between", getStatusColor(viewBooking.status))}>
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest opacity-80 mb-0.5">Current Status</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest opacity-95 mb-0.5">Current Status</p>
                   <p className="text-lg font-bold">{viewBooking.status}</p>
                 </div>
                 {viewBooking.paymentStatus === 'Paid' && (
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-black/20 rounded-full">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-black/35 rounded-full border border-white/15 text-white shadow-sm">
                     <CheckCircle2 className="h-4 w-4" />
-                    <span className="text-xs font-bold uppercase tracking-wider">Paid Offline/Online</span>
+                    <span className="text-xs font-bold uppercase tracking-wider">Online</span>
                   </div>
                 )}
               </div>
 
               {/* Booking Code */}
               <div>
-                <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
+                <h3 className="text-[10px] font-bold text-grey-200 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
                   <CreditCard className="h-3 w-3" /> Booking Code
                 </h3>
-                <div className="bg-[#C5A059]/20 border border-[#C5A059]/50 rounded-2xl p-4 flex items-center justify-between gap-4 shadow-sm">
+                <div className="bg-[#C5A059]/25 border border-[#C5A059]/70 rounded-2xl p-4 flex items-center justify-between gap-4 shadow-md">
                   <div>
-                    <p className="text-xs text-zinc-400 mb-1 font-semibold">Customer S-code</p>
-                    <p className="text-2xl font-black tracking-[0.25em] text-[#C5A059] font-mono" style={{ letterSpacing: '0.15em' }}>{resolveSCode(viewBooking)}</p>
+                    <p className="text-xs text-black mb-1 font-semibold">Customer S-code</p>
+                    <p className="text-2xl font-black tracking-[0.25em] text-[#B8872B] font-mono" style={{ letterSpacing: '0.15em' }}>{resolveSCode(viewBooking)}</p>
                   </div>
-                  <div className="px-3 py-1.5 rounded-full bg-[#C5A059]/85 border border-[#f5deb1] text-[10px] font-bold uppercase tracking-widest text-white shadow-sm">
+                  <div className="px-3 py-1.5 rounded-full bg-[#A67F34] border border-[#f5deb1] text-[10px] font-bold uppercase tracking-widest text-white shadow-md">
                     Verify at check-in
                   </div>
                 </div>
@@ -324,7 +324,7 @@ const BookingManagement = () => {
 
               {/* Customer Info */}
               <div>
-                <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
+                <h3 className="text-[10px] font-bold text-grey-500 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
                   <User className="h-3 w-3" /> Customer Information
                 </h3>
                 <div className="bg-black/40 border border-white/5 rounded-2xl p-4 space-y-4">
@@ -334,12 +334,12 @@ const BookingManagement = () => {
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-xs text-zinc-500 mb-1 flex items-center gap-1"><Phone className="h-3 w-3"/> Phone</p>
-                      <p className="text-sm text-zinc-300">{viewBooking.customerPhone || 'N/A'}</p>
+                      <p className="text-xs text-grey-200 mb-1 flex items-center gap-1"><Phone className="h-3 w-3"/> Phone</p>
+                      <p className="text-sm font-bold text-white">{viewBooking.customerPhone || 'N/A'}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-zinc-500 mb-1 flex items-center gap-1"><Mail className="h-3 w-3"/> Email</p>
-                      <p className="text-sm text-zinc-300 truncate" title={viewBooking.customerEmail}>{viewBooking.customerEmail || 'N/A'}</p>
+                      <p className="text-xs text-grey-200 mb-1 flex items-center gap-1"><Mail className="h-3 w-3"/> Email</p>
+                      <p className="text-sm font-bold text-white truncate" title={viewBooking.customerEmail}>{viewBooking.customerEmail || 'N/A'}</p>
                     </div>
                   </div>
                 </div>
@@ -347,7 +347,7 @@ const BookingManagement = () => {
 
               {/* Appointment Info */}
               <div>
-                <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
+                <h3 className="text-[10px] font-bold text-grey-500 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
                   <Clock className="h-3 w-3" /> Appointment Details
                 </h3>
                 <div className="bg-black/40 border border-white/5 rounded-2xl p-4 space-y-4">
@@ -363,12 +363,12 @@ const BookingManagement = () => {
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-xs text-zinc-500 mb-1">Date</p>
-                      <p className="text-sm text-zinc-300">{viewBooking.date}</p>
+                      <p className="text-xs text-grey-200 mb-1">Date</p>
+                      <p className="text-sm font-bold text-white">{viewBooking.date}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-zinc-500 mb-1">Time</p>
-                      <p className="text-sm text-zinc-300">{viewBooking.time}</p>
+                      <p className="text-xs text-grey-200 mb-1">Time</p>
+                      <p className="text-sm font-bold text-white">{viewBooking.time}</p>
                     </div>
                   </div>
                 </div>
@@ -379,21 +379,21 @@ const BookingManagement = () => {
             {/* Modal Actions Footer */}
             <div className="p-6 border-t border-white/5 bg-zinc-950 flex flex-wrap gap-3">
                {viewBooking.status === 'Pending' && (
-                 <button onClick={() => { updateStatus(viewBooking.id, 'Confirmed'); setViewBooking(null); }} className="flex-1 py-3 rounded-xl bg-emerald-500/20 text-emerald-400 font-bold text-sm border border-emerald-500/30 hover:bg-emerald-500/30 transition-colors">
+                 <button onClick={() => { updateStatus(viewBooking.id, 'Confirmed'); setViewBooking(null); }} className="flex-1 py-3 rounded-xl bg-emerald-600 text-white font-bold text-sm border border-emerald-300/80 hover:bg-emerald-700 transition-colors shadow-sm">
                    Confirm Appointment
                  </button>
                )}
                {viewBooking.status === 'Confirmed' && (
-                 <button onClick={() => { updateStatus(viewBooking.id, 'Completed'); setViewBooking(null); }} className="flex-1 py-3 rounded-xl bg-blue-500/20 text-blue-400 font-bold text-sm border border-blue-500/30 hover:bg-blue-500/30 transition-colors">
+                 <button onClick={() => { updateStatus(viewBooking.id, 'Completed'); setViewBooking(null); }} className="flex-1 py-3 rounded-xl bg-blue-600 text-white font-bold text-sm border border-blue-300/80 hover:bg-blue-700 transition-colors shadow-sm">
                    Mark as Completed
                  </button>
                )}
                {(viewBooking.status === 'Pending' || viewBooking.status === 'Confirmed') && (
-                 <button onClick={() => { updateStatus(viewBooking.id, 'Cancelled'); setViewBooking(null); }} className="flex-1 py-3 rounded-xl bg-amber-500/10 text-amber-500 font-bold text-sm border border-amber-500/20 hover:bg-amber-500/20 transition-colors">
+                 <button onClick={() => { updateStatus(viewBooking.id, 'Cancelled'); setViewBooking(null); }} className="flex-1 py-3 rounded-xl bg-amber-600 text-white font-bold text-sm border border-amber-200/80 hover:bg-amber-700 transition-colors shadow-sm">
                    Cancel Appointment
                  </button>
                )}
-               <button onClick={() => setDeleteId(viewBooking.id)} className="p-3 rounded-xl bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20 transition-colors" title="Delete Permanently">
+               <button onClick={() => setDeleteId(viewBooking.id)} className="p-3 rounded-xl bg-red-600 text-white border border-red-300/80 hover:bg-red-700 transition-colors shadow-sm" title="Delete Permanently">
                  <Trash2 className="h-5 w-5" />
                </button>
             </div>
