@@ -29,6 +29,29 @@ const AdminLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+  const [pendingReviewCount, setPendingReviewCount] = React.useState(0);
+
+  const fetchPendingReviews = React.useCallback(async () => {
+    try {
+      const reviews = await fetch('/api/reviews').then((res) => res.json());
+      setPendingReviewCount(reviews.filter((review: any) => !review.approved).length);
+    } catch (error) {
+      console.error('Failed to fetch pending reviews:', error);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    fetchPendingReviews();
+
+    const source = new EventSource('/api/reviews/stream');
+    source.onmessage = (event) => {
+      if (event.data === 'updated') {
+        fetchPendingReviews();
+      }
+    };
+
+    return () => source.close();
+  }, [fetchPendingReviews]);
 
   if (loading) return <div className="min-h-screen bg-[#FDFAF5] flex items-center justify-center text-zinc-800">Loading...</div>;
   if (!user) return <Navigate to="/admin/login" />;
@@ -80,7 +103,17 @@ const AdminLayout = () => {
                 )}
               >
                 <item.icon className="h-5 w-5" />
-                <span>{item.name}</span>
+                <span className="flex-1">{item.name}</span>
+                {item.name === 'Reviews' && pendingReviewCount > 0 && (
+                  <span
+                    className={cn(
+                      'min-w-6 h-6 px-2 inline-flex items-center justify-center rounded-full text-[10px] font-black',
+                      isActive(item.path) ? 'bg-white text-[#C5A059]' : 'bg-[#C5A059] text-white'
+                    )}
+                  >
+                    {pendingReviewCount}
+                  </span>
+                )}
               </Link>
             ))}
           </nav>
