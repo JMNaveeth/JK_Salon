@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion, useInView } from 'motion/react';
 import {
   Scissors, Instagram, Facebook, Twitter, Mail, Phone,
-  MapPin, ArrowUpRight, Clock, Heart, ArrowRight
+  MapPin, Clock, Heart, ArrowRight
 } from 'lucide-react';
 
 /* ── Real-time shop status based on Sri Lanka time (Asia/Colombo, UTC+5:30) ── */
@@ -120,51 +120,7 @@ const Footer = () => {
         }}
       />
 
-      <div ref={ref} className="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 pt-16 lg:pt-24 pb-8">
-        {/* Top CTA Row */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8 pb-16 mb-12"
-          style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}
-        >
-          <div>
-            <h2 className="text-3xl lg:text-4xl font-serif text-white tracking-tight mb-3">
-              Ready for a{' '}
-              <span
-                style={{
-                  background: `linear-gradient(135deg, ${GOLD}, ${GOLD_LIGHT})`,
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}
-              >
-                transformation?
-              </span>
-            </h2>
-            <p className="text-zinc-500 text-sm max-w-md">
-              Book your appointment today and experience premium grooming at its finest.
-            </p>
-          </div>
-          <Link to="/booking">
-            <motion.div
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              className="group relative flex items-center gap-3 px-8 py-4 rounded-2xl text-sm font-bold text-white transition-all"
-              style={{
-                background: `linear-gradient(135deg, ${GOLD}, ${GOLD_LIGHT})`,
-                boxShadow: `0 12px 32px rgba(197,160,89,0.25)`,
-              }}
-            >
-              Book Appointment
-              <ArrowUpRight className="h-4 w-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-              <div
-                className="absolute inset-0 rounded-2xl bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              />
-            </motion.div>
-          </Link>
-        </motion.div>
+      <div ref={ref} className="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 pt-10 lg:pt-14 pb-8">
 
         {/* Main Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
