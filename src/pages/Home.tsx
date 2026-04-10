@@ -340,50 +340,11 @@ const WhyCard = ({ icon, title, desc, idx }: { icon: React.ReactNode; title: str
   );
 };
 
-/* ── Review Card ───────────────────────────────────────────── */
-const ReviewCard = ({ testimonial, idx }: { testimonial: any; idx: number }) => {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true });
-  return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 40, scale: 0.96 }}
-      animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
-      transition={{ delay: idx * 0.15, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-      whileHover={{ y: -6 }}
-      className="relative p-8 rounded-3xl bg-white overflow-hidden group"
-      style={{ border: "1px solid rgba(197,160,89,0.15)", boxShadow: "0 4px 30px rgba(197,160,89,0.07)" }}
-    >
-      <div className="absolute top-0 left-6 right-6 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-        style={{ background: `linear-gradient(90deg,transparent,${GOLD},transparent)` }} />
-      <div className="absolute top-5 right-7 text-8xl font-serif leading-none select-none" style={{ color: `rgba(197,160,89,0.08)` }}>"</div>
-
-      <div className="flex gap-0.5 mb-5">
-        {[...Array(5)].map((_, i) => <Star key={i} className="h-4 w-4 fill-[#C5A059] text-[#C5A059]" />)}
-      </div>
-      <p className="text-zinc-600 text-sm leading-relaxed mb-8 relative z-10">"{testimonial.comment}"</p>
-      <div className="flex items-center gap-3">
-        <div
-          className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm text-white"
-          style={{ background: `linear-gradient(135deg,${GOLD},${GOLD_LIGHT})` }}
-        >
-          {testimonial.customerName[0]}
-        </div>
-        <div>
-          <p className="font-bold text-[#1A1A1A] text-sm">{testimonial.customerName}</p>
-          <p className="text-zinc-400 text-[10px] uppercase tracking-widest mt-0.5">Verified Client</p>
-        </div>
-      </div>
-    </motion.div>
-  );
-};
-
 /* ══════════════════════════════════════════════════════════════
    HOME PAGE
 ══════════════════════════════════════════════════════════════ */
 const Home = () => {
   const [services, setServices] = useState<any[]>([]);
-  const [reviews, setReviews] = useState<any[]>([]);
 
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
@@ -394,9 +355,8 @@ const Home = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [servicesData, reviewsData] = await Promise.all([api.getServices(), api.getReviews()]);
+        const servicesData = await api.getServices();
         setServices(servicesData.filter((s: any) => s.status === 'Active').slice(0, 3));
-        setReviews(reviewsData.filter((r: any) => r.status === "approved").slice(0, 3));
       } catch (error) {
         console.error("Failed to fetch home data:", error);
       }
@@ -749,23 +709,6 @@ const Home = () => {
       </section>
 
       {/* ══ TESTIMONIALS ══════════════════════════════════════════════════════ */}
-      <section className="py-28 relative overflow-hidden" style={{ background: CREAM2 }}>
-        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: `radial-gradient(ellipse at 15% 50%,rgba(197,160,89,0.06) 0%,transparent 55%),radial-gradient(ellipse at 85% 50%,rgba(197,160,89,0.06) 0%,transparent 55%)` }} />
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-          <SectionHeading eyebrow="Client Love" title="What They Say" />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {reviews.map((testimonial, idx) => (
-              <ReviewCard key={testimonial._id || idx} testimonial={testimonial} idx={idx} />
-            ))}
-            {reviews.length === 0 && (
-              <div className="col-span-full text-center text-zinc-400 py-16 text-sm">
-                No reviews yet. Be the first to leave one!
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-
       {/* ══ BOOKING CTA ═══════════════════════════════════════════════════════ */}
       <section className="py-36 relative overflow-hidden" style={{ background: CREAM }}>
         {/* soft warm background */}
