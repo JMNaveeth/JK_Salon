@@ -5,7 +5,6 @@
 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate, useNavigate } from 'react-router-dom';
-import { signOut } from 'firebase/auth';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -19,7 +18,7 @@ import AdminLogin from './pages/AdminLogin';
 import AdminLayout from './admin/AdminLayout';
 import ScrollToTop from './components/ScrollToTop';
 import { useAuth } from './hooks/useAuth';
-import { auth } from './firebase/firebase';
+import { supabase } from './supabase/supabase';
 
 /* Loading spinner component */
 const LoadingScreen = () => (
@@ -63,7 +62,7 @@ const AppContent = () => {
   const hideFooter = hideChrome || location.pathname === '/booking';
 
   const handleLogout = async () => {
-    await signOut(auth);
+    await supabase.auth.signOut();
     navigate('/login', { replace: true });
   };
 

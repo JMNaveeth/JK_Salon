@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { onAuthStateChanged, User } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
-import { auth, db } from '../firebase/firebase';
+import { supabase } from '../supabase/supabase';
+import type { User } from '@supabase/supabase-js';
 
 export type UserRole = 'admin' | 'user' | null;
 
@@ -11,31 +10,55 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      setUser(firebaseUser);
-
-      if (firebaseUser) {
-        try {
-          const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-          if (userDoc.exists()) {
-            setRole(userDoc.data().role as UserRole);
-          } else {
-            // Fallback: if no Firestore doc exists, treat as regular user
-            setRole('user');
-          }
-        } catch (err) {
-          console.error('Error fetching user role:', err);
-          setRole('user');
-        }
+    // Get initial session
+    const initializeAuth = async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (session?.user) {
+        setUser(session.user);
+        await fetchRole(session.user.id);
       } else {
         setRole(null);
       }
-
       setLoading(false);
+    };
+
+    initializeAuth();
+
+    // Listen for state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user) {
+        setUser(session.user);
+        await fetchRole(session.user.id);
+      } else {
+        setUser(null);
+        setRole(null);
+      }
     });
 
-    return () => unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
+
+  const fetchRole = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', userId)
+        .single();
+        
+      if (data) {
+        setRole(data.role as UserRole);
+      } else {
+        setRole('user');
+      }
+    } catch (err) {
+      console.error('Error fetching user role:', err);
+      setRole('user');
+    }
+  };
 
   const isAdmin = role === 'admin';
 
