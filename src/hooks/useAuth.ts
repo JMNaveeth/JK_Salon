@@ -27,6 +27,7 @@ export function useAuth() {
 
     // Listen for state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      setLoading(true);
       if (session?.user) {
         setUser(session.user);
         await fetchRole(session.user.id);
@@ -34,6 +35,7 @@ export function useAuth() {
         setUser(null);
         setRole(null);
       }
+      setLoading(false);
     });
 
     return () => {

@@ -31,8 +31,8 @@ const LoginForm = ({ navigate }: { navigate: any }) => {
             if (error) throw error;
             navigate('/');
         } catch (err: any) {
-            if (err.message.includes('Invalid login credentials')) setError('Invalid email or password.');
-            else setError('Login failed. Please try again.');
+            if (err.message?.includes('Invalid login credentials')) setError('Invalid email or password.');
+            else setError(err.message || 'Login failed. Please try again.');
         } finally {
             setLoading(false);
         }
