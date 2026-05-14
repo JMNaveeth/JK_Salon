@@ -59,8 +59,7 @@ const AppContent = () => {
   const { user, loading } = useAuth();
   const hideChrome =
     ['/login', '/register'].includes(location.pathname) ||
-    location.pathname.startsWith('/admin') ||
-    (!!loading || !user) && location.pathname === '/';
+    location.pathname.startsWith('/admin');
   const hideFooter = hideChrome || location.pathname === '/booking';
 
   const handleLogout = async () => {
@@ -79,13 +78,13 @@ const AppContent = () => {
           <Route path="/register" element={<AuthPage />} />
           <Route path="/admin/login" element={<AdminLogin />} />
 
-          {/* Protected routes — require login */}
-          <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-          <Route path="/services" element={<ProtectedRoute><Services /></ProtectedRoute>} />
+          {/* Public and Protected routes */}
+          <Route path="/" element={<Home />} />
+          <Route path="/services" element={<Services />} />
           <Route path="/booking" element={<ProtectedRoute><Booking /></ProtectedRoute>} />
-          <Route path="/gallery" element={<ProtectedRoute><Gallery /></ProtectedRoute>} />
-          <Route path="/about" element={<ProtectedRoute><About /></ProtectedRoute>} />
-          <Route path="/contact" element={<ProtectedRoute><Contact /></ProtectedRoute>} />
+          <Route path="/gallery" element={<Gallery />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="/admin/*" element={<AdminRoute><AdminLayout /></AdminRoute>} />
         </Routes>
       </main>
