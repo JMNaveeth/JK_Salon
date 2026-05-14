@@ -26,16 +26,16 @@ export function useAuth() {
     initializeAuth();
 
     // Listen for state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setLoading(true);
       if (session?.user) {
         setUser(session.user);
-        await fetchRole(session.user.id);
+        fetchRole(session.user.id).finally(() => setLoading(false));
       } else {
         setUser(null);
         setRole(null);
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => {
