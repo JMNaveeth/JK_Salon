@@ -46,7 +46,7 @@ const GalleryManagement = () => {
       if (uploadRes.success) {
         // 2. Save to gallery db
         await api.uploadMedia({
-          url: uploadRes.imageUrl,
+          url: uploadRes.url,
           type: type,
           category: 'Styling' // Default category
         });

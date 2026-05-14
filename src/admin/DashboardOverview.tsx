@@ -205,7 +205,7 @@ const DashboardOverview = () => {
           </div>
           <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white tracking-tighter">
             {greeting()},{' '}
-            <span style={{ color: GOLD }}>{user?.displayName || 'Admin'}</span>
+            <span style={{ color: GOLD }}>{user?.user_metadata?.display_name || 'Admin'}</span>
           </h1>
           <p className="text-zinc-500 text-xs md:text-sm mt-1 md:mt-1.5">Here's an overview of your salon today.</p>
         </div>

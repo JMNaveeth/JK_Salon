@@ -49,10 +49,10 @@ const ContentManagement = () => {
 
     try {
       const result = await api.uploadImage(file);
-      if (!result?.success || !result?.imageUrl) {
+      if (!result?.success || !result?.url) {
         throw new Error(result?.error || 'Upload failed');
       }
-      updateField('profileImageUrl', result.imageUrl);
+      updateField('profileImageUrl', result.url);
     } catch (error: any) {
       setUploadError(error?.message || 'Failed to upload image');
     } finally {

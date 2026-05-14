@@ -1,8 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
-import { auth, db } from '../firebase/firebase';
+import { supabase } from '../supabase/supabase';
 import { motion } from 'motion/react';
 import { Lock, Mail, Scissors } from 'lucide-react';
 
@@ -19,16 +17,24 @@ const AdminLogin = () => {
     setError('');
 
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (signInError) throw signInError;
       
-      // Check if user has admin role in Firestore
-      const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
+      // Check if user has admin role in Supabase
+      const { data: userDoc, error: roleError } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', data.user.id)
+        .single();
       
-      if (userDoc.exists() && userDoc.data().role === 'admin') {
+      if (userDoc && userDoc.role === 'admin') {
         navigate('/admin/dashboard');
       } else {
         // Not an admin — sign them out and show error
-        await signOut(auth);
+        await supabase.auth.signOut();
         setError('Access denied. This account does not have admin privileges.');
       }
     } catch (err: any) {

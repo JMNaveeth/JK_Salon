@@ -9,11 +9,11 @@ import {
   format, addDays, startOfToday, isSameDay,
   startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths, isBefore,
 } from 'date-fns';
-import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import { cn } from '@/src/utils/cn';
 import { api } from '../services/api';
 import { simulatePayment } from '../api/bookingApi';
-import { db } from '../firebase/firebase';
+import { supabase } from '../supabase/supabase';
+import { query } from 'express';
 
 /* ─── Design tokens ────────────────────────────────────────── */
 const GOLD       = '#C5A059';
@@ -490,17 +490,6 @@ const Booking = () => {
   React.useEffect(() => {
     const selectedDate = format(formData.date, 'yyyy-MM-dd');
     setSlotAvailabilityLoading(true);
-    let firebaseSlots = new Set<string>();
-    let apiSlots = new Set<string>();
-
-    const mergeAndApply = () => {
-      const merged = new Set<string>([...firebaseSlots, ...apiSlots]);
-      setBookedSlots(merged);
-      if (formData.timeSlot && merged.has(normalizeSlotLabel(formData.timeSlot))) {
-        setFormData((prev) => ({ ...prev, timeSlot: '' }));
-        setSlotError('Please select a valid time slot');
-      }
-    };
 
     const fetchSlotsFromApi = async () => {
       try {
@@ -512,8 +501,11 @@ const Booking = () => {
             const slot = normalizeSlotLabel(booking?.timeSlot || booking?.time);
             if (slot) slots.add(slot);
           });
-        apiSlots = slots;
-        mergeAndApply();
+        setBookedSlots(slots);
+        if (formData.timeSlot && slots.has(normalizeSlotLabel(formData.timeSlot))) {
+          setFormData((prev) => ({ ...prev, timeSlot: '' }));
+          setSlotError('Please select a valid time slot');
+        }
       } catch (error) {
         console.error('Failed to load slot availability:', error);
       } finally {
@@ -521,42 +513,10 @@ const Booking = () => {
       }
     };
 
-    const q = query(collection(db, 'bookings'), where('date', '==', selectedDate));
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        const activeSlots = new Set<string>();
-        snapshot.docs.forEach((docSnap) => {
-          const data = docSnap.data() as any;
-          const status = normalizeStatus(data?.status);
-          if (status !== 'cancelled') {
-            const slot = normalizeSlotLabel(data?.timeSlot || data?.time);
-            if (slot) activeSlots.add(slot);
-          }
-        });
-        firebaseSlots = activeSlots;
-        mergeAndApply();
-        setSlotAvailabilityLoading(false);
-      },
-      () => {
-        setSlotAvailabilityLoading(false);
-      }
-    );
-
     fetchSlotsFromApi();
-    const source = new EventSource('/api/bookings/stream');
-    source.onmessage = (event) => {
-      if (event.data === 'updated') fetchSlotsFromApi();
-    };
-    source.onerror = () => {
-      source.close();
-    };
-
     const polling = window.setInterval(fetchSlotsFromApi, 10000);
 
     return () => {
-      unsubscribe();
-      source.close();
       window.clearInterval(polling);
     };
   }, [formData.date]);
@@ -1226,3 +1186,7 @@ const Booking = () => {
 };
 
 export default Booking;
+
+function collection(db: any, arg1: string): import("qs").IParseOptions<undefined> | { (str: string, options?: import("qs").IParseOptions<import("qs").BooleanOptional> & { decoder?: never | undefined; }): import("qs").ParsedQs; (str: string | Record<string, string>, options?: import("qs").IParseOptions<import("qs").BooleanOptional>): { [key: string]: unknown; }; } {
+  throw new Error('Function not implemented.');
+}

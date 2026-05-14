@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -18,7 +18,6 @@ import AdminLogin from './pages/AdminLogin';
 import AdminLayout from './admin/AdminLayout';
 import ScrollToTop from './components/ScrollToTop';
 import { useAuth } from './hooks/useAuth';
-import { supabase } from './supabase/supabase';
 
 /* Loading spinner component */
 const LoadingScreen = () => (
@@ -54,17 +53,11 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
 
 const AppContent = () => {
   const location = useLocation();
-  const navigate = useNavigate();
   const { user, loading } = useAuth();
   const hideChrome =
     ['/login', '/register'].includes(location.pathname) ||
     location.pathname.startsWith('/admin');
   const hideFooter = hideChrome || location.pathname === '/booking';
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate('/login', { replace: true });
-  };
 
   return (
     <div className="min-h-screen bg-black font-sans selection:bg-emerald-500/30 selection:text-emerald-500">

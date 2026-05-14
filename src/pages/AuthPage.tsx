@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
-import { auth, db } from '../firebase/firebase';
+import { supabase } from '../supabase/supabase';
 import { Scissors, Mail, Lock, Eye, EyeOff, ArrowRight, Loader2, Sparkles, User, CheckCircle } from 'lucide-react';
 
 const GOLD = '#C5A059';
@@ -26,13 +24,14 @@ const LoginForm = ({ navigate }: { navigate: any }) => {
         setLoading(true);
         setError('');
         try {
-            await signInWithEmailAndPassword(auth, email, password);
+            const { error } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
+            if (error) throw error;
             navigate('/');
         } catch (err: any) {
-            if (err.code === 'auth/user-not-found') setError('No account found with this email.');
-            else if (err.code === 'auth/wrong-password') setError('Incorrect password.');
-            else if (err.code === 'auth/invalid-email') setError('Invalid email address.');
-            else if (err.code === 'auth/invalid-credential') setError('Invalid email or password.');
+            if (err.message.includes('Invalid login credentials')) setError('Invalid email or password.');
             else setError('Login failed. Please try again.');
         } finally {
             setLoading(false);
@@ -244,21 +243,31 @@ const RegisterForm = ({ navigate }: { navigate: any }) => {
         setLoading(true);
         setError('');
         try {
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            await updateProfile(userCredential.user, { displayName: name });
-            // Save user with 'user' role in Firestore
-            await setDoc(doc(db, 'users', userCredential.user.uid), {
-              name,
-              email,
-              role: 'user',
-              createdAt: new Date().toISOString(),
+            const { data, error } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: { display_name: name },
+                },
             });
+            if (error) throw error;
+
+            // Save user with 'user' role in users table
+            if (data.user) {
+                await supabase.from('users').upsert({
+                    id: data.user.id,
+                    name,
+                    email,
+                    role: 'user',
+                    created_at: new Date().toISOString(),
+                });
+            }
             navigate('/');
         } catch (err: any) {
-            if (err.code === 'auth/email-already-in-use') setError('Email is already registered. Try logging in.');
-            else if (err.code === 'auth/invalid-email') setError('Invalid email address.');
-            else if (err.code === 'auth/weak-password') setError('Password is too weak. Use at least 6 characters.');
-            else setError('Registration failed. Please try again.');
+            if (err.message?.includes('already registered')) setError('Email is already registered. Try logging in.');
+            else if (err.message?.includes('invalid')) setError('Invalid email address.');
+            else if (err.message?.includes('weak')) setError('Password is too weak. Use at least 6 characters.');
+            else setError(err.message || 'Registration failed. Please try again.');
         } finally {
             setLoading(false);
         }

@@ -155,7 +155,7 @@ const ServiceManagement = () => {
       if (imageFile) {
         const uploadRes = await api.uploadImage(imageFile);
         if (uploadRes.success) {
-          finalImageUrl = uploadRes.imageUrl;
+          finalImageUrl = uploadRes.url;
         } else {
           showToast('Image upload failed.', 'error');
           setSaving(false);

@@ -1,17 +1,10 @@
-import { createClient } from '@supabase/supabase-js';
+/// <reference types="vite/client" />
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-type ImportMetaEnv = {
-  VITE_SUPABASE_URL?: string;
-  VITE_SUPABASE_ANON_KEY?: string;
-};
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.trim();
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim();
 
-const env = import.meta as ImportMeta & { env: ImportMetaEnv };
-
-const supabaseUrl = env.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = env.env.VITE_SUPABASE_ANON_KEY;
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Supabase URL or Anon key is missing in environment variables.');
-}
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// ✅ Don't crash if Supabase is not configured (SQLite mode)
+export const supabase: SupabaseClient = supabaseUrl && supabaseAnonKey
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : (null as unknown as SupabaseClient);

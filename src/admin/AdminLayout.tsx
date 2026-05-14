@@ -13,8 +13,7 @@ import {
   Mail
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
-import { auth } from '../firebase/firebase';
-import { signOut } from 'firebase/auth';
+import { supabase } from '../supabase/supabase';
 import { cn } from '@/src/utils/cn';
 import DashboardOverview from './DashboardOverview';
 import ServiceManagement from './ServiceManagement';
@@ -130,7 +129,7 @@ const AdminLayout = () => {
   if (!user) return <Navigate to="/admin/login" />;
 
   const handleLogout = async () => {
-    await signOut(auth);
+    await supabase.auth.signOut();
     navigate('/admin/login');
   };
 
