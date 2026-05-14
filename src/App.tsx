@@ -69,7 +69,7 @@ const AppContent = () => {
 
   return (
     <div className="min-h-screen bg-black font-sans selection:bg-emerald-500/30 selection:text-emerald-500">
-      {!hideChrome && <Navbar onLogout={user ? handleLogout : undefined} />}
+      {!hideChrome && <Navbar />}
       <ScrollToTop />
       <main>
         <Routes>

@@ -1,10 +1,10 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, LogIn } from 'lucide-react';
+import { Menu, X, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/src/utils/cn';
 
-const Navbar = ({ onLogout }: { onLogout?: () => void }) => {
+const Navbar = () => {
   const [isOpen, setIsOpen] = React.useState(false);
   const location = useLocation();
 
@@ -58,43 +58,39 @@ const Navbar = ({ onLogout }: { onLogout?: () => void }) => {
               Book Now
             </Link>
 
-            {/* Admin Login Button */}
-            {!onLogout && (
-              <Link to="/admin/login">
-                <motion.button
-                  whileTap={{ scale: 0.95 }}
-                  whileHover={{ scale: 1.02 }}
-                  className={cn(
-                    "w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300 border",
-                    "bg-black/20 border-[#C5A059]/35 text-[#C5A059] hover:bg-[#C5A059]/10"
-                  )}
-                  aria-label="Admin Login"
-                  title="Admin Login"
-                >
-                  <LogIn className="h-4 w-4" />
-                </motion.button>
-              </Link>
-            )}
+            {/* Auth Login/Signup Button */}
+            <Link to="/login">
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.02 }}
+                className={cn(
+                  "w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300 border",
+                  "bg-black/20 border-[#C5A059]/35 text-[#C5A059] hover:bg-[#C5A059]/10"
+                )}
+                aria-label="Log In"
+                title="Log In"
+              >
+                <User className="h-4 w-4" />
+              </motion.button>
+            </Link>
           </div>
 
           {/* Mobile Right Controls */}
           <div className="md:hidden flex items-center gap-2">
-            {/* Admin Login Mobile (icon only) */}
-            {!onLogout && (
-              <Link to="/admin/login">
-                <motion.button
-                  whileTap={{ scale: 0.85 }}
-                  className={cn(
-                    "w-9 h-9 rounded-full flex items-center justify-center border transition-colors duration-300",
-                    "bg-black/20 border-[#C5A059]/35 text-[#C5A059]"
-                  )}
-                  aria-label="Admin Login"
-                  title="Admin Login"
-                >
-                  <LogIn className="h-4 w-4" />
-                </motion.button>
-              </Link>
-            )}
+            {/* Auth Login/Signup Mobile (icon only) */}
+            <Link to="/login">
+              <motion.button
+                whileTap={{ scale: 0.85 }}
+                className={cn(
+                  "w-9 h-9 rounded-full flex items-center justify-center border transition-colors duration-300",
+                  "bg-black/20 border-[#C5A059]/35 text-[#C5A059]"
+                )}
+                aria-label="Log In"
+                title="Log In"
+              >
+                <User className="h-4 w-4" />
+              </motion.button>
+            </Link>
 
             {/* Hamburger */}
             <button
