@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   Plus,
   Search,
@@ -17,8 +17,10 @@ import {
   FileText,
   Sparkles,
 } from 'lucide-react';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 import { cn } from '@/src/utils/cn';
 import { api } from '../services/api';
+import { supabase } from '../supabase/supabase';
 
 const GOLD = '#C5A059';
 const GOLD_LIGHT = '#E8C97A';
@@ -70,7 +72,7 @@ const ServiceManagement = () => {
     setTimeout(() => setToast(null), 3000);
   };
 
-  const fetchServices = async () => {
+  const fetchServices = useCallback(async () => {
     try {
       const data = await api.getServices();
       setServices(data);
@@ -79,23 +81,25 @@ const ServiceManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchServices();
 
-    // Listen to real-time updates
-    const source = new EventSource('/api/services/stream');
-    source.onmessage = (event) => {
-      if (event.data === 'updated') {
-        fetchServices();
-      }
-    };
+    // Real-time: update instantly on any service INSERT / UPDATE / DELETE
+    const channel: RealtimeChannel = supabase
+      .channel('service-management-live')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'services' },
+        () => fetchServices()
+      )
+      .subscribe();
 
     return () => {
-      source.close();
+      supabase.removeChannel(channel);
     };
-  }, []);
+  }, [fetchServices]);
 
   const filteredServices = services.filter((s) => {
     const matchesSearch =
@@ -153,11 +157,11 @@ const ServiceManagement = () => {
 
       // Upload image if file selected
       if (imageFile) {
-        const uploadRes = await api.uploadImage(imageFile);
-        if (uploadRes.success) {
+        const uploadRes = await api.uploadServiceImage(imageFile);
+        if (uploadRes.success && uploadRes.url) {
           finalImageUrl = uploadRes.url;
         } else {
-          showToast('Image upload failed.', 'error');
+          showToast(uploadRes.error ? `Image upload failed: ${uploadRes.error}` : 'Image upload failed.', 'error');
           setSaving(false);
           return;
         }

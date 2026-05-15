@@ -2,16 +2,16 @@ import { supabase } from '../supabase/supabase';
 
 // Frontend API Service
 export const api = {
-  // Image Upload
+  // Image Upload — generic (gallery bucket)
   uploadImage: async (file: File) => {
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+      const fileExt = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
+      const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 10)}.${fileExt}`;
       const filePath = `uploads/${fileName}`;
 
-      const { data, error } = await supabase.storage
+      const { error } = await supabase.storage
         .from('gallery')
-        .upload(filePath, file);
+        .upload(filePath, file, { contentType: file.type, upsert: false });
 
       if (error) throw error;
 
@@ -21,8 +21,32 @@ export const api = {
 
       return { success: true, url: publicUrl };
     } catch (error: any) {
-      console.error("Supabase Upload Error:", error);
-      return { success: false, error: error.message };
+      console.error('Supabase Upload Error:', error);
+      return { success: false, error: error.message as string };
+    }
+  },
+
+  // Image Upload — service images (stored under services/ prefix in gallery bucket)
+  uploadServiceImage: async (file: File) => {
+    try {
+      const fileExt = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
+      const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 10)}.${fileExt}`;
+      const filePath = `services/${fileName}`;
+
+      const { error } = await supabase.storage
+        .from('gallery')
+        .upload(filePath, file, { contentType: file.type, upsert: false });
+
+      if (error) throw error;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('gallery')
+        .getPublicUrl(filePath);
+
+      return { success: true, url: publicUrl };
+    } catch (error: any) {
+      console.error('Supabase Service Image Upload Error:', error);
+      return { success: false, error: error.message as string };
     }
   },
 

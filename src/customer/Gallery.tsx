@@ -1,8 +1,10 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { motion, useInView, AnimatePresence } from 'motion/react';
 import { Play, Maximize2, Loader2, Sparkles, ChevronDown, X, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 import { api } from '../services/api';
+import { supabase } from '../supabase/supabase';
 
 const GOLD = '#C5A059';
 const GOLD_LIGHT = '#E8C97A';
@@ -173,27 +175,27 @@ const Gallery = () => {
   const [filter, setFilter] = useState('All');
   const [lightboxItem, setLightboxItem] = useState<any | null>(null);
 
+  const fetchGallery = useCallback(async () => {
+    try {
+      const data = await api.getGallery();
+      setGalleryItems(data);
+    } catch (error) {
+      console.error('Failed to fetch gallery:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    const fetchGallery = async () => {
-      try {
-        const data = await api.getGallery();
-        setGalleryItems(data);
-      } catch (error) {
-        console.error('Failed to fetch gallery:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchGallery();
 
-    const source = new EventSource('/api/gallery/stream');
-    source.onmessage = (event) => {
-      if (event.data === 'updated') {
-        fetchGallery();
-      }
-    };
-    return () => source.close();
-  }, []);
+    const channel: RealtimeChannel = supabase
+      .channel('customer-gallery-live')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'gallery' }, () => fetchGallery())
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [fetchGallery]);
 
   const displayItems = galleryItems;
 

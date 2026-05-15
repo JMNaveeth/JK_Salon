@@ -10,8 +10,9 @@ import {
   LogOut,
   Menu,
   X,
-  Mail
+  Mail,
 } from 'lucide-react';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 import { useAuth } from '../auth/useAuth';
 import { supabase } from '../supabase/supabase';
 import { cn } from '@/src/utils/cn';
@@ -23,20 +24,7 @@ import ReviewManagement from './ReviewManagement';
 import MessageManagement from './MessageManagement';
 import ContentManagement from './ContentManagement';
 
-const isReviewPending = (review: any) => {
-  const approved = review?.approved;
-  if (approved === true || approved === 1) return false;
-  if (typeof approved === 'string' && approved.trim().toLowerCase() === 'true') return false;
-  return true;
-};
-
-const normalizeStatus = (status?: string) => (status || '').trim().toLowerCase();
-
-const shouldCountBookingBadge = (booking: any) => {
-  const status = normalizeStatus(booking?.status);
-  return status === 'pending' || status === 'confirmed';
-};
-
+/* ─── AdminLayout ─────────────────────────────────────────── */
 const AdminLayout = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
@@ -45,87 +33,83 @@ const AdminLayout = () => {
   const [pendingReviewCount, setPendingReviewCount] = React.useState(0);
   const [bookingBadgeCount, setBookingBadgeCount] = React.useState(0);
 
-  const fetchPendingReviews = React.useCallback(async () => {
+  /* ── fetch helpers (called on mount + every realtime event) ── */
+  const refreshReviewBadge = React.useCallback(async () => {
     try {
-      const reviews = await fetch('/api/reviews').then((res) => res.json());
-      setPendingReviewCount(reviews.filter((review: any) => isReviewPending(review)).length);
-    } catch (error) {
-      console.error('Failed to fetch pending reviews:', error);
+      const { data, error } = await supabase
+        .from('reviews')
+        .select('id, approved')
+        .or('approved.is.null,approved.eq.false');
+      if (!error) setPendingReviewCount(data?.length ?? 0);
+    } catch (err) {
+      console.error('Badge: reviews fetch error', err);
     }
   }, []);
 
-  React.useEffect(() => {
-    fetchPendingReviews();
-
-    const source = new EventSource('/api/reviews/stream');
-    source.onmessage = (event) => {
-      if (event.data === 'updated') {
-        fetchPendingReviews();
-      }
-    };
-
-    source.onerror = () => {
-      source.close();
-    };
-
-    const poll = window.setInterval(fetchPendingReviews, 10000);
-    const onWindowFocus = () => fetchPendingReviews();
-    const onVisibilityChange = () => {
-      if (document.visibilityState === 'visible') fetchPendingReviews();
-    };
-
-    window.addEventListener('focus', onWindowFocus);
-    document.addEventListener('visibilitychange', onVisibilityChange);
-
-    return () => {
-      source.close();
-      window.clearInterval(poll);
-      window.removeEventListener('focus', onWindowFocus);
-      document.removeEventListener('visibilitychange', onVisibilityChange);
-    };
-  }, [fetchPendingReviews]);
-
-  const fetchBookingBadgeCount = React.useCallback(async () => {
+  const refreshBookingBadge = React.useCallback(async () => {
     try {
-      const bookings = await fetch('/api/bookings').then((res) => res.json());
-      setBookingBadgeCount(bookings.filter((booking: any) => shouldCountBookingBadge(booking)).length);
-    } catch (error) {
-      console.error('Failed to fetch booking badge count:', error);
+      const { data, error } = await supabase
+        .from('bookings')
+        .select('id, status')
+        .in('status', ['Pending', 'pending', 'Confirmed', 'confirmed']);
+      if (!error) setBookingBadgeCount(data?.length ?? 0);
+    } catch (err) {
+      console.error('Badge: bookings fetch error', err);
     }
   }, []);
 
+  /* ── Supabase Realtime — instant badge updates ── */
   React.useEffect(() => {
-    fetchBookingBadgeCount();
+    if (!user) return;
 
-    const source = new EventSource('/api/bookings/stream');
-    source.onmessage = (event) => {
-      if (event.data === 'updated') {
-        fetchBookingBadgeCount();
-      }
+    // Initial counts on mount
+    refreshReviewBadge();
+    refreshBookingBadge();
+
+    // Reviews: fire on every INSERT / UPDATE / DELETE
+    const reviewChannel: RealtimeChannel = supabase
+      .channel('admin-badge-reviews')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'reviews' },
+        () => refreshReviewBadge()
+      )
+      .subscribe();
+
+    // Bookings: fire on every INSERT / UPDATE / DELETE
+    const bookingChannel: RealtimeChannel = supabase
+      .channel('admin-badge-bookings')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'bookings' },
+        () => refreshBookingBadge()
+      )
+      .subscribe();
+
+    // Fallback: re-fetch when tab becomes visible again (handles missed events)
+    const onFocus = () => {
+      refreshReviewBadge();
+      refreshBookingBadge();
     };
-
-    source.onerror = () => {
-      source.close();
-    };
-
-    const poll = window.setInterval(fetchBookingBadgeCount, 10000);
-    const onWindowFocus = () => fetchBookingBadgeCount();
-    const onVisibilityChange = () => {
-      if (document.visibilityState === 'visible') fetchBookingBadgeCount();
-    };
-
-    window.addEventListener('focus', onWindowFocus);
-    document.addEventListener('visibilitychange', onVisibilityChange);
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') onFocus();
+    });
 
     return () => {
-      source.close();
-      window.clearInterval(poll);
-      window.removeEventListener('focus', onWindowFocus);
-      document.removeEventListener('visibilitychange', onVisibilityChange);
+      supabase.removeChannel(reviewChannel);
+      supabase.removeChannel(bookingChannel);
+      window.removeEventListener('focus', onFocus);
     };
-  }, [fetchBookingBadgeCount]);
+  }, [user, refreshReviewBadge, refreshBookingBadge]);
 
-  if (loading) return <div className="min-h-screen bg-[#FDFAF5] flex items-center justify-center text-zinc-800">Loading...</div>;
+  /* ── auth guard ── */
+  if (loading)
+    return (
+      <div className="min-h-screen bg-[#FDFAF5] flex items-center justify-center text-zinc-800">
+        Loading...
+      </div>
+    );
   if (!user) return <Navigate to="/admin/login" />;
 
   const handleLogout = async () => {
@@ -134,70 +118,68 @@ const AdminLayout = () => {
   };
 
   const menuItems = [
-    { name: 'Dashboard', icon: LayoutDashboard, path: '/admin/dashboard' },
-    { name: 'Services', icon: Scissors, path: '/admin/services' },
-    { name: 'Bookings', icon: Calendar, path: '/admin/bookings' },
-    { name: 'Gallery', icon: ImageIcon, path: '/admin/gallery' },
-    { name: 'Reviews', icon: Star, path: '/admin/reviews' },
-    { name: 'Messages', icon: Mail, path: '/admin/messages' },
-    { name: 'Owner Profile', icon: Settings, path: '/admin/content' },
+    { name: 'Dashboard',    icon: LayoutDashboard, path: '/admin/dashboard' },
+    { name: 'Services',     icon: Scissors,        path: '/admin/services'  },
+    { name: 'Bookings',     icon: Calendar,        path: '/admin/bookings'  },
+    { name: 'Gallery',      icon: ImageIcon,       path: '/admin/gallery'   },
+    { name: 'Reviews',      icon: Star,            path: '/admin/reviews'   },
+    { name: 'Messages',     icon: Mail,            path: '/admin/messages'  },
+    { name: 'Owner Profile',icon: Settings,        path: '/admin/content'   },
   ];
 
   const isActive = (path: string) => location.pathname === path;
 
+  /* ── tiny badge component ── */
+  const Badge = ({ count, active }: { count: number; active: boolean }) =>
+    count > 0 ? (
+      <span
+        className={cn(
+          'min-w-6 h-6 px-2 inline-flex items-center justify-center rounded-full text-[10px] font-black',
+          active ? 'bg-white text-[#C5A059]' : 'bg-[#C5A059] text-white'
+        )}
+      >
+        {count}
+      </span>
+    ) : null;
+
   return (
     <div className="admin-light min-h-screen bg-[#FDFAF5] flex">
-      {/* Sidebar */}
-      <aside className={cn(
-        "fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-[#C5A059]/20 transition-transform duration-300 lg:translate-x-0 lg:static",
-        isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-      )}>
+
+      {/* ── Sidebar ── */}
+      <aside
+        className={cn(
+          'fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-[#C5A059]/20 transition-transform duration-300 lg:translate-x-0 lg:static',
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        )}
+      >
         <div className="h-full flex flex-col p-6">
           <div className="mb-12">
-            <img
-              src="/jk_logo.png"
-              alt="JK Salon Admin"
-              className="h-14 w-auto object-contain"
-            />
+            <img src="/jk_logo.png" alt="JK Salon Admin" className="h-14 w-auto object-contain" />
           </div>
 
           <nav className="flex-1 space-y-2">
-            {menuItems.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                onClick={() => setIsSidebarOpen(false)}
-                className={cn(
-                  "flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all",
-                  isActive(item.path)
-                    ? "bg-[#C5A059] text-white shadow-lg shadow-[#C5A059]/20"
-                    : "text-zinc-600 hover:text-zinc-900 hover:bg-[#F6F1E8]"
-                )}
-              >
-                <item.icon className="h-5 w-5" />
-                <span className="flex-1">{item.name}</span>
-                {item.name === 'Reviews' && pendingReviewCount > 0 && (
-                  <span
-                    className={cn(
-                      'min-w-6 h-6 px-2 inline-flex items-center justify-center rounded-full text-[10px] font-black',
-                      isActive(item.path) ? 'bg-white text-[#C5A059]' : 'bg-[#C5A059] text-white'
-                    )}
-                  >
-                    {pendingReviewCount}
-                  </span>
-                )}
-                {item.name === 'Bookings' && bookingBadgeCount > 0 && (
-                  <span
-                    className={cn(
-                      'min-w-6 h-6 px-2 inline-flex items-center justify-center rounded-full text-[10px] font-black',
-                      isActive(item.path) ? 'bg-white text-[#C5A059]' : 'bg-[#C5A059] text-white'
-                    )}
-                  >
-                    {bookingBadgeCount}
-                  </span>
-                )}
-              </Link>
-            ))}
+            {menuItems.map((item) => {
+              const active = isActive(item.path);
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  onClick={() => setIsSidebarOpen(false)}
+                  className={cn(
+                    'flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all',
+                    active
+                      ? 'bg-[#C5A059] text-white shadow-lg shadow-[#C5A059]/20'
+                      : 'text-zinc-600 hover:text-zinc-900 hover:bg-[#F6F1E8]'
+                  )}
+                >
+                  <item.icon className="h-5 w-5 shrink-0" />
+                  <span className="flex-1">{item.name}</span>
+
+                  {item.name === 'Reviews'  && <Badge count={pendingReviewCount} active={active} />}
+                  {item.name === 'Bookings' && <Badge count={bookingBadgeCount}  active={active} />}
+                </Link>
+              );
+            })}
           </nav>
 
           <button
@@ -210,7 +192,7 @@ const AdminLayout = () => {
         </div>
       </aside>
 
-      {/* Main Content */}
+      {/* ── Main Content ── */}
       <div className="flex-1 flex flex-col min-w-0">
         <header className="h-20 bg-white border-b border-[#C5A059]/20 flex items-center justify-between px-6 lg:px-10">
           <button
@@ -234,18 +216,18 @@ const AdminLayout = () => {
         <main className="flex-1 p-6 lg:p-10 overflow-y-auto">
           <Routes>
             <Route path="dashboard" element={<DashboardOverview />} />
-            <Route path="services" element={<ServiceManagement />} />
-            <Route path="bookings" element={<BookingManagement />} />
-            <Route path="gallery" element={<GalleryManagement />} />
-            <Route path="reviews" element={<ReviewManagement />} />
-            <Route path="messages" element={<MessageManagement />} />
-            <Route path="content" element={<ContentManagement />} />
-            <Route path="*" element={<Navigate to="dashboard" />} />
+            <Route path="services"  element={<ServiceManagement />} />
+            <Route path="bookings"  element={<BookingManagement />} />
+            <Route path="gallery"   element={<GalleryManagement />} />
+            <Route path="reviews"   element={<ReviewManagement />} />
+            <Route path="messages"  element={<MessageManagement />} />
+            <Route path="content"   element={<ContentManagement />} />
+            <Route path="*"         element={<Navigate to="dashboard" />} />
           </Routes>
         </main>
       </div>
 
-      {/* Mobile Overlay */}
+      {/* ── Mobile Overlay ── */}
       {isSidebarOpen && (
         <div
           className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 lg:hidden"

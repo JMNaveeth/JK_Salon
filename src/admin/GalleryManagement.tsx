@@ -1,6 +1,8 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Plus, Trash2, Image as ImageIcon, Video, Loader2 } from 'lucide-react';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 import { api } from '../services/api';
+import { supabase } from '../supabase/supabase';
 
 const GalleryManagement = () => {
   const [items, setItems] = useState<any[]>([]);
@@ -8,7 +10,7 @@ const GalleryManagement = () => {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const fetchGallery = async () => {
+  const fetchGallery = useCallback(async () => {
     try {
       const data = await api.getGallery();
       setItems(data);
@@ -17,19 +19,25 @@ const GalleryManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchGallery();
 
-    const source = new EventSource('/api/gallery/stream');
-    source.onmessage = (event) => {
-      if (event.data === 'updated') {
-        fetchGallery();
-      }
+    // Real-time: update instantly on any gallery INSERT / UPDATE / DELETE
+    const channel: RealtimeChannel = supabase
+      .channel('gallery-management-live')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'gallery' },
+        () => fetchGallery()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
     };
-    return () => source.close();
-  }, []);
+  }, [fetchGallery]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

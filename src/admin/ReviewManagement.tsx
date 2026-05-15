@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Star, Check, Trash2, Loader2, MessageSquare, CheckCircle2, Clock3, Sparkles } from 'lucide-react';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 import { cn } from '@/src/utils/cn';
 import { api } from '../services/api';
+import { supabase } from '../supabase/supabase';
 
 const ReviewManagement = () => {
   const [reviews, setReviews] = useState<any[]>([]);
@@ -24,7 +26,7 @@ const ReviewManagement = () => {
     });
   };
 
-  const fetchReviews = async () => {
+  const fetchReviews = useCallback(async () => {
     try {
       const data = await api.getReviews();
       setReviews(data);
@@ -33,20 +35,25 @@ const ReviewManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchReviews();
 
-    const source = new EventSource('/api/reviews/stream');
-    source.onmessage = (event) => {
-      if (event.data === 'updated') {
-        fetchReviews();
-      }
-    };
+    // Real-time: refresh whenever a review is inserted, updated, or deleted
+    const channel: RealtimeChannel = supabase
+      .channel('review-management-live')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'reviews' },
+        () => fetchReviews()
+      )
+      .subscribe();
 
-    return () => source.close();
-  }, []);
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchReviews]);
 
   const handleApprove = async (id: string) => {
     try {

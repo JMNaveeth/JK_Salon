@@ -1,8 +1,10 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { motion, useInView, AnimatePresence } from 'motion/react';
 import { Scissors, Clock, ArrowRight, Loader2, Sparkles, ChevronDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 import { api } from '../services/api';
+import { supabase } from '../supabase/supabase';
 
 const GOLD      = '#C5A059';
 const GOLD_LIGHT = '#E8C97A';
@@ -355,23 +357,27 @@ const Services = () => {
   const [activeFilter, setActiveFilter] = useState('All');
   const [count, setCount]           = useState(0);
 
+  const fetchServices = useCallback(async () => {
+    try {
+      const data = await api.getServices();
+      setServices(data.filter((s: any) => s.status === 'Active'));
+    } catch (error) {
+      console.error('Failed to fetch services:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    const fetchServices = async () => {
-      try {
-        const data = await api.getServices();
-        setServices(data.filter((s: any) => s.status === 'Active'));
-      } catch (error) {
-        console.error('Failed to fetch services:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchServices();
 
-    const source = new EventSource('/api/services/stream');
-    source.onmessage = (event) => { if (event.data === 'updated') fetchServices(); };
-    return () => source.close();
-  }, []);
+    const channel: RealtimeChannel = supabase
+      .channel('customer-services-live')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'services' }, () => fetchServices())
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [fetchServices]);
 
   const categories = ['All', ...Array.from(new Set(services.map((s: any) => s.category))) as string[]];
   const filtered   = activeFilter === 'All' ? services : services.filter((s) => s.category === activeFilter);

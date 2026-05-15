@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -9,11 +9,11 @@ import {
   format, addDays, startOfToday, isSameDay,
   startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths, isBefore,
 } from 'date-fns';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 import { cn } from '@/src/utils/cn';
 import { api } from '../services/api';
 import { simulatePayment } from '../services/bookingApi';
 import { supabase } from '../supabase/supabase';
-import { query } from 'express';
 
 /* ─── Design tokens ────────────────────────────────────────── */
 const GOLD = '#C5A059';
@@ -472,22 +472,27 @@ const Booking = () => {
     name: '', email: '', phone: '',
   });
 
-  React.useEffect(() => {
-    const fetchServices = async () => {
-      try {
-        const data = await api.getServices();
-        setServices(data.filter((s: any) => s.status === 'Active'));
-      } catch (error) {
-        console.error('Failed to fetch services:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchServices();
-    const source = new EventSource('/api/services/stream');
-    source.onmessage = (event) => { if (event.data === 'updated') fetchServices(); };
-    return () => source.close();
+  const fetchBookingServices = useCallback(async () => {
+    try {
+      const data = await api.getServices();
+      setServices(data.filter((s: any) => s.status === 'Active'));
+    } catch (error) {
+      console.error('Failed to fetch services:', error);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  React.useEffect(() => {
+    fetchBookingServices();
+
+    const channel: RealtimeChannel = supabase
+      .channel('booking-services-live')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'services' }, () => fetchBookingServices())
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [fetchBookingServices]);
 
   React.useEffect(() => {
     const selectedDate = format(formData.date, 'yyyy-MM-dd');

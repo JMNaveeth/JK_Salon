@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { motion, useScroll, useTransform, useInView } from "motion/react";
 import {
@@ -13,7 +13,9 @@ import {
   Users,
   Zap,
 } from "lucide-react";
+import type { RealtimeChannel } from "@supabase/supabase-js";
 import { api } from "../services/api";
+import { supabase } from "../supabase/supabase";
 import {
   OwnerProfile,
   defaultOwnerProfile,
@@ -357,29 +359,25 @@ const Home = () => {
   const textY = useTransform(scrollYProgress, [0, 1], ["0%", "12%"]);
   const ownerY = useTransform(scrollYProgress, [0, 1], ["0%", "8%"]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const servicesData = await api.getServices();
-        setServices(servicesData.filter((s: any) => s.status === 'Active').slice(0, 3));
-      } catch (error) {
-        console.error("Failed to fetch home data:", error);
-      }
-    };
-    fetchData();
-
-    // Listen to real-time updates
-    const source = new EventSource('/api/services/stream');
-    source.onmessage = (event) => {
-      if (event.data === 'updated') {
-        fetchData();
-      }
-    };
-
-    return () => {
-      source.close();
-    };
+  const fetchHomeServices = useCallback(async () => {
+    try {
+      const servicesData = await api.getServices();
+      setServices(servicesData.filter((s: any) => s.status === 'Active').slice(0, 3));
+    } catch (error) {
+      console.error("Failed to fetch home data:", error);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchHomeServices();
+
+    const channel: RealtimeChannel = supabase
+      .channel('home-services-live')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'services' }, () => fetchHomeServices())
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [fetchHomeServices]);
 
   useEffect(() => {
     const unsubscribe = subscribeOwnerProfileChanges((profile) => {

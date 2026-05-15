@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Search, Check, X, Eye, Loader2, Trash2, Calendar as CalIcon, Clock, Phone, Mail, User, CreditCard, ChevronRight, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { format, isToday, isTomorrow, isPast, parseISO } from 'date-fns';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 import { cn } from '@/src/utils/cn';
 import { api } from '../services/api';
+import { supabase } from '../supabase/supabase';
 
 const GOLD = '#C5A059';
 const GOLD_LIGHT = '#E8C97A';
@@ -29,7 +31,7 @@ const BookingManagement = () => {
     setTimeout(() => setToast(null), 3000);
   };
 
-  const fetchBookings = async () => {
+  const fetchBookings = useCallback(async () => {
     try {
       const data = await api.getBookings();
       setBookings(data);
@@ -39,19 +41,25 @@ const BookingManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchBookings();
-    const source = new EventSource('/api/bookings/stream');
-    source.onmessage = (event) => {
-      if (event.data === 'updated') fetchBookings();
+
+    // Real-time: update instantly on any booking INSERT / UPDATE / DELETE
+    const channel: RealtimeChannel = supabase
+      .channel('booking-management-live')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'bookings' },
+        () => fetchBookings()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
     };
-    source.onerror = () => {
-      source.close();
-    };
-    return () => source.close();
-  }, []);
+  }, [fetchBookings]);
 
   const updateStatus = async (id: string, newStatus: string) => {
     try {
