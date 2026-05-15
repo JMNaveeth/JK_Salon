@@ -7,17 +7,17 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import Home from './pages/Home';
-import Services from './pages/Services';
-import Gallery from './pages/Gallery';
-import About from './pages/About';
-import Contact from './pages/Contact';
-import Booking from './pages/Booking';
-import AuthPage from './pages/AuthPage';
-import AdminLogin from './pages/AdminLogin';
+import Home from './customer/Home';
+import Services from './customer/Services';
+import Gallery from './customer/Gallery';
+import About from './customer/About';
+import Contact from './customer/Contact';
+import Booking from './customer/Booking';
+import AuthPage from './auth/AuthPage';
+import AdminLogin from './auth/AdminLogin';
 import AdminLayout from './admin/AdminLayout';
 import ScrollToTop from './components/ScrollToTop';
-import { useAuth } from './hooks/useAuth';
+import { useAuth } from './auth/useAuth';
 
 /* Loading spinner component */
 const LoadingScreen = () => (

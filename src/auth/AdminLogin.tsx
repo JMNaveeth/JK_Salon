@@ -49,10 +49,10 @@ const AdminLogin = () => {
           password,
         });
         if (signInError) throw signInError;
-        
+
         // Check if user has admin role in metadata
         const userRole = data.user.user_metadata?.role;
-        
+
         if (userRole === 'admin') {
           navigate('/admin/dashboard');
         } else {
@@ -147,7 +147,7 @@ const AdminLogin = () => {
           >
             {loading ? (isSignUp ? 'Registering...' : 'Signing in...') : (isSignUp ? 'Create Admin Account' : 'Sign In')}
           </button>
-          
+
           <div className="text-center mt-4">
             <button
               type="button"

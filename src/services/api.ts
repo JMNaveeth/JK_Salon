@@ -14,7 +14,7 @@ export const api = {
         .upload(filePath, file);
 
       if (error) throw error;
-      
+
       const { data: { publicUrl } } = supabase.storage
         .from('gallery')
         .getPublicUrl(filePath);
@@ -72,7 +72,7 @@ export const api = {
     try {
       const { data: service, error: fetchError } = await supabase.from('services').select('status').eq('id', id).single();
       if (fetchError) throw fetchError;
-      
+
       const newStatus = service.status === 'Active' ? 'Inactive' : 'Active';
       const { data, error } = await supabase.from('services').update({ status: newStatus }).eq('id', id).select().single();
       if (error) throw error;

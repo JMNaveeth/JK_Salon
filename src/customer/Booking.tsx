@@ -11,33 +11,33 @@ import {
 } from 'date-fns';
 import { cn } from '@/src/utils/cn';
 import { api } from '../services/api';
-import { simulatePayment } from '../api/bookingApi';
+import { simulatePayment } from '../services/bookingApi';
 import { supabase } from '../supabase/supabase';
 import { query } from 'express';
 
 /* ─── Design tokens ────────────────────────────────────────── */
-const GOLD       = '#C5A059';
+const GOLD = '#C5A059';
 const GOLD_LIGHT = '#E8C97A';
-const GOLD_DIM   = '#5C4A25';
-const BG         = '#FDFAF5';
-const BG2        = '#FFFFFF';
-const PANEL      = '#FFFFFF';
-const BORDER     = 'rgba(197,160,89,0.24)';
-const BORDER_HI  = 'rgba(197,160,89,0.38)';
-const TEXT       = '#1E1A14';
-const TEXT_MID   = 'rgba(30,26,20,0.56)';
+const GOLD_DIM = '#5C4A25';
+const BG = '#FDFAF5';
+const BG2 = '#FFFFFF';
+const PANEL = '#FFFFFF';
+const BORDER = 'rgba(197,160,89,0.24)';
+const BORDER_HI = 'rgba(197,160,89,0.38)';
+const TEXT = '#1E1A14';
+const TEXT_MID = 'rgba(30,26,20,0.56)';
 
 const timeSlots = [
-  '09:00 AM','10:00 AM','11:00 AM','12:00 PM',
-  '01:00 PM','02:00 PM','03:00 PM','04:00 PM',
-  '05:00 PM','06:00 PM','07:00 PM',
+  '09:00 AM', '10:00 AM', '11:00 AM', '12:00 PM',
+  '01:00 PM', '02:00 PM', '03:00 PM', '04:00 PM',
+  '05:00 PM', '06:00 PM', '07:00 PM',
 ];
 
 const steps = [
-  { id: 1, title: 'Service',  icon: Scissors  },
-  { id: 2, title: 'Schedule', icon: Calendar  },
-  { id: 3, title: 'Details',  icon: User      },
-  { id: 4, title: 'Payment',  icon: CreditCard},
+  { id: 1, title: 'Service', icon: Scissors },
+  { id: 2, title: 'Schedule', icon: Calendar },
+  { id: 3, title: 'Details', icon: User },
+  { id: 4, title: 'Payment', icon: CreditCard },
 ];
 
 const resolveSCode = (code?: string, bookingId?: string) => {
@@ -105,8 +105,8 @@ const MiniCalendar = ({
   const [viewMonth, setViewMonth] = React.useState(startOfMonth(startOfToday()));
   const today = startOfToday();
   const start = startOfMonth(viewMonth);
-  const end   = endOfMonth(viewMonth);
-  const days  = eachDayOfInterval({ start, end });
+  const end = endOfMonth(viewMonth);
+  const days = eachDayOfInterval({ start, end });
   const leadingBlanks = getDay(start); // 0=Sun
 
   return (
@@ -138,7 +138,7 @@ const MiniCalendar = ({
 
       {/* Day headers */}
       <div className="grid grid-cols-7 mb-2">
-        {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => (
+        {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => (
           <div key={d} className="text-center text-[9px] font-black uppercase tracking-widest py-1" style={{ color: TEXT_MID }}>
             {d}
           </div>
@@ -149,9 +149,9 @@ const MiniCalendar = ({
       <div className="grid grid-cols-7 gap-y-1">
         {[...Array(leadingBlanks)].map((_, i) => <div key={`b-${i}`} />)}
         {days.map(day => {
-          const past     = isBefore(day, today);
-          const isToday  = isSameDay(day, today);
-          const isSel    = isSameDay(day, selected);
+          const past = isBefore(day, today);
+          const isToday = isSameDay(day, today);
+          const isSel = isSameDay(day, selected);
           return (
             <button
               key={day.toISOString()}
@@ -304,9 +304,9 @@ const SummaryPanel = ({
       <div className="mx-6 rounded-2xl p-4 space-y-3 mb-6"
         style={{ background: 'rgba(0,0,0,0.015)', border: `1px solid ${BORDER}` }}>
         {[
-          { icon: Scissors, label: 'Service',  value: selectedService?.name          || '—' },
-          { icon: Calendar, label: 'Date',     value: formData.date ? format(formData.date, 'MMM dd, yyyy') : '—' },
-          { icon: Clock,    label: 'Time',     value: formData.timeSlot               || '—' },
+          { icon: Scissors, label: 'Service', value: selectedService?.name || '—' },
+          { icon: Calendar, label: 'Date', value: formData.date ? format(formData.date, 'MMM dd, yyyy') : '—' },
+          { icon: Clock, label: 'Time', value: formData.timeSlot || '—' },
           { icon: CreditCard, label: 'Amount', value: selectedService ? `LKR ${Number(selectedService.price).toLocaleString()}` : '—' },
         ].map(({ icon: Icon, label, value }, i) => (
           <div key={label} className="flex items-center gap-3">
@@ -337,9 +337,9 @@ const SummaryPanel = ({
       {/* vertical step indicator */}
       <div className="mx-6 space-y-0 mb-6 flex-1">
         {steps.map((s, i) => {
-          const done    = step > s.id;
-          const active  = step === s.id;
-          const isLast  = i === steps.length - 1;
+          const done = step > s.id;
+          const active = step === s.id;
+          const isLast = i === steps.length - 1;
           return (
             <div key={s.id} className="flex gap-3">
               <div className="flex flex-col items-center">
@@ -365,8 +365,10 @@ const SummaryPanel = ({
                   }
                 </motion.div>
                 {!isLast && (
-                  <div className="w-px flex-1 my-0.5" style={{ minHeight: 20,
-                    background: done ? `linear-gradient(to bottom,${GOLD_DIM},${GOLD_DIM})` : 'rgba(0,0,0,0.08)' }} />
+                  <div className="w-px flex-1 my-0.5" style={{
+                    minHeight: 20,
+                    background: done ? `linear-gradient(to bottom,${GOLD_DIM},${GOLD_DIM})` : 'rgba(0,0,0,0.08)'
+                  }} />
                 )}
               </div>
               <div className="pb-4 pt-1">
@@ -446,15 +448,15 @@ const MobileSummaryCard = ({
 ══════════════════════════════════════════════════════════════ */
 const Booking = () => {
   const [searchParams] = useSearchParams();
-  const navigate       = useNavigate();
+  const navigate = useNavigate();
   const initialServiceId = searchParams.get('service');
 
-  const [step, setStep]         = React.useState(1);
+  const [step, setStep] = React.useState(1);
   const [services, setServices] = React.useState<any[]>([]);
-  const [loading, setLoading]   = React.useState(true);
-  const [paying, setPaying]     = React.useState(false);
+  const [loading, setLoading] = React.useState(true);
+  const [paying, setPaying] = React.useState(false);
   const [payMethod, setPayMethod] = React.useState<'payhere' | 'genie'>('payhere');
-  const [sCode, setSCode]       = React.useState('');
+  const [sCode, setSCode] = React.useState('');
   const [bookingConfirmed, setBookingConfirmed] = React.useState(false);
   const [reviewRating, setReviewRating] = React.useState(5);
   const [reviewComment, setReviewComment] = React.useState('');
@@ -715,11 +717,11 @@ const Booking = () => {
             {/* ticket body */}
             <div className="px-8 pt-6 pb-8" style={{ background: BG2 }}>
               {[
-                { label: 'Service',  value: selectedService?.name || '—' },
-                { label: 'Date',     value: format(formData.date, 'EEEE, MMMM dd yyyy') },
-                { label: 'Time',     value: formData.timeSlot },
-                { label: 'Client',   value: formData.name },
-                { label: 'Amount',   value: `LKR ${Number(selectedService?.price || 0).toLocaleString()}`, gold: true },
+                { label: 'Service', value: selectedService?.name || '—' },
+                { label: 'Date', value: format(formData.date, 'EEEE, MMMM dd yyyy') },
+                { label: 'Time', value: formData.timeSlot },
+                { label: 'Client', value: formData.name },
+                { label: 'Amount', value: `LKR ${Number(selectedService?.price || 0).toLocaleString()}`, gold: true },
               ].map(({ label, value, gold }, i) => (
                 <motion.div
                   key={label}
@@ -944,8 +946,8 @@ const Booking = () => {
                               background: booked
                                 ? 'rgba(239,68,68,0.10)'
                                 : sel
-                                ? `linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`
-                                : 'rgba(0,0,0,0.03)',
+                                  ? `linear-gradient(135deg,${GOLD},${GOLD_LIGHT})`
+                                  : 'rgba(0,0,0,0.03)',
                               border: `1px solid ${booked ? 'rgba(239,68,68,0.35)' : sel ? GOLD : BORDER}`,
                               color: booked ? '#B91C1C' : sel ? '#fff' : TEXT_MID,
                               boxShadow: sel ? `0 6px 20px rgba(197,160,89,0.35)` : 'none',
@@ -1039,8 +1041,8 @@ const Booking = () => {
                     </div>
 
                     {[
-                      { label: 'Date',  value: format(formData.date, 'EEEE, MMMM dd yyyy') },
-                      { label: 'Time',  value: formData.timeSlot },
+                      { label: 'Date', value: format(formData.date, 'EEEE, MMMM dd yyyy') },
+                      { label: 'Time', value: formData.timeSlot },
                       { label: 'Client', value: formData.name },
                     ].map(({ label, value }, i, arr) => (
                       <div key={label} className="flex justify-between items-center py-2.5"

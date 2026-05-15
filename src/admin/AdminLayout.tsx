@@ -12,7 +12,7 @@ import {
   X,
   Mail
 } from 'lucide-react';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../auth/useAuth';
 import { supabase } from '../supabase/supabase';
 import { cn } from '@/src/utils/cn';
 import DashboardOverview from './DashboardOverview';

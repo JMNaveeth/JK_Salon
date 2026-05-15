@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { cn } from '@/src/utils/cn';
 import { api } from '../services/api';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../auth/useAuth';
 import {
   Calendar,
   TrendingUp,

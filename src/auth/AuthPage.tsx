@@ -29,10 +29,10 @@ const LoginForm = ({ navigate }: { navigate: any }) => {
                 password,
             });
             if (error) throw error;
-            
+
             if (data?.user) {
                 const userRole = data.user.user_metadata?.role;
-                    
+
                 if (userRole === 'admin') {
                     navigate('/admin/dashboard');
                     return;
@@ -53,8 +53,8 @@ const LoginForm = ({ navigate }: { navigate: any }) => {
             initial={{ opacity: 0, rotateY: -70, z: -100 }}
             animate={{ opacity: 1, rotateY: 0, z: 0 }}
             exit={{ opacity: 0, rotateY: 70, z: -100 }}
-            transition={{ 
-                duration: 0.7, 
+            transition={{
+                duration: 0.7,
                 ease: [0.22, 1, 0.36, 1],
                 opacity: { duration: 0.4 }
             }}
@@ -163,7 +163,7 @@ const LoginForm = ({ navigate }: { navigate: any }) => {
                 <motion.button
                     type="submit"
                     disabled={loading}
-                    whileHover={loading ? {} : { 
+                    whileHover={loading ? {} : {
                         scale: 1.02,
                         boxShadow: `0 20px 40px rgba(197,160,89,0.45), inset 0 2px 0 rgba(255,255,255,0.3)`,
                     }}
@@ -197,8 +197,8 @@ const LoginForm = ({ navigate }: { navigate: any }) => {
             <p className="text-center text-sm text-zinc-400 mt-8">
                 Don't have an account?{' '}
                 <Link to="/register" className="inline-block">
-                    <motion.span 
-                        className="font-bold transition-colors hover:underline cursor-pointer" 
+                    <motion.span
+                        className="font-bold transition-colors hover:underline cursor-pointer"
                         style={{ color: GOLD }}
                         whileHover={{ scale: 1.05, y: -1 }}
                         whileTap={{ scale: 0.95 }}
@@ -288,8 +288,8 @@ const RegisterForm = ({ navigate }: { navigate: any }) => {
             initial={{ opacity: 0, rotateY: 70, z: -100 }}
             animate={{ opacity: 1, rotateY: 0, z: 0 }}
             exit={{ opacity: 0, rotateY: -70, z: -100 }}
-            transition={{ 
-                duration: 0.7, 
+            transition={{
+                duration: 0.7,
                 ease: [0.22, 1, 0.36, 1],
                 opacity: { duration: 0.4 }
             }}
@@ -472,7 +472,7 @@ const RegisterForm = ({ navigate }: { navigate: any }) => {
                 <motion.button
                     type="submit"
                     disabled={loading}
-                    whileHover={loading ? {} : { 
+                    whileHover={loading ? {} : {
                         scale: 1.02,
                         boxShadow: `0 20px 40px rgba(197,160,89,0.45), inset 0 2px 0 rgba(255,255,255,0.3)`,
                     }}
@@ -506,8 +506,8 @@ const RegisterForm = ({ navigate }: { navigate: any }) => {
             <p className="text-center text-sm text-zinc-400 mt-8">
                 Already have an account?{' '}
                 <Link to="/login" className="inline-block">
-                    <motion.span 
-                        className="font-bold transition-colors hover:underline cursor-pointer" 
+                    <motion.span
+                        className="font-bold transition-colors hover:underline cursor-pointer"
                         style={{ color: GOLD }}
                         whileHover={{ scale: 1.05, y: -1 }}
                         whileTap={{ scale: 0.95 }}
@@ -526,8 +526,8 @@ const AuthPage = () => {
     const isLogin = location.pathname === '/login';
 
     return (
-        <div 
-            className="min-h-screen w-full relative flex items-center justify-center py-12 px-4 lg:px-8 overflow-hidden" 
+        <div
+            className="min-h-screen w-full relative flex items-center justify-center py-12 px-4 lg:px-8 overflow-hidden"
             style={{ background: CREAM }}
         >
             {/* Ambient Background Elements */}
@@ -542,9 +542,9 @@ const AuthPage = () => {
                             top: '50%', left: '50%',
                             transform: 'translate(-50%, -50%)',
                         }}
-                        animate={{ 
-                            scale: [1, 1.05, 1], 
-                            rotate: [0, isLogin ? 5 : -5, 0] 
+                        animate={{
+                            scale: [1, 1.05, 1],
+                            rotate: [0, isLogin ? 5 : -5, 0]
                         }}
                         transition={{ duration: 8 + i * 4, repeat: Infinity, ease: 'easeInOut' }}
                     />
@@ -560,7 +560,7 @@ const AuthPage = () => {
                 className="relative z-10 w-full lg:w-[65%] max-w-4xl aspect-square lg:aspect-[16/9] flex flex-col lg:flex-row bg-white rounded-[40px] overflow-hidden shadow-[0_40px_100px_rgba(0,0,0,0.12)] border border-white"
             >
                 <div className={`flex w-full h-full ${isLogin ? 'flex-row' : 'flex-row-reverse'}`}>
-                    
+
                     {/* Decorative Panel (Old Design Component) */}
                     <motion.div
                         layout

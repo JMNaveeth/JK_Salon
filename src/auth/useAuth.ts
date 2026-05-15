@@ -13,7 +13,7 @@ export function useAuth() {
     // Get initial session
     const initializeAuth = async () => {
       const { data: { session }, error } = await supabase.auth.getSession();
-      
+
       if (session?.user) {
         setUser(session.user);
         const userRole = session.user.user_metadata?.role || 'user';
@@ -52,7 +52,7 @@ export function useAuth() {
         .select('role')
         .eq('id', userId)
         .single();
-        
+
       if (data) {
         setRole(data.role as UserRole);
       } else {
