@@ -5,10 +5,8 @@ import { motion } from 'motion/react';
 import { Lock, Mail, Scissors } from 'lucide-react';
 
 const AdminLogin = () => {
-  const [isSignUp, setIsSignUp] = React.useState(false);
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
-  const [adminSecret, setAdminSecret] = React.useState('');
   const [error, setError] = React.useState('');
   const [loading, setLoading] = React.useState(false);
   const navigate = useNavigate();
@@ -19,47 +17,21 @@ const AdminLogin = () => {
     setError('');
 
     try {
-      if (isSignUp) {
-        // Basic validation
-        if (password.length < 6) {
-          throw new Error('Password must be at least 6 characters.');
-        }
-        if (adminSecret !== 'JK-ADMIN-SECRET') {
-          throw new Error('Invalid Admin Secret Code. Registration denied.');
-        }
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (signInError) throw signInError;
 
-        const { data, error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: { role: 'admin' }
-          }
-        });
-        if (signUpError) throw signUpError;
+      // Check if user has admin role in metadata
+      const userRole = data.user.user_metadata?.role;
 
-        if (data.user) {
-          setIsSignUp(false);
-          setAdminSecret('');
-          setPassword('');
-          setError('Admin account created successfully. Please sign in to continue.');
-        }
+      if (userRole === 'admin') {
+        navigate('/admin/dashboard');
       } else {
-        const { data, error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (signInError) throw signInError;
-
-        // Check if user has admin role in metadata
-        const userRole = data.user.user_metadata?.role;
-
-        if (userRole === 'admin') {
-          navigate('/admin/dashboard');
-        } else {
-          // Not an admin — sign them out and show error
-          await supabase.auth.signOut();
-          setError('Access denied. This account does not have admin privileges.');
-        }
+        // Not an admin — sign them out and show error
+        await supabase.auth.signOut();
+        setError('Access denied. This account does not have admin privileges.');
       }
     } catch (err: any) {
       setError(err.message || 'Authentication failed. Please try again.');
@@ -81,9 +53,7 @@ const AdminLogin = () => {
             <Scissors className="h-8 w-8 text-[#C5A059]" />
           </div>
           <h1 className="text-3xl font-bold text-white tracking-tighter">Admin Portal</h1>
-          <p className="text-zinc-500 text-sm mt-2">
-            {isSignUp ? 'Register a new admin account' : 'Sign in to manage JK Salon'}
-          </p>
+          <p className="text-zinc-500 text-sm mt-2">Sign in to manage JK Salon</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
@@ -122,24 +92,6 @@ const AdminLogin = () => {
             </div>
           </div>
 
-          {isSignUp && (
-            <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-zinc-500">Secret Admin Code</label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-500" />
-                <input
-                  type="password"
-                  required
-                  autoComplete="new-password"
-                  value={adminSecret}
-                  onChange={(e) => setAdminSecret(e.target.value)}
-                  className="w-full bg-black border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white focus:border-[#C5A059] outline-none transition-all"
-                  placeholder="Required for admin registration"
-                />
-              </div>
-            </div>
-          )}
-
           {error && (
             <p className="text-red-500 text-xs font-bold bg-red-500/10 p-3 rounded-lg border border-red-500/20">
               {error}
@@ -151,21 +103,8 @@ const AdminLogin = () => {
             disabled={loading}
             className="w-full bg-[#C5A059] hover:bg-[#b59048] disabled:opacity-50 text-white font-bold py-4 rounded-xl transition-all flex items-center justify-center"
           >
-            {loading ? (isSignUp ? 'Registering...' : 'Signing in...') : (isSignUp ? 'Create Admin Account' : 'Sign In')}
+            {loading ? 'Signing in...' : 'Sign In'}
           </button>
-
-          <div className="text-center mt-4">
-            <button
-              type="button"
-              onClick={() => {
-                setIsSignUp(!isSignUp);
-                setError('');
-              }}
-              className="text-zinc-500 hover:text-[#C5A059] text-xs font-semibold transition-colors"
-            >
-              {isSignUp ? 'Already an admin? Sign in instead' : 'Need an admin account? Register'}
-            </button>
-          </div>
         </form>
       </motion.div>
     </div>
