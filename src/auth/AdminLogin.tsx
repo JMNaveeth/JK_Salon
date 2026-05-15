@@ -86,7 +86,7 @@ const AdminLogin = () => {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
           <div className="space-y-2">
             <label className="text-xs font-bold uppercase tracking-widest text-zinc-500">Email Address</label>
             <div className="relative">
@@ -94,6 +94,10 @@ const AdminLogin = () => {
               <input
                 type="email"
                 required
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="none"
+                spellCheck={false}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full bg-black border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white focus:border-[#C5A059] outline-none transition-all"
@@ -109,6 +113,7 @@ const AdminLogin = () => {
               <input
                 type="password"
                 required
+                autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full bg-black border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white focus:border-[#C5A059] outline-none transition-all"
@@ -125,6 +130,7 @@ const AdminLogin = () => {
                 <input
                   type="password"
                   required
+                  autoComplete="new-password"
                   value={adminSecret}
                   onChange={(e) => setAdminSecret(e.target.value)}
                   className="w-full bg-black border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white focus:border-[#C5A059] outline-none transition-all"
