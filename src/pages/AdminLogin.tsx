@@ -31,18 +31,13 @@ const AdminLogin = () => {
         const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            data: { role: 'admin' }
+          }
         });
         if (signUpError) throw signUpError;
 
         if (data.user) {
-          // Elevate to admin role
-          const { error: insertError } = await supabase.from('users').upsert({
-            id: data.user.id,
-            email: data.user.email,
-            role: 'admin',
-            created_at: new Date().toISOString()
-          });
-          if (insertError) throw insertError;
           setIsSignUp(false);
           setAdminSecret('');
           setPassword('');
@@ -55,14 +50,10 @@ const AdminLogin = () => {
         });
         if (signInError) throw signInError;
         
-        // Check if user has admin role in Supabase
-        const { data: userDoc, error: roleError } = await supabase
-          .from('users')
-          .select('role')
-          .eq('id', data.user.id)
-          .single();
+        // Check if user has admin role in metadata
+        const userRole = data.user.user_metadata?.role;
         
-        if (userDoc && userDoc.role === 'admin') {
+        if (userRole === 'admin') {
           navigate('/admin/dashboard');
         } else {
           // Not an admin — sign them out and show error

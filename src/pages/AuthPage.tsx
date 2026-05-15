@@ -24,11 +24,20 @@ const LoginForm = ({ navigate }: { navigate: any }) => {
         setLoading(true);
         setError('');
         try {
-            const { error } = await supabase.auth.signInWithPassword({
+            const { data, error } = await supabase.auth.signInWithPassword({
                 email,
                 password,
             });
             if (error) throw error;
+            
+            if (data?.user) {
+                const userRole = data.user.user_metadata?.role;
+                    
+                if (userRole === 'admin') {
+                    navigate('/admin/dashboard');
+                    return;
+                }
+            }
             navigate('/');
         } catch (err: any) {
             if (err.message?.includes('Invalid login credentials')) setError('Invalid email or password.');

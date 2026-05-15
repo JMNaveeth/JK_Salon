@@ -16,7 +16,8 @@ export function useAuth() {
       
       if (session?.user) {
         setUser(session.user);
-        await fetchRole(session.user.id);
+        const userRole = session.user.user_metadata?.role || 'user';
+        setRole(userRole as UserRole);
       } else {
         setRole(null);
       }
@@ -30,12 +31,13 @@ export function useAuth() {
       setLoading(true);
       if (session?.user) {
         setUser(session.user);
-        fetchRole(session.user.id).finally(() => setLoading(false));
+        const userRole = session.user.user_metadata?.role || 'user';
+        setRole(userRole as UserRole);
       } else {
         setUser(null);
         setRole(null);
-        setLoading(false);
       }
+      setLoading(false);
     });
 
     return () => {
