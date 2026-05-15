@@ -13,7 +13,7 @@ import Gallery from './customer/Gallery';
 import About from './customer/About';
 import Contact from './customer/Contact';
 import Booking from './customer/Booking';
-import AuthPage from './auth/AuthPage';
+import AuthPage from './auth/AdminLogin';
 import AdminLogin from './auth/AdminLogin';
 import AdminLayout from './admin/AdminLayout';
 import ScrollToTop from './components/ScrollToTop';
