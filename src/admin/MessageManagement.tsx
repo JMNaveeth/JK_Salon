@@ -97,7 +97,7 @@ const MessageManagement = () => {
                   </div>
                   <div className="flex items-center text-xs text-zinc-500">
                     <Clock className="h-3 w-3 mr-1" />
-                    {format(new Date(msg.createdAt), 'MMM dd, yyyy HH:mm')}
+                    {format(new Date(msg.created_at), 'MMM dd, yyyy HH:mm')}
                   </div>
                 </div>
                 
