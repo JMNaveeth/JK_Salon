@@ -578,15 +578,22 @@ const Booking = () => {
         const generatedSCode = resolveSCode(response.sCode, response.id);
         setSCode(generatedSCode);
         setBookingConfirmed(true);
-
         setStep(5);
+        setPaying(false);
 
-        const paymentResult = await simulatePayment(response.id, selectedService?.price || 0);
-        if (paymentResult?.transactionId) {
-          console.info('Payment transaction:', paymentResult.transactionId);
+        // Payment simulation — fire-and-forget, never block the success screen
+        try {
+          const paymentResult = await simulatePayment(response.id, selectedService?.price || 0);
+          if (paymentResult?.transactionId) {
+            console.info('Payment transaction:', paymentResult.transactionId);
+          }
+        } catch (payErr) {
+          // Payment sim is optional; don't disrupt the confirmed booking
+          console.warn('Payment simulation skipped:', payErr);
         }
+        return; // booking succeeded — exit early
       } else {
-        alert(response?.error || 'Booking failed. Please try another slot.');
+        alert('Booking failed. Please try another slot.');
       }
     } catch (error: any) {
       const message = String(error?.message || '').toLowerCase();
