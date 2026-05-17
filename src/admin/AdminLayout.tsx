@@ -32,6 +32,7 @@ const AdminLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
   const [pendingReviewCount, setPendingReviewCount] = React.useState(0);
   const [bookingBadgeCount, setBookingBadgeCount] = React.useState(0);
+  const [unreadMessageCount, setUnreadMessageCount] = React.useState(0);
 
   /* ── fetch helpers (called on mount + every realtime event) ── */
   const refreshReviewBadge = React.useCallback(async () => {
@@ -58,6 +59,18 @@ const AdminLayout = () => {
     }
   }, []);
 
+  const refreshMessageBadge = React.useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('id, status')
+        .eq('status', 'Unread');
+      if (!error) setUnreadMessageCount(data?.length ?? 0);
+    } catch (err) {
+      console.error('Badge: messages fetch error', err);
+    }
+  }, []);
+
   /* ── Supabase Realtime — instant badge updates ── */
   React.useEffect(() => {
     if (!user) return;
@@ -65,6 +78,7 @@ const AdminLayout = () => {
     // Initial counts on mount
     refreshReviewBadge();
     refreshBookingBadge();
+    refreshMessageBadge();
 
     // Reviews: fire on every INSERT / UPDATE / DELETE
     const reviewChannel: RealtimeChannel = supabase
@@ -86,10 +100,21 @@ const AdminLayout = () => {
       )
       .subscribe();
 
+    // Messages: fire on every INSERT / UPDATE / DELETE
+    const messageChannel: RealtimeChannel = supabase
+      .channel('admin-badge-messages')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'messages' },
+        () => refreshMessageBadge()
+      )
+      .subscribe();
+
     // Fallback: re-fetch when tab becomes visible again (handles missed events)
     const onFocus = () => {
       refreshReviewBadge();
       refreshBookingBadge();
+      refreshMessageBadge();
     };
     window.addEventListener('focus', onFocus);
     document.addEventListener('visibilitychange', () => {
@@ -99,9 +124,10 @@ const AdminLayout = () => {
     return () => {
       supabase.removeChannel(reviewChannel);
       supabase.removeChannel(bookingChannel);
+      supabase.removeChannel(messageChannel);
       window.removeEventListener('focus', onFocus);
     };
-  }, [user, refreshReviewBadge, refreshBookingBadge]);
+  }, [user, refreshReviewBadge, refreshBookingBadge, refreshMessageBadge]);
 
   /* ── auth guard ── */
   if (loading)
@@ -177,6 +203,7 @@ const AdminLayout = () => {
 
                   {item.name === 'Reviews'  && <Badge count={pendingReviewCount} active={active} />}
                   {item.name === 'Bookings' && <Badge count={bookingBadgeCount}  active={active} />}
+                  {item.name === 'Messages' && <Badge count={unreadMessageCount} active={active} />}
                 </Link>
               );
             })}
