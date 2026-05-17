@@ -15,6 +15,48 @@ const resolveSCode = (booking: any) => {
   return 'N/A';
 };
 
+const CustomSelect = ({ value, onChange, options, placeholder = "Select..." }: { value: string, onChange: (val: string) => void, options: {label: string, value: string}[], placeholder?: string }) => {
+  const [open, setOpen] = useState(false);
+  const selectedLabel = options.find(o => o.value === value)?.label || placeholder;
+
+  return (
+    <div className="relative w-full sm:w-auto min-w-[140px]">
+      <button 
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-[#C5A059]/50 outline-none transition-all flex items-center justify-between"
+      >
+        <span className="truncate mr-2">{selectedLabel}</span>
+        <svg className={`h-4 w-4 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {open && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div className="absolute top-full left-0 right-0 mt-2 z-50 bg-white rounded-xl shadow-2xl border border-zinc-200 overflow-hidden py-1 max-h-60 overflow-y-auto">
+            {options.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => { onChange(opt.value); setOpen(false); }}
+                className={cn(
+                  "w-full text-left px-4 py-3 text-sm transition-colors",
+                  value === opt.value ? "font-bold" : "text-zinc-700 hover:bg-zinc-50"
+                )}
+                style={value === opt.value ? { backgroundColor: 'rgba(197,160,89,0.15)', color: '#000000' } : {}}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
 const BookingManagement = () => {
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -153,28 +195,28 @@ const BookingManagement = () => {
             className="w-full bg-black border border-white/10 rounded-xl pl-12 pr-4 py-3 text-sm text-white focus:border-[#C5A059]/50 outline-none transition-all placeholder:text-zinc-600"
           />
         </div>
-        <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
-          <select 
+        <div className="flex flex-col sm:flex-row gap-3 overflow-visible pb-1 scrollbar-hide">
+          <CustomSelect 
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-black border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-[#C5A059]/50 outline-none transition-all min-w-[140px]"
-          >
-            <option value="All">All Statuses</option>
-            <option value="Pending">Pending</option>
-            <option value="Confirmed">Confirmed</option>
-            <option value="Completed">Completed</option>
-            <option value="Cancelled">Cancelled</option>
-          </select>
-          <select 
+            onChange={setStatusFilter}
+            options={[
+              { label: 'All Statuses', value: 'All' },
+              { label: 'Pending', value: 'Pending' },
+              { label: 'Confirmed', value: 'Confirmed' },
+              { label: 'Completed', value: 'Completed' },
+              { label: 'Cancelled', value: 'Cancelled' }
+            ]}
+          />
+          <CustomSelect 
             value={dateFilter}
-            onChange={(e) => setDateFilter(e.target.value)}
-            className="bg-black border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-[#C5A059]/50 outline-none transition-all min-w-[140px]"
-          >
-            <option value="All">All Dates</option>
-            <option value="Today">Today</option>
-            <option value="Tomorrow">Tomorrow</option>
-            <option value="Past">Past Bookings</option>
-          </select>
+            onChange={setDateFilter}
+            options={[
+              { label: 'All Dates', value: 'All' },
+              { label: 'Today', value: 'Today' },
+              { label: 'Tomorrow', value: 'Tomorrow' },
+              { label: 'Past Bookings', value: 'Past' }
+            ]}
+          />
         </div>
       </div>
 

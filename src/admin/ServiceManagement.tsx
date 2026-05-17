@@ -47,6 +47,48 @@ const emptyForm: ServiceForm = {
   imageUrl: '',
 };
 
+const CustomSelect = ({ value, onChange, options, placeholder = "Select..." }: { value: string, onChange: (val: string) => void, options: {label: string, value: string}[], placeholder?: string }) => {
+  const [open, setOpen] = useState(false);
+  const selectedLabel = options.find(o => o.value === value)?.label || placeholder;
+
+  return (
+    <div className="relative w-full sm:w-auto min-w-[160px]">
+      <button 
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="w-full bg-zinc-900/40 border border-white/5 rounded-xl px-4 py-3 text-sm text-white focus:border-[#C5A059]/50 outline-none transition-all flex items-center justify-between shadow-sm"
+      >
+        <span className="truncate mr-2">{selectedLabel}</span>
+        <svg className={`h-4 w-4 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {open && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div className="absolute top-full left-0 right-0 mt-2 z-50 bg-white rounded-xl shadow-2xl border border-zinc-200 overflow-hidden py-1 max-h-60 overflow-y-auto">
+            {options.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => { onChange(opt.value); setOpen(false); }}
+                className={cn(
+                  "w-full text-left px-4 py-3 text-sm transition-colors",
+                  value === opt.value ? "font-bold" : "text-zinc-700 hover:bg-zinc-50"
+                )}
+                style={value === opt.value ? { backgroundColor: 'rgba(197,160,89,0.15)', color: '#000000' } : {}}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
 const ServiceManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -282,18 +324,14 @@ const ServiceManagement = () => {
             className="w-full bg-zinc-900/40 border border-white/5 rounded-xl pl-11 pr-4 py-3 text-sm text-white focus:border-[#C5A059]/50 outline-none transition-all placeholder:text-zinc-600"
           />
         </div>
-        <select
+        <CustomSelect
           value={categoryFilter}
-          onChange={(e) => setCategoryFilter(e.target.value)}
-          className="bg-zinc-900/40 border border-white/5 rounded-xl px-4 py-3 text-sm text-white focus:border-[#C5A059]/50 outline-none transition-all min-w-[160px]"
-        >
-          <option value="all">All Categories</option>
-          {CATEGORIES.map((cat) => (
-            <option key={cat} value={cat}>
-              {cat}
-            </option>
-          ))}
-        </select>
+          onChange={setCategoryFilter}
+          options={[
+            { label: 'All Categories', value: 'all' },
+            ...CATEGORIES.map(c => ({ label: c, value: c }))
+          ]}
+        />
       </div>
 
       {/* Services Table */}
@@ -465,30 +503,24 @@ const ServiceManagement = () => {
                   <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 mb-2">
                     Category *
                   </label>
-                  <select
+                  <CustomSelect
                     value={form.category}
-                    onChange={(e) => setForm({ ...form, category: e.target.value })}
-                    className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-[#C5A059]/50 transition-all"
-                  >
-                    {CATEGORIES.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(val) => setForm({ ...form, category: val })}
+                    options={CATEGORIES.map(c => ({ label: c, value: c }))}
+                  />
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 mb-2">
                     Status
                   </label>
-                  <select
+                  <CustomSelect
                     value={form.status}
-                    onChange={(e) => setForm({ ...form, status: e.target.value })}
-                    className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-[#C5A059]/50 transition-all"
-                  >
-                    <option value="Active">Active</option>
-                    <option value="Inactive">Inactive</option>
-                  </select>
+                    onChange={(val) => setForm({ ...form, status: val })}
+                    options={[
+                      { label: 'Active', value: 'Active' },
+                      { label: 'Inactive', value: 'Inactive' }
+                    ]}
+                  />
                 </div>
               </div>
 

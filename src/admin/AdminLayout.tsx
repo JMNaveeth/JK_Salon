@@ -171,6 +171,14 @@ const AdminLayout = () => {
   return (
     <div className="admin-light min-h-screen bg-[#FDFAF5] flex">
 
+      {/* ── Mobile Overlay ── */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* ── Sidebar ── */}
       <aside
         className={cn(

@@ -171,7 +171,7 @@ const About = () => {
       role: 'Senior Barber',
       bio: 'Naveeth specializes in classic cuts and modern fades, bringing artistic flair to every client who sits in his chair.',
       exp: '10+ Years',
-      img: 'naveeth.jpg',
+      img: 'hani.jpeg',
     },
     {
       name: 'Dilshan Silva',
