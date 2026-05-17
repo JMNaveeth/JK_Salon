@@ -33,6 +33,24 @@ const MessageManagement = () => {
     return matchesSearch && msg.status === filter;
   });
 
+  const handleMarkRead = async (id: string) => {
+    try {
+      await api.markMessageRead(id);
+      setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, status: 'Read' } : m)));
+    } catch (error) {
+      console.error('Failed to mark message as read:', error);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await api.deleteMessage(id);
+      setMessages((prev) => prev.filter((m) => m.id !== id));
+    } catch (error) {
+      console.error('Failed to delete message:', error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -109,11 +127,11 @@ const MessageManagement = () => {
 
               <div className="flex md:flex-col justify-end gap-2">
                 {msg.status === 'Unread' && (
-                  <button className="p-2 rounded-lg bg-[#C5A059]/10 text-[#C5A059] hover:bg-[#C5A059] hover:text-white transition-all">
+                  <button onClick={() => handleMarkRead(msg.id)} className="p-2 rounded-lg bg-[#C5A059]/10 text-[#C5A059] hover:bg-[#C5A059] hover:text-white transition-all" title="Mark as Read">
                     <CheckCircle className="h-5 w-5" />
                   </button>
                 )}
-                <button className="p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all">
+                <button onClick={() => handleDelete(msg.id)} className="p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all" title="Delete">
                   <Trash2 className="h-5 w-5" />
                 </button>
               </div>

@@ -233,5 +233,25 @@ export const api = {
       console.error("API sendMessage Error:", error);
       throw error;
     }
+  },
+  markMessageRead: async (id: string) => {
+    try {
+      const { data, error } = await supabase.from('messages').update({ status: 'Read' }).eq('id', id).select().single();
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error("API markMessageRead Error:", error);
+      throw error;
+    }
+  },
+  deleteMessage: async (id: string) => {
+    try {
+      const { error } = await supabase.from('messages').delete().eq('id', id);
+      if (error) throw error;
+      return { success: true };
+    } catch (error: any) {
+      console.error("API deleteMessage Error:", error);
+      return { error: error.message };
+    }
   }
 };
