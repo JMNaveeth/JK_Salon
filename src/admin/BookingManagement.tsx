@@ -215,7 +215,7 @@ const BookingManagement = () => {
 
                     {/* Service & Time */}
                     <td className="px-6 py-4">
-                      <p className="font-semibold text-zinc-200">{booking.serviceName}</p>
+                      <p className="font-semibold text-zinc-900">{booking.serviceName}</p>
                       <div className="flex items-center gap-2 text-[11px] text-zinc-500 mt-1">
                         <span className="flex items-center gap-1"><CalIcon className="w-3 h-3" />{booking.date}</span>
                         <span>•</span>
