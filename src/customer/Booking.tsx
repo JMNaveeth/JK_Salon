@@ -495,6 +495,9 @@ const Booking = () => {
   }, [fetchBookingServices]);
 
   React.useEffect(() => {
+    // Don't check slot availability after booking is confirmed
+    if (step >= 5) return;
+
     const selectedDate = format(formData.date, 'yyyy-MM-dd');
     setSlotAvailabilityLoading(true);
 
@@ -526,7 +529,7 @@ const Booking = () => {
     return () => {
       window.clearInterval(polling);
     };
-  }, [formData.date]);
+  }, [formData.date, step]);
 
   const selectedService = services.find(s => s.id === formData.serviceId);
 
