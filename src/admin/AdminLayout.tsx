@@ -38,8 +38,8 @@ const AdminLayout = () => {
     try {
       const { data, error } = await supabase
         .from('reviews')
-        .select('id, approved')
-        .or('approved.is.null,approved.eq.false');
+        .select('id, status')
+        .eq('status', 'pending');
       if (!error) setPendingReviewCount(data?.length ?? 0);
     } catch (err) {
       console.error('Badge: reviews fetch error', err);

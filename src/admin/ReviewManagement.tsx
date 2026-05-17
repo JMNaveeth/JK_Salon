@@ -10,8 +10,8 @@ const ReviewManagement = () => {
   const [loading, setLoading] = useState(true);
 
   const totalReviews = reviews.length;
-  const approvedReviews = reviews.filter((review) => Boolean(review.approved)).length;
-  const pendingReviews = totalReviews - approvedReviews;
+  const approvedReviews = reviews.filter((review) => review.status === 'approved').length;
+  const pendingReviews = reviews.filter((review) => review.status !== 'approved').length;
   const averageRating = totalReviews
     ? (reviews.reduce((sum, review) => sum + Number(review.rating || 0), 0) / totalReviews).toFixed(1)
     : '0.0';
@@ -58,7 +58,7 @@ const ReviewManagement = () => {
   const handleApprove = async (id: string) => {
     try {
       await api.approveReview(id);
-      setReviews((current) => current.map((review) => (review.id === id ? { ...review, approved: true } : review)));
+      setReviews((current) => current.map((review) => (review.id === id ? { ...review, status: 'approved' } : review)));
     } catch (error) {
       console.error('Failed to approve review:', error);
     }
@@ -117,7 +117,7 @@ const ReviewManagement = () => {
         <div className="grid grid-cols-1 gap-5">
           {reviews.map((review) => {
             const initial = (review.customerName || '?').charAt(0).toUpperCase();
-            const isApproved = Boolean(review.approved);
+            const isApproved = review.status === 'approved';
             const serviceName = review.serviceName || 'Salon service';
 
             return (
