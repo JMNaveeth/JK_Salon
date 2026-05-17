@@ -167,18 +167,18 @@ const About = () => {
       img: ownerProfile.profileImageUrl,
     },
     {
-      name: 'Sameera Perera',
+      name: 'Muhammed Naveeth',
       role: 'Senior Barber',
-      bio: 'Sameera specializes in classic cuts and modern fades, bringing artistic flair to every client who sits in his chair.',
+      bio: 'Naveeth specializes in classic cuts and modern fades, bringing artistic flair to every client who sits in his chair.',
       exp: '10+ Years',
-      img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=800',
+      img: 'naveeth.jpg',
     },
     {
       name: 'Dilshan Silva',
       role: 'Styling Specialist',
       bio: "Dilshan is our creative powerhouse, known for transformative styling that perfectly suits each client's personality.",
       exp: '8+ Years',
-      img: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=800',
+      img: 'naveeth1.jpg',
     },
   ];
 
