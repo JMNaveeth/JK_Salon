@@ -565,18 +565,16 @@ const Booking = () => {
       setPaying(true);
       setBookingConfirmed(false);
       const bookingPayload = {
-        userId: formData.email || formData.phone || 'guest-user',
         customerName: formData.name,
         customerEmail: formData.email,
         customerPhone: formData.phone,
         serviceName: selectedService?.name,
         date: format(formData.date, 'yyyy-MM-dd'),
-        timeSlot: formData.timeSlot,
         time: formData.timeSlot,
         amount: selectedService?.price,
       };
       const response = await api.createBooking({ ...bookingPayload });
-      if (response.success) {
+      if (response && response.id) {
         const generatedSCode = resolveSCode(response.sCode, response.id);
         setSCode(generatedSCode);
         setBookingConfirmed(true);
